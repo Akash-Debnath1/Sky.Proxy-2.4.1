@@ -1,0 +1,2782 @@
+/* src/options/options.css — стили страницы расширения. Перенос прототипа
+   Страница_v227_2026-09-05.html на этапе 3Б.3 без изменений по существу:
+   все правила и комментарии прототипа на месте, кроме стенда (леса
+   разработки) и блока меню языка (снят решением 07.09). Что изменилось,
+   помечено «3Б.3» прямо в тексте: селекторы темы получили префикс
+   html[data-theme="light"] / html:not([data-theme="light"]), фон страницы
+   задан и на html. Шрифты подключает fonts.css из src/assets/fonts/ —
+   ссылок на Google Fonts нет, своих @font-face здесь нет.
+   3Б.6: переменные палитры (:root и светлая тема) — в src/shared/tokens.css,
+   общем для обоих окон; здесь их больше нет. */
+/* ════════════════════════════════════════════════════════════════
+   СИСТЕМА v188 (откат = v187) (архитектура токенов — по модели Atlassian ADS,
+   дисциплина контраста — по Carbon; бренд прежний)
+
+   СЕРЫЕ — чисто нейтральные (R=G=B), без зелёного подмеса.
+   Цветной в интерфейсе — только смысл; серому оттенок не положен.
+   Исключение — lit-токены: это не серые, а зелёная вуаль
+   соединения (acc ·0.08 поверх поверхности).
+
+   ПОВЕРХНОСТИ — глубокая лестница: герой заякорен на исходной
+   светлоте макета, разделение берётся ВНИЗ. Фон утоплен до
+   #050505 — приглушённой ступени хватает места в обе стороны
+   (до фона 15 ед. RGB, до героя 5). Панели — чистые заливки,
+   без колец и бликов: форму держат тон, скругления и вкладки:
+     фон        #050505   утопленный уровень (surface.sunken)
+     список     #141414   «Мои прокси» (surface)
+     герой      #191919   основной блок (surface.raised)
+     надстройка #242424   меню, тосты (surface.overlay) + тень
+   ВРЕЗКИ — два уровня глубины:
+     well #050505 — функциональные колодцы (поля ввода,
+     контейнеры контролов): читаются как вырезанные;
+     dip — чёрная вуаль ·0.2 для плашек-значений (креды):
+     чуть темнее своей поверхности, на любой из них.
+
+   ПАНЕЛИ — без обводок: высоту несёт разница заливок и блик
+   света сверху (inset 1px — тот же «свет сверху», что у
+   фонового свечения). Разделители внутри панелей не касаются
+   краёв: отступ линии равен внутреннему полю. Обводки остаются
+   у интерактивных элементов (аффорданс: поля, кнопки, веллы)
+   и у надстройки (меню, тост) — им нужна кромка над любым фоном.
+
+   ТЕКСТ — три ступени, все проходят WCAG AA (≥4.5:1 на любой
+   поверхности): ink ~15:1 · mut ~7:1 · mut-2 ~5:1.
+   dim — НЕ для текста: покойные кольца, индикаторы, кноб
+   (не-текстовая норма ≥3:1).
+
+   ЗЕЛЁНЫЙ — спокойный травяной, не неон. Только смысл:
+   бренд, активное соединение, выбранная строка.
+   Красный — только разрушение. Янтарь — процесс/деградация.
+   У каждого статуса триада: tint (заливка) / tint-2 (заливка
+   сильнее) / edge (обводка) — как у зелёного.
+
+   ХОВЕРЫ — белая вуаль (rgba white), чтобы плашка была видна
+   на любой поверхности с одинаковым контрастом.
+
+   ОТСТУПЫ — шаг 4px для макетных зазоров. Вне сетки:
+   оптические поправки ≤3px и значения, производные от правила
+   радиусов (6px паддинг меню = 14−8; 5px в табе = зазор бейджа).
+   РАДИУСЫ — правило вложений:
+   radius(ребёнка) = radius(родителя) − inset, минимум 8:
+     24 панели → 16 вложенные блоки (тумблер, строки, кнопки)
+     → 10 элементы внутри них (кноб, пункты меню, плашки-веллы)
+     → 8 чипы. Пилюли — навигация.
+
+   ЧТО ИЗМЕНИЛОСЬ В v188
+   1. СТРАНА — только у прокси из proxys.io. У добавленных
+      вручную в слоте флага стоит «?» с подсказкой: слот тот же,
+      поэтому строки с флагом и без него стоят в одной сетке.
+      Срок аренды — оттуда же: вручную он неизвестен.
+   2. ПРОКСИ-ЧЕКЕРЫ заморожены, а не вырезаны. Разметка, стили и
+      механика целы; видимостью правят флаги CHECKERS в скрипте,
+      вёрстку подстраивает класс .no-chk на body. Возврат —
+      в один флаг, в том числе частичный (только по ключу).
+   ════════════════════════════════════════════════════════════════ */
+/* 3Б.6: токены палитры — блоки :root и html[data-theme="light"] — вынесены в
+   src/shared/tokens.css: в обоих окнах они совпадали побайтно. Файл
+   подключается в options.html до этого; здесь остались только правила
+   страницы. Описание системы токенов выше остаётся здесь. */
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{
+  -webkit-text-size-adjust:100%;
+  /* Место под полосу прокрутки держим всегда. Иначе длинный
+     список появляется — и вся страница прыгает влево на её
+     ширину: смена страницы, разворот «показать все», открытие
+     помощи. На десктопе запас по бокам большой, потеря 15px
+     незаметна; на узких экранах гаттер отключаем — там каждый
+     пиксель ширины на счету (см. адаптив). */
+  scrollbar-gutter:stable;
+}
+/* ════════════════════════════════════════════════════════════════
+   СВЕТЛАЯ ТЕМА — спроектирована с нуля, не инверсия: своя лестница
+   (белые карточки над серым полем #ECECEC, колодцы темнее), свой
+   контрастно-безопасный зелёный #2A8038 (4.95:1 на белом и под
+   белым текстом), статусы пересчитаны, глубина — тенями. Токены
+   AA-проверены скриптом. По умолчанию всегда тёмная.
+   3Б.3: атрибут data-theme живёт на <html>, а не на body (решение 07.09):
+   переменные объявлены на html, остальные селекторы темы получили
+   префикс html[data-theme="light"] / html:not([data-theme="light"]);
+   правила о самом body — купол, свечение ::before, .lit и .no-proxy —
+   стали html[data-theme="light"] body… — сам элемент остался тот же.
+   3Б.6: сами переменные светлой темы — в src/shared/tokens.css ════ */
+/* лампы «в работе» на светлом плафоне — сочнее, с сильным ореолом */
+html[data-theme="light"] .hero[data-power="on"] .ledL{fill:#2DBE4C;filter:drop-shadow(0 1px 3px rgba(45,190,76,.75))}
+html[data-theme="light"] .hero[data-power="on"] .ledA{fill:#2DBE4C;filter:drop-shadow(0 1px 3px rgba(45,190,76,.75))}
+html[data-theme="light"] .hero[data-power="on"] .ledstroke{fill:#2E9E44}
+html[data-theme="light"] .hero[data-power="on"] .glint{fill:#2DBE4C;filter:drop-shadow(0 0 3px rgba(45,190,76,.85))}
+/* адресные материалы: белые вуали тёмной темы → тёмные */
+html[data-theme="light"] body::before{display:none}   /* без свечения за шапкой */
+/* ТЕСТ: зелёный радиальный купол на фоне света — до половины
+   страницы, плавно растворяется в базовый фон; откат = v126 */
+html[data-theme="light"] body{
+  background-image:radial-gradient(72% 58% at 2% -8%, rgba(42,128,56,.14), rgba(42,128,56,0) 96%);
+  background-attachment:fixed;
+}
+html[data-theme="light"] body.lit .nav{box-shadow:inset 0 0 0 1px rgba(42,128,56,.22)}   /* кромка держит плашку на фоне */
+html[data-theme="light"] .chip .fl{outline-color:rgba(0,0,0,.15)}
+html[data-theme="light"] button.well:not(.sq):hover{border-color:rgba(0,0,0,.3)}
+html[data-theme="light"] .thm{background:rgba(110,126,168,.10)}
+html[data-theme="light"] .thm:hover{background:rgba(110,126,168,.16)}
+html[data-theme="light"] .power:hover{border-color:rgba(0,0,0,.24)}
+html[data-theme="light"] .btn-check:not([data-phase]):hover{border-color:rgba(0,0,0,.26)}
+html[data-theme="light"] .btn-check[data-phase="checking"] .fill{background:rgba(0,0,0,.06)}
+html[data-theme="light"] .spin{border-color:rgba(0,0,0,.16);border-top-color:var(--acc)}
+html[data-theme="light"] .row:hover{background:rgba(0,0,0,.045)}
+html[data-theme="light"] .row.edit{background:rgba(0,0,0,.03)}
+html[data-theme="light"] .untag:hover{background:rgba(0,0,0,.12)}
+html[data-theme="light"] .chip.add:hover{border-color:rgba(0,0,0,.32)}
+html[data-theme="light"] .acc-list .btn-ft,html[data-theme="light"] .hsupport .btn-ft{background:rgba(0,0,0,.05)}
+html[data-theme="light"] .acc-list .btn-ft:hover,html[data-theme="light"] .hsupport .btn-ft:hover{background:rgba(0,0,0,.09)}
+html[data-theme="light"] .menu,
+html[data-theme="light"] .tip{box-shadow:0 18px 44px -12px rgba(30,42,33,.25)}   /* 7Е: тень пузыря подсказки — на узле #tip; прежде стояла у псевдоэлемента носителя, которого не было, и подсказки не рисовались */
+html[data-theme="light"] .toast{box-shadow:0 22px 50px -16px rgba(30,42,33,.28)}
+html[data-theme="light"] .row.on .chip:not(.tagc):not(.add){color:#1E672B}
+html[data-theme="light"] .h-note .hl-ok{color:var(--acc)}
+html[data-theme="light"] .hacc.bad{background:#FAEDEA;border-color:rgba(193,58,43,.38)}
+html[data-theme="light"] .hacc.bad:has(.hacc-hd:hover){background:#F6E2DE;border-color:var(--bad-edge)}
+html[data-theme="light"] .hacc.bad .hacc-ch{color:rgba(193,58,43,.55)}
+html[data-theme="light"] .hacc.org{background:#FBF1E7;border-color:rgba(217,106,16,.42)}
+html[data-theme="light"] .hacc.org:has(.hacc-hd:hover){background:#F8E9D8;border-color:var(--org-edge)}
+html[data-theme="light"] .hacc.org .hacc-ch{color:rgba(217,106,16,.6)}
+html[data-theme="light"] .hacc.bad .h-act .btn-ft{background:rgba(193,58,43,.09)}
+html[data-theme="light"] .hacc.bad .h-act .btn-ft:hover{background:rgba(193,58,43,.15)}
+html[data-theme="light"] .hacc.org .h-act .btn-ft{background:rgba(233,116,44,.11)}
+html[data-theme="light"] .hacc.org .h-act .btn-ft:hover{background:rgba(233,116,44,.18)}
+html[data-theme="light"] .opt-i.warn{border-color:rgba(193,58,43,.35)}
+html[data-theme="light"] .opt-i.org{border-color:rgba(217,106,16,.4);background:rgba(233,116,44,.12)}
+html[data-theme="light"] .pin{border-color:rgba(193,58,43,.3)}
+html[data-theme="light"] .hero[data-power="on"] .wlbase::before{background-image:linear-gradient(90deg,transparent,#2A8038 50%,transparent)}
+.art-l{display:none}
+/* покой ламп светлого порта — значения из авторского файла */
+html[data-theme="light"] .ledstroke{fill:#AFAFAF}
+html[data-theme="light"] .ledL{fill:#CDDECD}
+html[data-theme="light"] .ledA{fill:#CDDECD}
+html[data-theme="light"] .art-d{display:none}
+html[data-theme="light"] .art-l{display:inline}
+html[data-theme="light"] .expch:not(.bad){color:#D36300}   /* срок на свету — теплее общего янтаря */
+/* значки неактивных вкладок на свету — в зелёном языке плашек,
+   серые кружки на зелени смотрелись чужими */
+html[data-theme="light"] .ltabs button:not([aria-selected="true"]) .tico,
+html[data-theme="light"] .ltabs button:not([aria-selected="true"]) .tally,
+html[data-theme="light"] .ltabs button:not([aria-selected="true"]) .tabplus{background:rgba(255,255,255,.55)}   /* кружки светлее своей плашки */
+html[data-theme="light"] .ltabs button:not([aria-selected="true"]) .tico{color:#457450}
+html[data-theme="light"] .ltabs button:not([aria-selected="true"]) .tally{color:#33613D}
+html[data-theme="light"] .ltabs button:not([aria-selected="true"]):hover .tico{color:#2A8038}
+/* ховер текста всех неактивных вкладок на свету — единый зелёный
+   акцент: чёрная вспышка на пастели выглядела чужой */
+html[data-theme="light"] .ltabs button:not([aria-selected="true"]):hover{color:var(--acc)}
+/* вкладки настроек на свету — нейтральные, без зелёных оттенков:
+   серая плашка, угол в тоне белой панели-примыкания, серые глифы */
+html[data-theme="light"] #stabs button:not([aria-selected="true"]){
+  color:var(--mut);
+  background:#E0E0E0;   /* нейтраль; зелёная пастель — только у «Добавить» */
+  background-image:radial-gradient(150px 115px at 100% 100%, var(--tab-srf), transparent 72%);
+}
+html[data-theme="light"] #stabs button:not([aria-selected="true"]):hover{color:var(--ink);background-color:#D6D6D6}
+html[data-theme="light"] #stabs button:not([aria-selected="true"]) .tico{color:var(--mut-2);background:transparent}
+html[data-theme="light"] #stabs button:not([aria-selected="true"]):hover .tico{color:var(--mut)}
+/* «Мои прокси» на свету — в языке вкладок настроек: серый текст,
+   угол в тоне панели-примыкания, счётчик без круглой плашки */
+html[data-theme="light"] .ltabs button[data-ltab="list"]:not([aria-selected="true"]){
+  color:var(--mut);
+  background:#E0E0E0;
+  background-image:radial-gradient(150px 115px at 100% 100%, var(--tab-srf), transparent 72%);
+}
+html[data-theme="light"] .ltabs button[data-ltab="list"]:not([aria-selected="true"]):hover{color:var(--ink);background-color:#D6D6D6}
+html[data-theme="light"] .ltabs button[data-ltab="list"]:not([aria-selected="true"]) .tally,
+html[data-theme="light"] .ltabs button[data-ltab="list"]:not([aria-selected="true"]):hover .tally{background:transparent}
+/* зелёное дыхание в уголке неактивной плашки: тёмная — слева,
+   светлая — тёмно-зелёным в правом нижнем; заливка из --raise живёт */
+/* неактивные тёмной: угол в тоне панели-примыкания — предпросмотр
+   блока, к которому вкладка пристыкуется; «Добавить» — зелёное дыхание */
+html:not([data-theme="light"]) .ltabs button:not([aria-selected="true"]):not([data-ltab="add"]){
+  background-image:radial-gradient(150px 115px at 100% 100%, var(--tab-srf), transparent 72%);
+}
+html:not([data-theme="light"]) .ltabs button[data-ltab="add"]:not([aria-selected="true"]){
+  background-image:radial-gradient(150px 115px at 100% 100%, rgba(72,180,87,.13), transparent 72%);
+}
+/* кружки иконок неактивных вкладок настроек тёмной — без плашки:
+   глиф лежит прямо на вкладке */
+html:not([data-theme="light"]) #stabs button:not([aria-selected="true"]) .tico{background:transparent}
+/* «Мои прокси» неактивная — счётчик тоже без круглой плашки */
+html:not([data-theme="light"]) .ltabs button[data-ltab="list"]:not([aria-selected="true"]) .tally{background:transparent}
+/* активная вкладка настроек: кружок #141414 на панели */
+html:not([data-theme="light"]) #stabs button[aria-selected="true"] .tico{background:#141414}
+
+html[data-theme="light"] .ltabs button:not([aria-selected="true"]){
+  background-image:radial-gradient(150px 115px at 100% 100%, rgba(30,103,43,.22), transparent 72%);
+}
+/* примыкание неактивной угловой — тот же тон панели: стык чист */
+html:not([data-theme="light"]) .ltabs button:not([aria-selected="true"]):last-child::after{
+  background:radial-gradient(circle at 0 100%, transparent 23.5px, var(--tab-srf) 24px);
+}
+html[data-theme="light"] .ltabs button:not([aria-selected="true"]):last-child::after{
+  background:radial-gradient(circle at 0 100%, transparent 23.5px, var(--tab-srf) 24px);
+}
+html[data-theme="light"] .ltabs button:not([aria-selected="true"]):hover .tico,
+html[data-theme="light"] .ltabs button:not([aria-selected="true"]):hover .tally,
+html[data-theme="light"] .ltabs button:not([aria-selected="true"]):hover .tabplus{background:rgba(255,255,255,.8)}   /* и ещё светлее на ховере */
+html[data-theme="light"] .lg-d{display:none}
+html[data-theme="light"] .lg-l{display:block}
+
+/* 3Б.3: фон и на html, не только на body — как у попапа на 3Б.2:
+   холст должен быть в цвет страницы до первой отрисовки, а тему на
+   <html> к этому моменту уже поставил theme.js. Переменная та же, что
+   у body; купол светлой темы остаётся на body (см. выше). */
+html{background:var(--bg)}
+body{
+  min-width:340px;
+  font-family:var(--ui);font-size:14px;line-height:1.5;color:var(--ink);
+  background:var(--bg);min-height:100vh;-webkit-font-smoothing:antialiased;
+}
+/* холодный свет сверху — едва заметен, оживает при соединении */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.15;
+  background:radial-gradient(36% 38% at calc(50% - 360px) -8%, var(--bloom), var(--bloom-0) 70%)   /* центр над логотипом при любой ширине: контейнер-центр минус 360px */;
+  transition:opacity .7s var(--e);
+}
+body.lit::before{opacity:.85}
+.bar,main,.toast{position:relative;z-index:2}
+
+button,input{font:inherit;color:inherit}
+button{background:none;border:none;cursor:pointer}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px;border-radius:6px}
+[hidden]{display:none!important}
+svg{flex-shrink:0}
+
+/* ── атомы ── */
+.mono{font-family:var(--mono);font-variant-ligatures:none}
+.chk-sm{display:none}   /* короткая подпись проверки — только мобайл */
+.lbl{display:block;font-size:12.5px;color:var(--mut-2);margin-bottom:8px}
+.chip{
+  display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 12px;
+  border-radius:var(--r-el);border:1px solid var(--line);background:var(--well);
+  font-size:13px;color:var(--ink);white-space:nowrap;
+}
+/* ── 2.4: ФЛАГИ ──
+   Флаг — ячейка одного спрайта src/assets/flags.png (257 стран, сетка
+   16 колонок, ячейка 17×12, файл снят в тройном размере). Позицию
+   задаёт inline background-position из flag() — так разметка не тащит
+   за собой 257 CSS-правил, — а здесь только размер, картинка и рамка.
+   Один PNG вместо 257 SVG: список из шестидесяти строк делает шестьдесят
+   обращений к одному кешированному файлу, а не к шестидесяти. */
+.fl{
+  display:inline-block;flex-shrink:0;
+  width:17px;height:12px;border-radius:2.5px;
+  outline:1px solid rgba(255,255,255,.16);outline-offset:-.5px;
+  background-image:url(../assets/flags.png);
+  background-repeat:no-repeat;
+  background-size:272px 192px;
+  vertical-align:-2px;
+}
+.chip .fl{display:block}
+
+/* ── СТРАНЫ НЕТ ──
+   Раньше здесь стоял «?». Он спрашивал, хотя вопрос задавать
+   не к кому: страну расширению взять неоткуда. Знак вопроса
+   читается как ошибка, серый квадрат — как флаг несуществующей
+   страны. Поэтому слот просто пустой: пунктирная рамка ровно по
+   габариту флага (17×12, тот же радиус). Место занято — строка
+   с флагом и строка без него собираются по одной сетке, — но
+   ничего не утверждается.
+   У прокси, добавленных вручную, слот вдобавок кликается: там
+   страну ставит сам человек (см. .geo-pick ниже). */
+/* ── ОБЛАСТЬ ОТКЛИКА ──
+   Сам слот — 17×12, и попасть по нему мышью тяжело. Поэтому
+   кликается не квадрат, а кнопка вокруг него: она забирает
+   левый паддинг чипа и всю его высоту. Визуально ничего не
+   прибавилось — только цель выросла с 17×12 до ~37×32.
+   Отсюда же padding-left:0 у самого чипа: поле, которое он
+   отдал кнопке, никуда не делось, просто теперь кликается. */
+.chip:has(.geo-q),.chip:has(.geo-set){padding-left:0;gap:0}
+.geo-q,.geo-set{
+  display:flex;align-items:center;gap:8px;flex-shrink:0;
+  height:100%;padding:0 8px 0 12px;
+  border-radius:var(--r-el) 0 0 var(--r-el);
+  background:none;transition:background .15s;
+}
+.r-meta .chip:has(.geo-q),.r-meta .chip:has(.geo-set){padding-left:0;gap:0}
+.r-meta .geo-q,.r-meta .geo-set{padding:0 7px 0 10px;gap:7px}
+.geo-q{cursor:help}
+.geo-q.pick,.geo-set{cursor:pointer}
+.geo-q.pick:hover,.geo-q.pick:focus,
+.geo-set:hover,.geo-set:focus{background:var(--hov-2);outline:none}
+.row.on .geo-q.pick:hover,.row.on .geo-set:hover{background:rgba(72,180,87,.14)}
+
+/* сам слот: пунктирная рамка по габариту флага. У прокси,
+   которым страну ставит человек, внутри стоит плюс — иначе
+   пустой квадрат ничего не предлагает и выглядит поломкой.
+   У пришедших по ключу плюса нет: там нажимать не на что,
+   страна приедет сама. */
+.gq-box{
+  display:grid;place-items:center;flex-shrink:0;
+  width:17px;height:12px;border-radius:2.5px;
+  border:1px dashed var(--line-2);color:var(--mut-2);
+  transition:border-color .15s,color .15s;
+}
+.geo-q:hover .gq-box,.geo-q:focus .gq-box{border-color:var(--mut-2);color:var(--ink)}
+.row.on .gq-box{border-color:rgba(72,180,87,.4)}
+.row.on .geo-q:hover .gq-box{border-color:var(--acc);color:#C4E9C9}
+
+/* флаг, поставленный вручную, — тоже кнопка: его можно
+   поменять или убрать. Кнопка внутри чипа обязана быть flex:
+   .fl нарисован блоком, и в обычной кнопке он ронял подпись
+   страны на строку ниже */
+
+/* ── КАРТОЧКА ПРИ НАВЕДЕНИИ ──
+   Раньше здесь была подсказка на ::after — текст и всё. Но
+   объяснения мало: узнав, что страну можно поставить самому,
+   человек тут же хочет её поставить. Поэтому подсказка стала
+   карточкой: текст, а под ним кнопка, открывающая список.
+   Карточка живёт в DOM, а не в псевдоэлементе, — иначе в неё
+   не навести курсор и кнопку не нажать. Держится, пока
+   указатель на метке или на ней самой. */
+.geo-wrap{position:relative;display:inline-flex;align-items:center}
+.geo-hint{
+  position:absolute;left:-12px;bottom:calc(100% + 10px);z-index:44;width:268px;
+  padding:11px 12px 10px;border-radius:var(--r-el);
+  background:var(--ovl);border:1px solid var(--line-2);
+  box-shadow:0 18px 44px -12px rgba(0,0,0,.85);
+  display:grid;gap:10px;cursor:default;
+  animation:pop .16s var(--e);
+}
+html[data-theme="light"] .geo-hint{box-shadow:0 18px 44px -12px rgba(30,42,33,.25)}
+.geo-hint p{font-size:12px;line-height:1.5;color:var(--ink);text-align:left}
+.geo-hint::after{
+  content:'';position:absolute;left:20px;bottom:-6px;
+  width:10px;height:10px;transform:rotate(45deg);
+  background:var(--ovl);border:1px solid var(--line-2);border-top:none;border-left:none;
+}
+.geo-hint-b{
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  min-height:32px;padding:7px 14px;border-radius:var(--r-chip);
+  background:var(--acc-tint);color:var(--acc-hi);
+  font-size:12.5px;font-weight:600;line-height:1.3;text-align:center;
+  transition:background .15s;
+}
+.geo-hint-b:hover{background:var(--acc-tint-2)}
+html[data-theme="light"] .geo-hint-b{color:#1E672B}
+
+/* ── СПИСОК СТРАН ──
+   Узкая карточка фиксированной ширины: строка на страну, в
+   строке флаг, название и код. Ширину задаём мы, а не длина
+   самого длинного названия, — иначе список растягивается на
+   всю строку прокси и рассыпается в кашу. */
+.geo-pick{
+  position:absolute;left:-12px;top:calc(100% + 10px);z-index:45;width:250px;
+  padding:8px;border-radius:14px;
+  background:var(--ovl);border:1px solid var(--line-2);
+  box-shadow:0 20px 48px -14px rgba(0,0,0,.85);
+  display:grid;gap:8px;cursor:default;
+  animation:pop .16s var(--e);
+}
+html[data-theme="light"] .geo-pick{box-shadow:0 20px 48px -14px rgba(30,42,33,.25)}
+.gp-q{
+  width:100%;height:34px;padding:0 11px;
+  background:var(--well);border:1px solid var(--line-2);border-radius:var(--r-chip);
+  font-family:var(--ui);font-size:12.5px;color:var(--ink);
+  transition:border-color .15s;
+}
+.gp-q::placeholder{color:var(--mut-2)}
+.gp-q:focus{outline:none;border-color:var(--acc-edge)}
+.gp-list{
+  max-height:212px;overflow:auto;overscroll-behavior:contain;
+  display:grid;gap:1px;
+}
+.gp-list::-webkit-scrollbar{width:8px}
+.gp-list::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:4px;border:2px solid var(--ovl)}
+.gp-row{
+  display:flex;align-items:center;gap:9px;width:100%;height:32px;padding:0 8px;
+  border-radius:var(--r-chip);text-align:left;
+  font-size:12.5px;color:var(--ink);
+  transition:background .12s;
+}
+.gp-row .fl{flex-shrink:0;border-radius:2.5px;outline:1px solid rgba(255,255,255,.16);outline-offset:-.5px}
+html[data-theme="light"] .gp-row .fl{outline-color:rgba(0,0,0,.15)}
+.gp-row b{flex:1;min-width:0;font-weight:400;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gp-row i{
+  font-style:normal;font-family:var(--mono);font-size:10.5px;
+  color:var(--mut-2);flex-shrink:0;
+}
+.gp-row:hover{background:var(--hov)}
+.gp-row.on{background:var(--acc-tint);color:var(--acc-hi)}
+.gp-row.on i{color:inherit;opacity:.7}
+.gp-none{padding:10px 8px;font-size:12px;color:var(--mut-2);line-height:1.5}
+.gp-clear{
+  height:32px;border-radius:var(--r-chip);
+  font-size:12.5px;color:var(--bad);background:var(--bad-tint);
+  transition:background .15s;
+}
+.gp-clear:hover{background:var(--bad-tint-2)}
+
+.ico{
+  display:grid;place-items:center;width:34px;height:34px;border-radius:var(--r-chip);
+  color:var(--mut-2);transition:color .15s,background .15s;
+}
+.ico:hover{color:var(--ink);background:var(--hov-2)}
+
+/* ════════ ШАПКА ════════
+   Не тянется на всю ширину: логотип · навигация · кнопка —
+   компактная центрированная группа, без подложек и обводок. */
+.bar{
+  display:flex;align-items:center;justify-content:center;gap:44px;
+  padding:32px 24px 8px;flex-wrap:wrap;
+}
+/* 2.2: знак Sky.Proxy — разметка и форма в shared/brand.css, здесь
+   только кегль: у страницы он 25px (высота знака ~28px, как у прежнего
+   логотипа), у попапа 21px, у страницы запросов 25px. */
+.brand .bw{font-size:25px}
+.bar-end{display:flex;align-items:center;gap:12px}
+/* смена темы — парная «Купить»: 44×44, радиус 12; плашка и кромка
+   в оттенках своей иллюстрации — золото у солнца, сизый у месяца */
+.thm{
+  width:44px;height:44px;border-radius:12px;
+  display:grid;place-items:center;flex-shrink:0;
+  border:1px solid transparent;   /* без обводки; 1px держит геометрию */
+  background:rgba(242,185,60,.055);
+  transition:background .15s,border-color .15s;
+}
+.thm svg{display:block}
+body.theming *,body.theming *::before,body.theming *::after{transition:none !important}
+.thm:hover{background:rgba(242,185,60,.08)}
+
+.nav{
+  display:flex;gap:4px;padding:5px;
+  background:var(--srf);border-radius:999px;
+  transition:background-color .7s var(--e),box-shadow .7s var(--e);
+}
+.nav button{
+  display:flex;align-items:center;gap:8px;height:38px;padding:0 20px;
+  border-radius:999px;font-size:13.5px;font-weight:500;color:var(--mut);
+  transition:color .15s,background .45s var(--e);
+}
+.nav button svg{color:var(--mut-2);transition:color .15s}
+.nav button:hover{color:var(--ink)}
+.nav button:hover svg{color:var(--mut)}
+.nav button[aria-current="page"]{
+  color:var(--ink);background:var(--bg);
+}
+.nav button[aria-current="page"] svg{color:var(--acc)}
+/* при включённом прокси шапка не остаётся глухо-серым пятном
+   на зелёном свечении — плашка плавно берёт тот же подтон,
+   в такт свечению фона (.7s) */
+body.lit .nav{
+  background:var(--lit-srf);
+  box-shadow:inset 0 0 0 1px rgba(72,180,87,.1);
+}
+body.lit .nav button[aria-current="page"]{background:var(--lit-bg)}
+
+.buy{
+  display:flex;align-items:center;gap:8px;height:44px;padding:0 20px;
+  border:1px solid var(--acc-edge);border-radius:12px;
+  color:var(--acc);font-size:14px;font-weight:600;
+  transition:background .15s,border-color .15s,color .15s,transform .1s;
+}
+.buy svg{color:var(--acc)}
+.buy:hover{background:var(--acc-tint);border-color:var(--acc);color:var(--acc-hi)}
+.buy:hover svg{color:var(--acc-hi)}
+.buy:active{transform:translateY(1px)}
+
+/* ════════ КАРКАС ════════ */
+.wrap{max-width:960px;margin:0 auto;padding:28px 28px 72px;display:grid;gap:20px}
+.view[hidden]{display:none}
+.view{display:grid;gap:20px;animation:in .3s var(--e)}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.panel{background:var(--srf);border-radius:var(--r-panel)}
+.panel.low{background:var(--srf-low)}
+
+/* ════════ ГЕРОЙ ════════
+   [соединение 1fr | управление 300px | пинг]. Колонка управления
+   растянута на высоту блока. Пока чекеры заморожены, тумблер
+   занимает её целиком (.no-chk); когда «Проверить подключение»
+   вернётся — встанет под тумблером во второй ряд. */
+.hero{
+  padding:28px;position:relative;overflow:hidden;
+  /* диагональ: полный srf держится до середины хода (стоп 50%),
+     затем сползание к 20% прозрачности — тёмная зона поджата
+     к правому нижнему углу */
+  background:linear-gradient(to bottom right, var(--srf) 50%, color-mix(in srgb, var(--srf) 80%, transparent));
+}
+.hero::before{
+  content:'';position:absolute;left:-10%;top:-80%;width:56%;height:200%;
+  pointer-events:none;opacity:0;transition:opacity .6s var(--e);
+  background:radial-gradient(closest-side,var(--hglow),transparent);
+}
+.hero[data-power="on"]::before{opacity:1}
+
+.hero-grid{
+  position:relative;display:grid;gap:32px;align-items:stretch;
+  grid-template-columns:minmax(0,1fr) 300px 184px;
+}
+
+/* — соединение — */
+.status{display:flex;align-items:center;gap:8px;row-gap:4px;flex-wrap:wrap;margin-bottom:12px}
+/* активный чёрный/белый список — тихая метка рядом со статусом */
+.lm-chip{
+  display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 9px;
+  border-radius:999px;background:var(--hov);font-size:11.5px;color:var(--mut);
+  transition:color .15s,background .15s;
+}
+.lm-chip svg{width:12px;height:12px;display:block;color:var(--acc)}   /* галочка всегда зелёная */
+.lm-chip:hover{color:var(--ink);background:var(--hov-2)}
+.status span{font-size:15px;color:var(--mut);transition:color .3s}
+.dot{
+  width:11px;height:11px;border-radius:50%;flex-shrink:0;
+  border:1.5px solid var(--dim);background:transparent;transition:.3s;
+}
+.hero[data-power="on"] .dot{border-color:var(--acc);background:var(--acc);animation:beat 2.4s infinite}
+.hero[data-power="on"] .status span{color:var(--acc)}
+.hero[data-power="busy"] .dot{border-color:var(--warn);background:var(--warn);animation:blink 1s infinite}
+.hero[data-power="busy"] .status span{color:var(--warn)}
+@keyframes beat{0%{box-shadow:0 0 0 0 rgba(72,180,87,.4)}70%{box-shadow:0 0 0 9px rgba(72,180,87,0)}100%{box-shadow:0 0 0 0 rgba(72,180,87,0)}}
+/* отказ: не удалось включиться (err) или упало на ходу (fault) */
+.hero[data-power="err"] .dot{border-color:var(--bad);background:var(--bad)}
+.hero[data-power="err"] .status span{color:var(--bad)}
+@keyframes blink{50%{opacity:.4}}
+
+.ip{
+  font-family:var(--mono);font-weight:700;color:var(--ink);
+  font-size:36px;line-height:1.1;letter-spacing:-.04em;
+  min-height:40px;display:flex;align-items:center;
+  white-space:nowrap;transition:color .3s;
+}
+.hero[data-power="on"] .ip{color:var(--acc)}
+/* аварийный ярус для аномально длинных адресов (IPv6, хостнеймы):
+   тоже фиксированный, включается только по длине > 15 символов */
+.ip.long{font-size:20px;letter-spacing:-.02em;line-height:1.25;white-space:normal;overflow-wrap:anywhere}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+
+.creds{display:flex;gap:16px;flex-wrap:wrap;margin-top:24px}
+/* плашки-колодцы: врезаны в поверхность, кромка-хэйрлайн */
+.well{
+  /* плашка обнимает контент: паддинги дают симметрию; длинное
+     значение упирается в потолок и уходит в многоточие (копия полная) */
+  display:inline-flex;align-items:center;height:42px;padding:0 16px;min-width:64px;max-width:220px;
+  border:1px solid var(--line);border-radius:var(--r-el);background:var(--dip);
+  font-family:var(--mono);font-size:13px;color:var(--ink);
+  transition:border-color .15s,color .15s,background .15s;
+}
+button.well:hover{border-color:rgba(255,255,255,.28)}
+.well.hit{border-color:var(--acc-edge);color:var(--acc-hi);background:var(--acc-tint)}
+.well:disabled{color:var(--mut-2);pointer-events:none}
+.well>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pw{display:flex;align-items:center;gap:0}   /* глаз вплотную к плашке пароля */
+.pw .well{letter-spacing:.12em;max-width:110px}   /* ≈8 символов, дальше многоточие */
+/* глаз пароля: голая иконка без плашек в любом состоянии;
+   отклик — только цветом (ховер светлеет, открытый пароль зелёный,
+   сам глиф тоже меняется: открытый/перечёркнутый глаз) */
+.well.sq{min-width:0;width:36px;padding:0;justify-content:center;color:var(--mut);background:none;border-color:transparent}
+.well.sq:hover{color:var(--ink);border-color:transparent}
+.well.sq[aria-pressed="true"]{color:var(--acc);background:none;border-color:transparent}
+
+/* — управление — */
+.ctl{display:grid;grid-template-rows:1fr auto;gap:12px;align-self:stretch}
+/* чекер заморожен: второго ряда нет — убираем и трек, и зазор,
+   иначе grid оставит фантомные 12px под тумблером */
+.no-chk .ctl{grid-template-rows:1fr;gap:0}
+
+.power{
+  position:relative;min-height:104px;width:100%;overflow:hidden;
+  background:var(--well);border:1px solid var(--line-2);border-radius:var(--r-block);
+  transition:background .3s,border-color .3s;
+}
+.power:hover{border-color:rgba(255,255,255,.24)}
+/* Во включённом состоянии фон кнопки остаётся тем же колодцем,
+   что и в выключенном. Здесь стоял радиал от порта, уводивший
+   поверхность к краям в тёмный акцент (токен --acc-dark; снят из
+   tokens.css на 7К.2, Е-4): подсветка получалась двойной —
+   зелёный лился и от провода с обводкой коннектора, и от самой
+   подложки, — а на светлой теме плашка выпадала из блока
+   цветным пятном. Состояние по-прежнему читается: провод,
+   обводка разъёма, светодиоды, подпись и кромка. */
+.hero[data-power="on"] .power{
+  border-color:rgba(72,180,87,.3);
+}
+.hero[data-power="on"] .power:hover{border-color:var(--acc-edge)}
+.hero[data-power="busy"] .power{pointer-events:none}
+.power:disabled{opacity:.4;pointer-events:none}
+
+/* текст слева: #pLabel сверху (текст ведёт JS),
+   статусная строка снизу (ведёт CSS по data-power) */
+.cn-ic{position:absolute;top:9px;left:16px;width:22px;height:22px}
+.cn-ic svg{display:block;width:100%;height:100%;overflow:visible}
+.icgl{fill:none;stroke:var(--mut);stroke-width:1.9;stroke-linecap:round;transition:stroke .3s}
+.power:hover .icgl{stroke:var(--ink)}
+.hero[data-power="err"] .icgl{stroke:var(--bad)}
+.hero[data-power="busy"] .icgl{stroke:var(--warn)}
+.hero[data-power="on"] .icgl{stroke:var(--acc)}
+.hero[data-power="on"] .power:hover .icgl{stroke:var(--acc-hi)}
+.cn-t{
+  position:absolute;top:12px;left:45px;max-width:122px;text-align:left;
+  font-size:15px;line-height:1.2;font-weight:600;color:var(--mut);transition:color .3s;
+}
+.power:hover .cn-t,
+.hero[data-power="busy"] .cn-t,.hero[data-power="on"] .cn-t{color:var(--ink)}
+.cn-s{
+  position:absolute;bottom:11px;left:16px;text-align:left;white-space:nowrap;
+  font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--mut-2);transition:color .3s;
+}
+.hero[data-power="busy"] .cn-s{color:var(--warn)}
+.hero[data-power="on"]  .cn-s{color:var(--acc)}
+.hero[data-power="err"] .cn-s{color:var(--bad)}
+.cnw span{display:none}
+.hero[data-power="off"]  .cnw .s-off{display:inline}
+.hero[data-power="busy"] .cnw .s-busy{display:inline}
+.hero[data-power="on"]   .cnw .s-on{display:inline}
+.hero[data-power="err"]  .cnw .s-err{display:inline}
+/* призыв: в покое по иконке и подписи неспешно пробегает зелёная
+   полоска — тем же маршрутом, что импульс по проводу, но реже.
+   На ховере гаснет: внимание уже здесь. */
+.hero[data-power="off"] .power:not(:hover) .cn-t{
+  background:linear-gradient(100deg,var(--mut) 42%,var(--acc-hi) 50%,var(--mut) 58%) no-repeat 100% 0/240% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:pwrSweep 5s linear infinite;
+}
+.hero[data-power="off"] .power:not(:hover) .icgl{animation:icoSweep 5s linear infinite}
+@keyframes pwrSweep{0%{background-position:100% 0}22%{background-position:0% 0}100%{background-position:0% 0}}
+@keyframes icoSweep{0%,7%,100%{stroke:var(--mut)}3%{stroke:var(--acc-hi)}}
+
+/* сцена, двухслойная:
+   · базовая линия провода — обычный div .wlbase: тянется на любую
+     ширину и не зависит от svg-масштабирования (svg-<line> под
+     preserveAspectRatio="none" падала на дробных масштабах);
+   · бегунки по проводу — псевдоэлементы линии .wlbase;
+   · .cn-cn — коннектор и порт фиксированные 300×104, прижаты к правому
+     краю: срез порта кромкой одинаков на всех брейкпоинтах.
+   transform-box:fill-box — ТОЛЬКО на листовых элементах со scale
+   (вспышка, глинты, волны): на группах с transition он даёт
+   пересчёт bbox каждый кадр и дёргание. */
+
+/* ════════ СЦЕНА КОННЕКТОРА ════════
+   Пришла на смену прежнему порту: тот был собран из примитивов
+   прямо здесь, этот — авторская отрисовка из Figma, четыре
+   комплекта на четыре состояния. Комплект — это коннектор плюс
+   панель; между собой они согласованы по координатам пинов и
+   гнёзд, поэтому подмена комплекта ничего не сдвигает.
+
+   ── НАСТРОЙКИ ──
+   Все размеры сцены живут в переменных ниже. Их и правим:
+   пересчёт кадра идёт от них, руками ничего двигать не нужно.
+     --cq-panel-x  где стоит панель. Точка стыковки едет за ней,
+                   поэтому коннектор дойдёт при любом значении
+     --cq-gap      отвод коннектора в разъединённом состоянии
+     --cq-seat     доводка посадки: поправка к точке стыковки.
+                   Отрицательная — коннектор не доезжает. Ею
+                   ловится место, где торец останавливается
+                   перед светящейся рамкой панели: заедет
+                   глубже — накроет её, и рамка почернеет
+     --cq-pad      воздух сверху и снизу. Не растягивает блок,
+                   а сужает иллюстрацию: кадр растёт от правого
+                   края влево, правая стена не отходит никогда
+   ── ЧТО НЕ ТРОГАТЬ ──
+   --cq-py и координаты в разметке: они вычислены из самих
+   файлов (гнёзда панели против пинов коннектора) и сходятся
+   с точностью до сотых. */
+.power{
+  --cq-panel-x:170;   /* положение панели по горизонтали */
+  --cq-gap:46;        /* отвод в разъединённом */
+  --cq-seat:0;        /* доводка посадки */
+  --cq-pad:10;        /* воздух сверху и снизу */
+  --cq-zoom:.95;      /* Масштаб сцены: больше — крупнее.
+                         Прежний потолок «свыше 1.07 панель срежется»
+                         снят — кадр теперь не даёт себя пережать
+                         (см. --cq-wmin), и число значит
+                         другое: им задаётся ширина кадра, а через
+                         неё крупность сцены. Крупнее 0.9 не
+                         ставится: кнопка стала уже и выше, кадр
+                         вслед за ней, и композиция упирается в
+                         подпись сверху, а провод слева уходит за
+                         кромку. 0.9 даёт те же 0.9 пикселя на
+                         единицу, что были при широкой кнопке. */
+  --cq-py:-47.5;      /* вертикаль панели — вычислена, не трогать */
+  --cq-wmin:292;      /* пол ширины кадра в единицах холста: ниже
+                         него композиция начинает резаться слева —
+                         провод укорачивается, а в отведённом
+                         положении подрезается и сам коннектор */
+}
+.cq{
+  position:absolute;inset:0;pointer-events:none;overflow:hidden;
+}
+.cq svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+
+/* ── ПРОВОД ──
+   Кабель нарисован в самом коннекторе, но он короткий. Эта
+   линия — его продолжение до левой кромки блока. Её правый
+   конец всегда перекрыт корпусом коннектора, поэтому шва не
+   видно ни в одной фазе движения. */
+.cq-wire{
+  position:absolute;left:0;top:50%;height:2.4px;
+  width:var(--cq-wire-w,120px);margin-top:var(--cq-wire-y,4px);
+  border-radius:1.2px;background:var(--wire);
+  transition:background .5s;
+}
+.hero[data-power="on"] .cq-wire{background:#2F5C36}
+.cq-wire::after{
+  content:'';position:absolute;inset:0;border-radius:inherit;
+  background:linear-gradient(90deg,transparent,var(--wire-run) 50%,transparent) no-repeat 0 0/46px 100%;
+  animation:cnRun 1.8s linear infinite;transition:opacity .3s;
+}
+.hero[data-power="busy"] .cq-wire::after,.hero[data-power="on"] .cq-wire::after{opacity:0}
+
+/* ── КОМПЛЕКТЫ ──
+   Невидимые гасим display:none, а не прозрачностью: при
+   opacity:0 браузер всё равно держит их растр и тратит на них
+   такт при каждой перерисовке. Перед переходом JS снимает
+   hidden на кадр раньше, поэтому кроссфейд остаётся плавным. */
+.cq-set{opacity:0;transition:opacity .42s ease}
+.cq-set[hidden]{display:none}
+.cq-set.on{opacity:1}
+
+/* ── ХОД КОННЕКТОРА ──
+   Двигается группа внутри SVG, а не обёртка снаружи. Слоем
+   было бы дешевле, но маска обрезает пины по круглым входам
+   гнезда и обязана стоять на месте: уехав вместе с коннектором,
+   она срезала бы пины и в отведённом положении — коннектор
+   оставался бы без них. Корректность тут дороже такта.
+   Один длинный переход без покачиваний: разъём вставляют
+   ровно, дрожь на подлёте читалась бы неисправностью. */
+.cq-cn{transition:transform 1.05s cubic-bezier(.4,.5,.15,1)}
+.cq-cn.move{will-change:transform}   /* только на время хода: постоянный will-change держит память впустую */
+
+/* ── ДОСТУПНОСТЬ ──
+   Кому движение в интерфейсе неприятно физически — тому
+   коннектор просто оказывается на месте. */
+@media (prefers-reduced-motion:reduce){
+  .cq-cn{transition:none}
+  .cq-set{transition:none}
+  .cq-wire::after{animation:none;opacity:0}
+}
+
+/* ЗАМОРОЖЕНО: прежняя отрисовка порта из примитивов. Её
+   заменила авторская из Figma (см. .cq выше). Оставлена
+   целиком — откат должен стоить одного атрибута hidden. */
+.cn-scene{
+  position:absolute;inset:0;pointer-events:none;
+  -webkit-mask:linear-gradient(90deg,transparent,#000 6%);
+  mask:linear-gradient(90deg,transparent,#000 6%);
+}
+.wlbase{
+  position:absolute;left:0;right:200px;top:calc(50% + 3.8px);height:2.4px;
+  border-radius:1.2px;background:var(--wire);
+  transition:background .5s,right .55s cubic-bezier(.3,1.4,.4,1);
+}
+/* конец линии всегда спрятан под корпусом коннектора:
+   в выкл. — right:200 (под телом), при стыковке линия дотягивается
+   вместе с коннектором (right:148) */
+.hero[data-power="busy"] .wlbase,.hero[data-power="on"] .wlbase{right:148px}
+.hero[data-power="on"] .wlbase{background:rgba(102,205,114,.24)}
+/* бегунки — псевдоэлементы самой линии, никаких svg-слоёв:
+   ::after — покой/err, едва заметный бесцветный;
+   ::before — согласование (янтарный, быстрый) и работа (зелёный).
+   Пробег и конец совпадают с самой линией — гаснет под коннектором. */
+.wlbase::after{
+  content:'';position:absolute;inset:0;border-radius:inherit;
+  background:linear-gradient(90deg,transparent,var(--wire-run) 50%,transparent) no-repeat 0 0/46px 100%;
+  animation:cnRun 1.8s linear infinite;transition:opacity .3s;
+}
+.hero[data-power="busy"] .wlbase::after,.hero[data-power="on"] .wlbase::after{opacity:0}
+.wlbase::before{
+  content:'';position:absolute;inset:0;border-radius:inherit;opacity:0;transition:opacity .25s;
+  background:linear-gradient(90deg,transparent,#66CD72 50%,transparent) no-repeat 0 0/58px 100%;
+  filter:drop-shadow(0 0 4px rgba(72,180,87,.55));
+}
+.hero[data-power="busy"] .wlbase::before{
+  opacity:1;transition-delay:.48s;
+  background-image:linear-gradient(90deg,transparent,#D9B860 50%,transparent);
+  filter:drop-shadow(0 0 4px rgba(217,184,96,.55));
+  animation:cnRun .6s linear infinite;
+}
+.hero[data-power="on"] .wlbase::before{opacity:1;animation:cnRun 1.05s linear infinite}
+/* отказ: линия глохнет в красный, по ней медленно ходит алый импульс */
+.hero[data-power="err"] .wlbase{background:rgba(229,107,89,.28)}
+.hero[data-power="err"] .wlbase::after{opacity:0}
+.hero[data-power="err"] .wlbase::before{
+  opacity:1;
+  background-image:linear-gradient(90deg,transparent,#E56B59 50%,transparent);
+  filter:drop-shadow(0 0 4px rgba(229,107,89,.5));
+  animation:cnRun 2.6s linear infinite;
+}
+@keyframes cnRun{from{background-position:-64px 0}to{background-position:calc(100% + 64px) 0}}
+
+.cn-cn{
+  position:absolute;right:0;top:50%;width:300px;height:104px;
+  transform:translateY(-50%);display:block;overflow:visible;
+}
+.impact,.glint,.wv{transform-box:fill-box;transform-origin:center}
+.dock{transition:transform .55s cubic-bezier(.3,1.4,.4,1);will-change:transform}
+.hero[data-power="busy"] .gC,.hero[data-power="on"] .gC{transform:translateX(40px)}
+.brC{animation:cnBob 3s ease-in-out infinite}
+.hero[data-power="busy"] .brC,.hero[data-power="on"] .brC{animation:none}
+@keyframes cnBob{0%,100%{transform:translateX(0)}50%{transform:translateX(2.6px)}}
+
+/* лампы панели (авторские: свет #5BB35B, обводка #337333) —
+   раздельные LINK (левая) и ACT (правая), обводка общая .ledstroke */
+.ledL,.ledA{transition:fill .3s}
+.ledstroke{fill:#2C2C2C;transition:fill .3s}
+.ledL{fill:#3D3D3D}
+.ledA{fill:#141414} /* в покое второй фонарик тёмный — стекло в цвет плафона */
+.hero[data-power="off"] .ledL{fill:var(--warn);animation:cnSeek 2.6s ease-in-out infinite}
+@keyframes cnSeek{0%,78%,100%{opacity:.12}84%,92%{opacity:.75}}
+.hero[data-power="err"] .ledL{fill:var(--bad);opacity:.9}
+.hero[data-power="busy"] .ledL{fill:var(--warn);animation:blink .3s infinite}
+.hero[data-power="busy"] .ledA{fill:var(--warn);animation:blink .3s .15s infinite}
+.hero[data-power="busy"] .ledstroke{fill:#8A7440}
+.hero[data-power="on"] .ledL{fill:#5BB35B;filter:drop-shadow(0 1px 3px rgba(91,179,91,.85))}
+.hero[data-power="on"] .ledA{fill:#5BB35B;animation:cnAct 1.3s steps(1) infinite;filter:drop-shadow(0 1px 3px rgba(91,179,91,.85))}
+.hero[data-power="on"] .ledstroke{fill:#337333}
+@keyframes cnAct{0%,10%,16%,30%,44%,64%,72%,100%{opacity:1}12%,38%,41%,68%{opacity:.15}76%{opacity:.25}82%{opacity:1}}
+
+/* «палки» внутри порта: при согласовании — быстрый янтарный прогон,
+   в работе — бегущий зелёный огонёк-свечение */
+.stx{transition:fill .3s}
+.hero[data-power="busy"] .stx{animation:cnStickB .55s ease-in-out infinite;animation-delay:calc(.45s + var(--i)*.07s)}
+@keyframes cnStickB{0%,100%{fill:#000}50%{fill:#6B5A2C;filter:drop-shadow(0 0 2.5px rgba(217,184,96,.5))}}
+.hero[data-power="on"] .stx{animation:cnStickG 1.6s ease-in-out infinite;animation-delay:calc(var(--i)*.14s)}
+@keyframes cnStickG{0%,100%{fill:#0C0C0C}45%{fill:var(--stick-g,#2F5C36);filter:drop-shadow(0 0 3px var(--stick-gsh,rgba(91,179,91,.55)))}}
+
+/* подсветка проёма, вспышка стыковки, точки контакта */
+.slotg{fill:var(--acc);opacity:0;filter:blur(4px);transition:opacity .4s .45s}
+.hero[data-power="on"] .slotg{opacity:.26}
+.impact{fill:none;stroke:var(--acc-hi);stroke-width:2;opacity:0}
+.hero[data-power="busy"] .impact{animation:cnPing .5s ease-out .42s both}
+@keyframes cnPing{0%{opacity:.9;transform:scale(.4)}100%{opacity:0;transform:scale(2.4)}}
+.glint{fill:var(--warn);opacity:0}
+.hero[data-power="busy"] .glint.k1{animation:cnSpark .35s ease-out .5s both}
+.hero[data-power="busy"] .glint.k2{animation:cnSpark .35s ease-out .58s both}
+.hero[data-power="on"] .glint{opacity:.95;fill:var(--acc-hi);filter:drop-shadow(0 0 3px rgba(72,180,87,.8));transition:opacity .3s .15s}
+@keyframes cnSpark{0%{opacity:0;transform:scale(.3)}40%{opacity:1;transform:scale(1.35)}100%{opacity:0;transform:scale(.6)}}
+
+/* после подключения: лёгкие волны от порта — чуть шире исходных
+   (размах 2.6 против прежних 2.1) */
+.wv{fill:none;stroke:var(--acc);stroke-width:1.3;opacity:0}
+.hero[data-power="on"] .w1{animation:cnWave 2.85s ease-out infinite}
+.hero[data-power="on"] .w2{animation:cnWave 2.85s ease-out .95s infinite}
+.hero[data-power="on"] .w3{animation:cnWave 2.85s ease-out 1.9s infinite}
+@keyframes cnWave{0%{opacity:0;transform:scale(.55)}12%{opacity:.45}100%{opacity:0;transform:scale(2.6)}}
+
+/* ── ЗАМОРОЖЕНО: кнопка проверки в герое ──
+   Стили целы; кнопку прячет атрибут hidden, который ставит JS по
+   флагу CHECKERS.hero. У .btn-check свой display, поэтому
+   правило [hidden] прописано явно — иначе класс перебьёт UA.
+
+   Кнопка проверки живёт в трёх фазах (data-phase):
+   checking — нейтральная заливка ползёт 0→100% на время проверки;
+   ok/fail  — плашка перекрашивается под результат, текст меняется,
+              и заливка снова идёт 0→100% уже как таймер, по концу
+              которого кнопка возвращается в исходное состояние.
+   Длительность заливки задаёт JS через --sweep, чтобы CSS и таймеры
+   всегда совпадали. */
+.btn-check{
+  position:relative;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  height:60px;width:100%;border-radius:var(--r-block);
+  border:1px solid var(--line-2);
+  font-size:14px;font-weight:500;color:var(--ink);
+  transition:background .15s,border-color .25s,color .25s,transform .1s;
+}
+.btn-check .lift{position:relative}
+.btn-check .c-ico{display:grid;place-items:center}
+.btn-check svg{color:var(--mut);transition:color .25s}
+.btn-check:not([data-phase]):hover{background:var(--hov);border-color:rgba(255,255,255,.17)}
+.btn-check:not([data-phase]):active{transform:translateY(1px)}
+.btn-check[data-phase]{pointer-events:none}
+.btn-check:disabled{opacity:.4;pointer-events:none}
+.btn-check[hidden]{display:none}
+
+.btn-check .fill{
+  position:absolute;inset:0;pointer-events:none;
+  transform:scaleX(0);transform-origin:0 50%;
+}
+.btn-check[data-phase="checking"] .fill{
+  background:rgba(255,255,255,.05);
+  animation:sweepA var(--sweep,.9s) linear forwards;
+}
+.btn-check[data-phase="checking"] svg{color:var(--acc);animation:blink .8s infinite}
+
+.btn-check[data-phase="ok"]{
+  border-color:var(--acc-edge);background:var(--acc-tint);color:var(--acc-hi);
+}
+.btn-check[data-phase="ok"] svg{color:var(--acc-hi)}
+
+.btn-check[data-phase="mid"]{
+  border-color:var(--warn-edge);background:var(--warn-tint);color:var(--warn);
+}
+.btn-check[data-phase="mid"] svg{color:var(--warn)}
+
+.btn-check[data-phase="slow"]{
+  border-color:var(--org-edge);background:var(--org-tint);color:var(--org);
+}
+.btn-check[data-phase="slow"] svg{color:var(--org)}
+
+.btn-check[data-phase="fail"]{
+  border-color:var(--bad-edge);background:var(--bad-tint);color:var(--bad);
+}
+.btn-check[data-phase="fail"] svg{color:var(--bad)}
+
+@keyframes sweepA{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+
+/* — соединение —
+   Здесь было крупное число в миллисекундах. Оно создавало три
+   беды сразу. Его сравнивали с пингом в VPN-клиентах, где это
+   расстояние до сервера, — а у нас время ответа страницы ЧЕРЕЗ
+   прокси, оно всегда больше, и прокси на этом фоне выглядел
+   медленным. Оно скакало от того, какой сайт открыт, и скачки
+   читались как нестабильность адреса. И набранное крупной
+   моноширинной цифрой, оно выглядело точным измерением, хотя
+   это оценка по последним замерам.
+
+   Место числа заняла молния — ровно того же веса в композиции,
+   иначе колонка просела бы и блок потерялся рядом с кнопкой
+   питания. Под молнией — слово. Число не показывается нигде
+   (см. SHOW_MS): в интерфейсе миллисекунд больше нет. */
+.ping{display:grid;align-content:center;justify-items:start;gap:10px;padding:0 8px}
+.ping .lbl{margin:0}
+
+/* ── МОЛНИЯ ──
+   Из той же электрической темы, что штекер в кнопке питания,
+   но другой объект: штекер — разъём, молния — энергия, они
+   дополняют друг друга. Второй штекер тут читался бы как
+   несобранность, а палец вверх — как одобрение вместо
+   показания (и палец вниз при медленном соединении звучал бы
+   обвинением в адрес купленного человеком прокси).
+
+   Плашки под молнией нет намеренно: рамка и подложка делали из
+   неё кнопку, а это показание. Голая фигура держится тремя
+   слоями. Тело — вся молния, залитая едва заметно: так силуэт
+   читается целиком даже когда энергии в нём нет. Заливка —
+   уровень, наливается снизу. Контур — кромка поверх обоих,
+   он и отличает пустую работающую молнию от спящей.
+
+   Фронт заливки срезан по диагонали, а не по горизонтали:
+   ровная линия поперёк фигуры смотрится как мензурка с
+   делением, наклонная подхватывает наклон самой молнии и
+   читается движением, а не измерением. */
+.cq-ico{position:relative;display:block;flex-shrink:0;line-height:0}
+.cq-ico svg{display:block;overflow:visible}
+.bolt-body{fill:currentColor;opacity:.13;transition:opacity .35s}
+.bolt-line{fill:none;stroke:currentColor;stroke-width:1.5;stroke-linejoin:round;opacity:.5;transition:opacity .35s}
+/* заливка ездит по вертикали: 0 — полная, 75 — пустая.
+   Единицы те же, что у viewBox */
+.bolt-fill{
+  fill:currentColor;
+  transform:translateY(var(--fill, 75px));
+  transition:transform .55s var(--e);
+}
+
+.cq-word{font-size:16px;font-weight:600;line-height:1.15;color:var(--mut);transition:color .35s;white-space:nowrap}
+
+/* значок сна — у плеча молнии, маленький и без оправы:
+   любая рамка тут снова превратила бы блок в кнопку */
+.cq-zzz{position:absolute;top:2px;right:-14px;color:var(--dim);line-height:0}
+.cq-zzz[hidden]{display:none}
+
+/* Свечение — не украшение, а единственное, что осталось от
+   плашки: оно отделяет молнию от фона и растёт с уровнем.
+   У медленного его почти нет, и это честно. */
+.ping[data-q="good"] .cq-ico{color:var(--acc);filter:drop-shadow(0 0 16px rgba(72,180,87,.55))}
+.ping[data-q="good"] .cq-word{color:var(--acc-hi)}
+.ping[data-q="mid"]  .cq-ico{color:var(--warn);filter:drop-shadow(0 0 12px rgba(216,164,74,.35))}
+.ping[data-q="mid"]  .cq-word{color:var(--warn)}
+.ping[data-q="slow"] .cq-ico{color:var(--org)}
+.ping[data-q="slow"] .cq-word{color:var(--org)}
+/* «Работает» и «Подключаем» — нейтральные: ничего ещё
+   не измерено, и красить нечего */
+.ping[data-q="ok"]   .cq-ico{color:var(--mut)}
+.ping[data-q="ok"]   .cq-word{color:var(--ink)}
+.ping[data-q="busy"] .cq-ico{color:var(--mut-2)}
+.ping[data-q="busy"] .cq-word{color:var(--mut-2)}
+/* «Работает» и «Отключено» обе с пустой молнией, и различить их
+   должен контур: у работающего он чёткий, у спящего блёклый */
+.ping[data-q="ok"]   .bolt-line{opacity:1;stroke-width:1.7}
+.ping[data-q="ok"]   .bolt-body{opacity:.16}
+/* выключен человеком и обрыв выглядят одинаково тихо: тревогу
+   за обрыв берёт на себя блок питания, дублировать её здесь
+   значит пугать дважды. Отличает их только значок сна —
+   он ставится там, где человек выключил прокси сам */
+.ping[data-q="off"]  .cq-ico,.ping[data-q="lost"] .cq-ico{color:var(--dim)}
+.ping[data-q="off"]  .cq-word,.ping[data-q="lost"] .cq-word{color:var(--mut-2)}
+.ping[data-q="off"]  .bolt-line,.ping[data-q="lost"] .bolt-line{opacity:.42}
+.ping[data-q="off"]  .bolt-body,.ping[data-q="lost"] .bolt-body{opacity:.08}
+
+/* ── ДВИЖЕНИЕ ──
+   Постоянно движется только «подключаем»: там процесс идёт
+   и его видно. У остальных состояний анимация однократная —
+   заливка приезжает на свой уровень, и всё. Блок висит перед
+   глазами всё время, вечное мерцание в нём раздражало бы. */
+@keyframes cqCharge{
+  0%,100%{transform:translateY(66px)}
+  50%    {transform:translateY(22px)}
+}
+.ping[data-q="busy"] .bolt-fill{animation:cqCharge 1.2s ease-in-out infinite;transition:none}
+/* короткая вспышка на обновлении уровня — характер взят
+   у cnSpark в кнопке питания */
+@keyframes cqSpark{
+  0%  {transform:scale(1);    filter:brightness(1)}
+  30% {transform:scale(1.09); filter:brightness(1.7)}
+  100%{transform:scale(1);    filter:brightness(1)}
+}
+.cq-ico.spark svg{animation:cqSpark .46s var(--e)}
+
+/* ════════ СПИСОК ════════ */
+/* ── ТАБЫ-ВКЛАДКИ «Примыкание справа» ──
+   Ряд вкладок прижат к правому краю панели заподлицо; подсказка —
+   на левом фланге. Панель сохраняет все свои 24px-углы: щель между
+   кривой угла и крайней плашкой закрыта заполнителем 24×24 цвета
+   самой плашки, вырезанным по кривой (актив сливается с панелью,
+   неактив обнимает угол вуалью — просвета фона нет ни в одном
+   состоянии, включая ховер). Плечи вкладок 22 = ½ высоты: правые
+   дуги концентричны бейджам (паддинг 10 + радиус бейджа 12).
+   Активная вкладка продолжает панельную плоскость тем же тоном,
+   вылеты r-chip 8 — по внутренним стенкам. */
+.list-wrap{--tab-srf:var(--srf-low);display:grid}
+#v-proxy .list-wrap{margin-top:12px}   /* секционный разрыв герой→список: 20 сетки + 12 = 32 */
+#v-settings .list-wrap{--tab-srf:var(--srf)}   /* панели настроек светлее — актив и примыкание следуют */
+.list-hd{
+  position:relative;z-index:1;
+  display:flex;align-items:flex-end;gap:12px;
+  padding:0 0 0 16px;   /* табы заподлицо справа, слева фланг подсказки */
+}
+/* табы панели: «Мои прокси» и «Добавить прокси» */
+.ltabs{display:flex;gap:4px;margin-left:auto}
+.ltabs button{
+  position:relative;
+  display:flex;align-items:center;gap:12px;height:44px;flex-shrink:0;
+  padding:0 10px 0 20px;   /* справа 10px = зазору бейджа сверху/снизу */
+  /* оба плеча 22 = ½ высоты; правая дуга концентрична бейджу
+     (паддинг 10 + радиус бейджа 12 = 22) — угол обтекает плашку */
+  border-radius:22px 22px 0 0;
+  background:var(--raise);
+  font-size:14px;font-weight:500;color:var(--mut);white-space:nowrap;
+  transition:color .15s,background .2s var(--e);
+}
+.ltabs button:hover{background:var(--raise-2)}
+.ltabs button:hover{color:var(--ink)}
+.ltabs button[aria-selected="true"]{
+  color:var(--ink);background:var(--tab-srf);
+  z-index:1;
+}
+/* вылеты: панельная плоскость поднимается вдоль стенок активной вкладки */
+.ltabs button[aria-selected="true"]::before,
+.ltabs button[aria-selected="true"]::after{
+  content:'';position:absolute;bottom:0;width:8px;height:8px;pointer-events:none;
+}
+.ltabs button[aria-selected="true"]::before{left:-8px;background:radial-gradient(circle at 0 0,transparent 7.5px,var(--tab-srf) 8px)}
+.ltabs button[aria-selected="true"]::after{right:-8px;background:radial-gradient(circle at 100% 0,transparent 7.5px,var(--tab-srf) 8px)}
+
+/* примыкание крайней вкладки к сохранённому углу панели.
+   Идёт в источнике ПОСЛЕ правил вылетов: при равной специфичности
+   перекрывает правый вылет у last-child — вылету там нет места,
+   его роль играет заполнитель по кривой угла. */
+.ltabs button:last-child::after{
+  content:'';position:absolute;right:0;left:auto;top:100%;bottom:auto;width:24px;height:24px;pointer-events:none;
+  background:radial-gradient(circle at 0 100%,transparent 23.5px,var(--raise) 24px);
+}
+.ltabs button:last-child:hover::after{
+  background:radial-gradient(circle at 0 100%,transparent 23.5px,var(--raise-2) 24px);
+}
+.ltabs button[aria-selected="true"]:last-child::after{
+  background:radial-gradient(circle at 0 100%,transparent 23.5px,var(--tab-srf) 24px);
+}
+
+/* «Добавить прокси» — тёмно-зелёный акцент, разгорается на ховере и в активе */
+.ltabs button[data-ltab="add"]{color:var(--acc-deep)}
+.ltabs button[data-ltab="add"] svg{color:inherit}
+.tabplus{
+  display:grid;place-items:center;width:24px;height:24px;border-radius:50%;
+  background:rgba(72,180,87,.12);transition:background .15s;
+}
+.tabplus svg{display:block}
+.ltabs button[data-ltab="add"]:hover .tabplus,
+.ltabs button[data-ltab="add"][aria-selected="true"] .tabplus{background:rgba(72,180,87,.18)}
+.ltabs button[data-ltab="add"]:hover,
+.ltabs button[data-ltab="add"][aria-selected="true"]{color:var(--acc)}
+.tally{
+  display:grid;place-items:center;min-width:24px;height:24px;padding:0 8px;
+  border-radius:999px;background:var(--hov);
+  font-size:11.5px;font-weight:600;line-height:1;
+  font-variant-numeric:tabular-nums;color:var(--mut);
+}
+/* кружок-иконка вкладки настроек — язык бейджей списка */
+.tico{
+  display:grid;place-items:center;width:24px;height:24px;border-radius:50%;
+  background:var(--hov);color:var(--mut-2);transition:color .15s;
+}
+.tico svg{display:block}
+.ltabs button:hover .tico,
+.ltabs button[aria-selected="true"] .tico{color:var(--mut)}
+.hint{display:flex;align-items:center;gap:8px;align-self:center;font-size:12.5px;color:var(--mut-2);white-space:nowrap}
+.hint svg{color:var(--mut-2)}
+
+/* ── вкладка добавления ── */
+.pane-add{
+  display:grid;grid-template-columns:248px minmax(0,1fr);
+  gap:12px 28px;padding:16px;
+}
+.a-q{font-size:14px;font-weight:600;color:var(--ink);margin:2px 0 12px;padding-left:12px}
+.amodes{display:grid;gap:8px;align-content:start}   /* зазор = межстрочному в «Моих прокси» */
+/* карточка способа: тот же язык выделения, что у строк списка */
+.amo{
+  display:flex;gap:12px;align-items:center;width:100%;
+  padding:12px;border-radius:14px;text-align:left;
+  border:1px solid transparent;
+  transition:background .15s,border-color .15s;
+}
+.amo:hover{background:var(--hov)}
+.amo[aria-pressed="true"]{background:var(--acc-tint);border-color:var(--acc-edge)}
+.amo-i{
+  display:grid;place-items:center;width:38px;height:38px;flex-shrink:0;
+  border-radius:10px;background:var(--well);border:1px solid var(--line);
+  color:var(--mut);transition:color .15s,border-color .15s,background .15s;
+}
+.amo[aria-pressed="true"] .amo-i{
+  color:var(--acc);border-color:rgba(72,180,87,.3);background:rgba(72,180,87,.1);
+}
+.amo-t{display:grid;gap:2px;min-width:0}
+.amo-tt{font-size:13.5px;font-weight:500;color:var(--mut);transition:color .15s}
+.amo:hover .amo-tt,.amo[aria-pressed="true"] .amo-tt{color:var(--ink)}
+.amo-d{font-size:11.5px;color:var(--mut-2);line-height:1.4}
+/* колонка формы тянется на высоту всей вкладки (её задаёт
+   список способов слева), а единственная видимая форма
+   растягивается на колонку — grid-template-rows:1fr */
+.a-form{border-left:1px solid var(--line);padding:4px 4px 4px 28px;min-width:0;
+  display:grid;grid-template-rows:1fr}   /* правой колонке 20 сверху/справа/снизу: 16 панели + 4 */
+/* содержимое форм по-прежнему прижато к верху: align-content
+   по умолчанию растянул бы поля по всей высоте колонки */
+.fgrid{display:grid;gap:16px;align-content:start}
+.finp{
+  width:100%;height:42px;padding:0 13px;
+  background:var(--well);border:1px solid var(--line-2);border-radius:var(--r-el);
+  font-family:var(--mono);font-size:13px;color:var(--ink);
+  transition:border-color .15s;
+}
+.finp::placeholder{color:var(--mut-2)}
+.finp:focus{outline:none;border-color:var(--acc-edge)}
+.finp.bad{border-color:var(--bad)}
+.duo{display:grid;grid-template-columns:1fr 110px;gap:8px}
+.duo.half{grid-template-columns:1fr 1fr}
+.seg{display:flex;gap:4px;padding:4px;background:var(--well);border:1px solid var(--line);border-radius:var(--r-el);width:max-content}
+.seg button{
+  height:30px;padding:0 14px;border-radius:calc(var(--r-el) - 3px);
+  font-size:12.5px;font-weight:500;color:var(--mut);transition:color .15s,background .15s;
+}
+.seg button:hover{color:var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--srf);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+/* недоступный протокол: гасим, но клик оставляем живым — по
+   наведению и по фокусу подсказка объясняет, почему нельзя
+   (aria-disabled, а не disabled: у disabled нет ни ховера, ни
+   фокуса, и подсказка не открылась бы) */
+.seg button[aria-disabled="true"]{opacity:.4;cursor:default}
+.seg button[aria-disabled="true"]:hover{color:var(--mut)}
+/* 7Е (решение человека 15.09): единственная подпись «HTTP / HTTPS» вместо
+   кнопки HTTP — в том же колодце, в виде выбранного сегмента, но не кнопка:
+   выбирать больше нечего (HTTPS и SOCKS5 скрыты). Та же подпись — в правке
+   строки (.seg.sm) */
+.seg .seg-lbl{
+  display:inline-flex;align-items:center;height:30px;padding:0 14px;
+  border-radius:calc(var(--r-el) - 3px);font-size:12.5px;font-weight:500;
+  color:var(--ink);background:var(--srf);box-shadow:inset 0 0 0 1px var(--line);cursor:default;
+}
+.seg.sm .seg-lbl{height:28px;padding:0 11px;font-size:12px;border-radius:calc(var(--r-el) - 4px)}
+/* правка человека 21.09 после проверки 7E-1: у колодца формы «Полями» углы
+   были заметно менее скруглены, чем у единственной подписи внутри, и это
+   ломало вид. Скругление колодца выводится из подписи: её радиус (r-el − 3)
+   плюс отступ 4px и рамка 1px — углы концентричны. Только здесь: в правке
+   строки (.seg.sm: 6 + 3 + 1 = 10) и у селектора списков и так сходится */
+#segType{border-radius:calc(var(--r-el) + 2px)}
+.f-note{font-size:12px;color:var(--mut-2);line-height:1.6}
+/* вторая подпись — оговорка к первой: тише и мельче, чтобы
+   читалась как сноска, а не как ещё одно равноправное правило */
+.f-note.sub{font-size:11.5px;color:var(--dim);margin-top:8px}
+/* прямому ребёнку сетки её 16px уже дала сама сетка — отбираем
+   половину, чтобы сноска прижалась к тому, что объясняет.
+   Вложенной (под переключателем протокола) отбирать нечего:
+   там свой отступ, и минус её бы наехал на кнопки */
+.fgrid > .f-note.sub,.kst > .f-note.sub{margin-top:-8px}
+.f-note.sub b{color:var(--mut-2);font-weight:500}
+.finp.area{height:64px;min-height:64px;padding:10px 13px;line-height:1.6;resize:vertical}
+/* живой разбор вставленного: что распозналось из строки */
+.read{display:none;flex-wrap:wrap;gap:6px 14px;padding:10px 13px;
+  background:var(--well);border:1px solid var(--line);border-radius:var(--r-el)}
+.read.on{display:flex}
+.rc{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11.5px}
+.rc s{text-decoration:none;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut-2)}
+.rc b{font-weight:500;color:var(--acc-hi)}
+.read .no{font-size:12px;color:var(--bad)}
+/* 2.1: построчный разбор вставки — «адрес → категория». Своя полоса на
+   всю ширину, чтобы адреса не рвали общий ряд сводки: сводка отвечает
+   «сколько каких», список — «где какой». Адреса моноширинные, тип —
+   тем же чипом, что в списке, поэтому цвета совпадают с чипами строк. */
+.read .bl{
+  flex-basis:100%;margin:4px 0 0;padding:6px 0 0;list-style:none;
+  border-top:1px solid var(--line);
+  max-height:168px;overflow:auto;
+}
+.read .bl li{display:flex;align-items:center;gap:10px;padding:3px 0;font-size:11.5px}
+.read .bl .bl-a{font-family:var(--mono);color:var(--ink);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.read .bl .tp{flex-shrink:0}
+.read .bl .bl-more{color:var(--mut-2);font-size:11px}
+.btn-acc{
+  height:46px;border-radius:var(--r-el);
+  background:var(--acc);color:var(--on-acc);
+  font-size:14px;font-weight:600;
+  transition:background .15s,transform .1s;
+}
+.btn-acc:hover{background:var(--acc-hi)}
+.btn-acc:active{transform:translateY(1px)}
+.btn-acc:disabled{opacity:.5;pointer-events:none}
+
+/* ── редактирование: строка раскрывается на месте ── */
+.row.edit{cursor:default;background:rgba(255,255,255,.03);border-color:var(--line-2)}
+.row.edit.on{background:var(--acc-tint);border-color:var(--acc-edge)}
+.ed-cap{font-size:11px;color:var(--mut-2)}
+.ed{grid-column:1/-1;display:grid;gap:12px;padding-top:2px}
+.ed-g{display:grid;grid-template-columns:minmax(0,1.4fr) 84px minmax(0,1fr) minmax(0,1fr);gap:8px}
+.ed .finp{height:36px;font-size:12.5px;padding:0 11px}
+.ed-b{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.seg.sm{padding:3px;gap:3px}
+.seg.sm button{height:28px;padding:0 11px;font-size:12px;border-radius:calc(var(--r-el) - 4px)}
+.ed-sp{flex:1}
+.btn-acc.sm{height:36px;padding:0 16px;font-size:13px;border-radius:9px}
+.ed-b .btn-ft{height:36px}
+
+/* ── ПОИСК ПО СПИСКУ ──
+   При сотне записей постраничный вывод не спасает: человек не
+   помнит, на какой странице нужный адрес. Поле стоит над
+   строками — там, где взгляд и так начинает читать список, —
+   и фильтрует на каждую букву: кнопка «найти» тут лишний шаг.
+   Материал — колодец, как у полей формы: это ввод, а не
+   плашка-значение. */
+.lsearch{
+  display:flex;align-items:center;gap:10px;
+  margin:16px 16px 0;height:42px;padding:0 12px;
+  background:var(--well);border:1px solid var(--line);border-radius:var(--r-el);
+  transition:border-color .15s;
+}
+.lsearch[hidden]{display:none}
+.lsearch:focus-within{border-color:var(--acc-edge)}
+.lsearch > svg{color:var(--mut-2);flex-shrink:0}
+.ls-q{
+  flex:1;min-width:0;height:100%;
+  background:none;border:0;outline:none;
+  font-family:var(--ui);font-size:13.5px;color:var(--ink);
+}
+.ls-q::placeholder{color:var(--mut-2)}
+.ls-x{
+  display:grid;place-items:center;width:24px;height:24px;flex-shrink:0;
+  border-radius:var(--r-chip);color:var(--mut-2);transition:color .13s,background .13s;
+}
+.ls-x:hover{color:var(--ink);background:var(--hov-2)}
+.ls-x[hidden]{display:none}
+
+.rows{padding:16px 16px 8px}
+/* смена вкладки: входящее содержимое мягко проявляется (тот же
+   язык, что вход .view, но короче); пейджер и футер дышат вместе
+   со списком — рестарт анимации только при реальном показе */
+.pane-add:not([hidden]),#rows:not([hidden]),.fgrid:not([hidden]),.pager,.list-ft:not([hidden]){animation:tabIn .22s var(--e)}
+@keyframes tabIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+/* панели настроек несут прилипшую вкладку: двигать их нельзя
+   (разорвётся примыкание) — только проявление без сдвига */
+.stab-pane:not([hidden]){animation:tabFade .22s var(--e)}
+@keyframes tabFade{from{opacity:0}to{opacity:1}}
+/* строка — двухэтажная, как в макете:
+   адрес + статус сверху, чипы + шестерёнка снизу */
+/* 2.4: четвёртая колонка — место под страну с флагом (сразу после
+   адреса, как в таблицах чекеров). Пинг встаёт в правый край первой
+   строки, метка подключения и шестерёнка — в правый край второй. */
+.row{
+  position:relative;
+  display:grid;grid-template-columns:auto auto auto minmax(0,1fr) auto;align-items:center;
+  gap:12px;
+  padding:16px;border-radius:var(--r-block);
+  border:1px solid transparent;cursor:pointer;
+  transition:background .15s,border-color .15s;
+}
+.row + .row{margin-top:8px}
+/* разделители между строками: живут в существующем 8px-зазоре
+   (отступы не растут), гаснут по соседству с наведённой, выбранной
+   или редактируемой строкой — «выбрана 1-я, наведена 3-я» гасит все */
+.row + .row::before{
+  content:'';position:absolute;left:16px;right:16px;top:-4px;height:1px;
+  background:var(--line);transition:opacity .15s;pointer-events:none;
+}
+.row:hover::before,.row.on::before,.row.edit::before,
+.row:hover + .row::before,.row.on + .row::before,.row.edit + .row::before{opacity:0}
+.row:hover{background:rgba(255,255,255,.035)}
+.row.on{background:var(--acc-tint);border-color:var(--acc-edge);cursor:default}
+
+.ring{
+  width:13px;height:13px;border-radius:50%;
+  border:1.5px solid var(--dim);transition:.18s;
+}
+.row:hover .ring{border-color:var(--mut)}
+.row.on .ring{border-color:var(--acc);background:var(--acc);box-shadow:0 0 9px rgba(72,180,87,.45)}
+
+.r-addr{
+  font-family:var(--mono);font-size:14.5px;letter-spacing:-.01em;color:var(--mut);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:color .15s;
+  min-width:0;max-width:min(52vw,420px);   /* 2.4: колонка по содержимому, но с потолком */
+}
+.r-addr .dt{color:var(--mut-2)}
+.r-addr .pt{color:var(--mut-2);transition:color .15s}
+.row.on .r-addr{color:var(--ink)}
+.row.on .r-addr .pt{color:var(--acc)}
+
+/* метка «Активен» временно выключена — вернём по запросу:
+.r-state{font-size:13px;font-weight:500;color:var(--acc)} */
+
+/* инлайн-проверка соединения — в правом краю первой строки */
+.r-end1{grid-column:5;display:flex;align-items:center;gap:16px;justify-self:end;flex-shrink:0}
+.rcheck{
+  display:inline-flex;align-items:center;gap:7px;flex-shrink:0;
+  font-size:11.5px;color:var(--mut-2);padding:3px 0;
+  transition:color .15s;
+}
+button.rcheck:hover{color:var(--ink)}
+.rcheck svg{color:currentColor}
+.rcheck b{font-family:var(--mono);font-weight:500}
+.rcheck .rdot{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0}
+.rcheck.busy{color:var(--mut);cursor:default}
+.rcheck.ok{color:var(--acc)}
+.rcheck.mid{color:var(--warn)}
+.rcheck.slow{color:var(--org)}
+.rcheck.bad{color:var(--bad)}
+
+.spin{
+  width:12px;height:12px;border-radius:50%;flex-shrink:0;
+  border:2px solid rgba(255,255,255,.15);border-top-color:var(--acc);
+  animation:rot .8s linear infinite;
+}
+@keyframes rot{to{transform:rotate(1turn)}}
+
+/* ── 2.4: МЕСТО (страна и город) ──
+   Живёт в первой строке сразу за адресом: флаг, название страны и, если
+   геосервис его отдал, город. Это подпись, а не чип: рамка чипа на
+   каждой строке превратила бы список в сетку коробок, а в таблицах
+   чекеров место стоит просто текстом. Высота та же, что у чипа, — строки
+   не разъезжаются.
+   Слишком длинное название («United Arab Emirates, Dubai») режется
+   многоточием: адрес важнее, он и так жмётся первым.
+   Кликается там, где страну можно менять руками (canPickGeo), и ведёт
+   себя как прежняя метка в чипе: наведение — карточка, клик — список. */
+.r-geo{
+  grid-column:3;
+  display:flex;align-items:center;min-width:0;max-width:min(46vw,340px);
+  font-size:12.5px;color:var(--mut);
+  transition:color .15s;
+}
+.row.on .r-geo{color:var(--ink)}
+.r-geo .geo-wrap{min-width:0;max-width:100%}
+.r-geo .geo-set,
+.r-geo .geo-q{
+  height:26px;padding:0 7px 0 6px;gap:7px;
+  border-radius:var(--r-chip);background:none;min-width:0;
+  transition:background .15s,color .15s;
+}
+.r-geo .geo-set{cursor:pointer}
+.r-geo .geo-set:hover,.r-geo .geo-set:focus{background:var(--hov-2);outline:none}
+.row.on .r-geo .geo-set:hover{background:rgba(72,180,87,.14)}
+.r-geo .geo-q{padding:0 6px}
+.r-geo .geo-name{
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-weight:500;letter-spacing:-.005em;
+}
+/* флаг чуть крупнее, чем в чипе: здесь он один и служит меткой строки */
+.r-geo .fl{flex-shrink:0}
+/* метка у прокси из аккаунта и у определённой автоматически — не кнопка */
+.geo-set-ro{display:inline-flex;align-items:center;gap:7px;min-width:0}
+/* разделитель «страна · тип» остался только в чипе героя */
+.geo-dot{color:var(--mut-2);margin:0 -3px}
+
+/* ── 2.4: ПОДКЛЮЧЕНО / ОТКЛЮЧЕНО ──
+   Метка состояния строки, как в чекерах: зелёная у подключённой,
+   красная у остальных. Кликается — это кнопка: зелёная отключает,
+   красная подключает именно эту строку.
+   Цвета — из токенов темы (--acc / --bad и их тинты): в светлой теме
+   зелёный темнее, красный глуше, контраст тот же. */
+.r-conn{
+  display:inline-flex;align-items:center;gap:6px;flex-shrink:0;
+  height:26px;padding:0 10px;border-radius:999px;
+  font-size:11.5px;font-weight:600;letter-spacing:.01em;white-space:nowrap;
+  border:1px solid transparent;
+  transition:background .15s,border-color .15s,color .15s,transform .1s;
+}
+.r-conn .cd{
+  width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0;
+}
+.r-conn.on .cd{box-shadow:0 0 0 3px var(--acc-tint-2)}
+.r-conn.off .cd{box-shadow:0 0 0 3px var(--bad-tint-2)}
+.r-conn.on{color:var(--acc);background:var(--acc-tint);border-color:var(--acc-edge)}
+.r-conn.off{color:var(--bad);background:var(--bad-tint);border-color:var(--bad-edge)}
+
+/* 2.4.1: две подписи в одной ячейке сетки — «в покое состояние, под
+   указателем действие». Обе занимают одно место, поэтому метка не
+   меняет ширину при наведении, а невидимая (visibility) не попадает
+   ни в innerText, ни в озвучку скринридера. */
+.r-conn .lbl{display:grid;align-items:center}
+.r-conn .lbl > span{grid-area:1 / 1;white-space:nowrap}
+.r-conn .l-hover{visibility:hidden}
+.r-conn:hover .l-idle,.r-conn:focus-visible .l-idle{visibility:hidden}
+.r-conn:hover .l-hover,.r-conn:focus-visible .l-hover{visibility:visible}
+/* наведение показывает то, что сделает клик: подключённая строка
+   краснеет и обещает «Disconnect», отключённая зеленеет и обещает
+   «Connect» — цвет и слово говорят одно и то же */
+.r-conn.on:hover,.r-conn.on:focus-visible{
+  color:var(--bad);background:var(--bad-tint);border-color:var(--bad-edge);
+}
+.r-conn.on:hover .cd,.r-conn.on:focus-visible .cd{box-shadow:0 0 0 3px var(--bad-tint-2)}
+.r-conn.off:hover,.r-conn.off:focus-visible{
+  color:var(--acc);background:var(--acc-tint);border-color:var(--acc-edge);
+}
+.r-conn.off:hover .cd,.r-conn.off:focus-visible .cd{box-shadow:0 0 0 3px var(--acc-tint-2)}
+.r-conn:active{transform:scale(.97)}
+.r-conn:focus-visible{outline:2px solid var(--acc-edge);outline-offset:2px}
+.r-conn.busy{color:var(--warn);background:var(--warn-tint);border-color:var(--warn-edge);cursor:progress}
+.r-conn.busy .cd{animation:pulseDot 1s ease-in-out infinite}
+@keyframes pulseDot{0%,100%{opacity:.35}50%{opacity:1}}
+html[data-theme="light"] .r-conn.on{color:var(--acc-deep)}
+html[data-theme="light"] .r-conn.on:hover{color:var(--bad)}
+
+/* тип отдельным чипом в нижней строке (2.4: он больше не делит чип со
+   страной) — та же высота и шрифт, что у соседей */
+.r-meta .chip.typec{padding:0 10px}
+.r-meta .chip.typec .tp{font-size:12px}
+
+.r-meta{grid-column:1 / 5;display:flex;gap:6px;align-items:center;flex-wrap:wrap;min-width:0}
+.r-meta .chip{height:28px;font-size:12px;padding:0 10px;gap:7px;transition:background .15s,border-color .15s,color .15s}
+/* срок действия: тихо до 7 дней, янтарь ≤7, красный ≤2 */
+.expch{color:var(--warn);background:var(--warn-tint)}
+.expch.bad{color:var(--bad);background:var(--bad-tint)}
+button.expch{cursor:pointer}
+.expch .rn{display:inline-flex;align-items:center;gap:4px;font-weight:600;text-decoration:underline;text-underline-offset:2px}
+/* при выделении гео и протокол уходят в зелёный оттенок;
+   теги сохраняют собственные цвета — это их смысл */
+.row.on .chip:not(.tagc):not(.add){
+  background:var(--acc-tint);border-color:rgba(72,180,87,.3);color:#C4E9C9;
+}
+
+/* ── НЕТ В АККАУНТЕ ──
+   Прокси пришёл по ключу, но из аккаунта пропал: аренда не
+   продлена, заказ удалён. Из списка мы его не выкидываем — он
+   ещё может работать, и решать за человека нельзя. Пометка
+   стоит рядом со сроком и намеренно тихая: это факт, а не
+   тревога, цветом мы её не поднимаем. */
+.nacc{font-size:11.5px;color:var(--mut-2);cursor:help;white-space:nowrap}
+.row.on .nacc{color:rgba(196,233,201,.6)}
+html[data-theme="light"] .row.on .nacc{color:rgba(30,103,43,.7)}
+
+.r-tools{grid-column:5;justify-self:end;display:flex;align-items:center;gap:6px}
+
+/* меню строки */
+.mwrap{position:relative}
+.mwrap .ico[aria-expanded="true"]{color:var(--ink);background:var(--hov-2)}
+.menu{
+  position:absolute;right:0;top:calc(100% + 6px);z-index:30;min-width:176px;
+  padding:6px;border-radius:14px;
+  background:var(--ovl);border:1px solid var(--line-2);
+  box-shadow:0 18px 44px -12px rgba(0,0,0,.85);
+  animation:pop .16s var(--e);
+}
+.menu[hidden]{display:none}
+@keyframes pop{from{opacity:0;transform:translateY(-4px) scale(.98)}to{opacity:1;transform:none}}
+.menu button{
+  display:flex;align-items:center;gap:10px;width:100%;height:36px;padding:0 12px;
+  border-radius:var(--r-chip);font-size:13px;font-weight:500;color:var(--ink);
+  transition:background .13s;
+}
+.menu button svg{color:var(--mut)}
+.menu button:hover{background:var(--hov)}
+.menu .danger,.menu .danger svg{color:var(--bad)}
+.menu .danger:hover{background:var(--bad-tint)}
+
+/* ── смена языка: глобус в шапке + меню с флагами ──
+   3Б.3: блока нет — решение 07.09, как в попапе: язык расширения задаёт
+   браузер (chrome.i18n переключать нечем), кнопки языка нет. В прототипе
+   здесь стояли .lngw, .lng (44×44, пара к переключателю темы), .lmenu
+   (базовый .menu на 176px, пункты 38px: флаг · название · галочка) и .chk;
+   снимать их там же. Правило .bar{z-index:5} оставлено: оно про шапку. */
+.bar{z-index:5}   /* шапка выше main (у обоих было 2, main позже в DOM
+                     и накрывал меню: z-30 заперт внутри контекста шапки);
+                     тост на 80 остаётся сверху */
+
+
+.blank{padding:44px 28px;text-align:center}
+.blank p{color:var(--mut);font-size:13px;max-width:300px;margin:0 auto;line-height:1.65}
+.blank .btn-ft{margin-top:16px}
+
+/* ── теги: цвет детерминирован названием ── */
+.tagc{gap:5px;padding:0 6px 0 8px;font-size:11px}
+.untag{display:grid;place-items:center;width:15px;height:15px;border-radius:4px;color:inherit;opacity:.45;transition:.13s}
+.tagc:hover .untag{opacity:.85}
+.untag:hover{opacity:1;background:rgba(255,255,255,.14)}
+.chip.add{
+  border-style:dashed;border-color:var(--line-2);background:transparent;
+  color:var(--mut-2);cursor:pointer;transition:color .15s,border-color .15s;
+  padding:0 15px 1px 12px;   /* 7З (решение человека 22.09): справа больше, чем слева, — с равными отступами текст «+ заметка» читался прижатым к правому краю; 1px снизу — подъём текста Onest по замеру чернил, как у плашек попапа 7Л; правое значение — по глазу */
+}
+.chip.add:hover{color:var(--ink);border-color:rgba(255,255,255,.3)}
+.chip.tagc{cursor:pointer}
+/* правка у глаза: голая иконка размером с глаз (16px, well.sq),
+   отделена коротким штрихом — показать и править живут рядом */
+.tag-inp{
+  height:28px;width:96px;padding:0 9px;
+  background:var(--well);border:1px solid var(--acc-edge);border-radius:var(--r-chip);
+  font-size:12px;color:var(--ink);
+}
+.tag-inp:focus{outline:none;border-color:var(--acc)}
+.tag-inp::placeholder{color:var(--mut-2)}
+
+/* ── пагинация: до 3 прокси на страницу ── */
+.pager{display:flex;align-items:center;gap:5px;padding:12px 16px}   /* видимостью правит [hidden] из JS */
+/* одна страница — пейджера нет: списку больше воздуха до разделителя */
+.panel.low:has(.pager[hidden]) #rows{padding-bottom:16px}
+.pg-info{font-size:12px;color:var(--mut-2);margin-right:auto}
+.pg{
+  min-width:30px;height:30px;padding:0 6px;border-radius:var(--r-chip);
+  display:grid;place-items:center;
+  font-family:var(--mono);font-size:12px;color:var(--mut);
+  transition:background .13s,color .13s;
+}
+.pg:hover{background:var(--hov);color:var(--ink)}
+.pg.cur{background:var(--acc-tint);color:var(--acc-hi);box-shadow:inset 0 0 0 1px var(--acc-edge)}
+.pg:disabled{opacity:.3;pointer-events:none}
+/* пропуск страниц: не кнопка — ни ховера, ни фокуса */
+.pg-gap{
+  min-width:20px;height:30px;display:grid;place-items:center;
+  font-size:12px;color:var(--dim);user-select:none;
+}
+/* переключатель режима списка: тихий текст в зоне пагинации */
+.pg-all{
+  padding:6px 2px;font-size:12px;color:var(--mut-2);
+  transition:color .15s;
+}
+.pg-all.div{margin-left:12px;padding-left:16px;border-left:1px solid var(--line)}
+.pg-all:hover{color:var(--ink)}
+
+/* ── футер: массовые действия ── */
+.list-ft{display:flex;gap:8px;margin:0 16px;padding:16px 0;border-top:1px solid var(--line)}   /* вертикаль = панельным 16 */   /* видимостью правит [hidden] из JS */
+.btn-ft{
+  display:inline-flex;align-items:center;gap:8px;
+  height:36px;padding:0 14px;border-radius:var(--r-el);
+  border:1px solid var(--line-2);font-size:13px;font-weight:500;color:var(--ink);
+  transition:background .15s,border-color .15s,color .15s;
+}
+.btn-ft:hover{background:var(--hov);border-color:rgba(255,255,255,.24)}
+.btn-ft:disabled{opacity:.5;pointer-events:none}
+.btn-ft[hidden]{display:none}   /* свой display перебивает UA-правило */
+.btn-ft.ghost{border-color:transparent}
+.btn-ft.ghost:hover{border-color:transparent;background:var(--hov)}
+.btn-ft.ghost svg{color:var(--mut);transition:color .15s}
+.btn-ft.ghost:hover svg{color:var(--ink)}
+.btn-ft.danger{color:var(--bad);border-color:rgba(229,107,89,.35)}
+.btn-ft.danger:hover{background:var(--bad-tint);border-color:rgba(229,107,89,.55)}
+.btn-ft.armed{background:var(--bad-tint);border-color:var(--bad);color:var(--bad)}
+
+/* ════════ НАСТРОЙКИ ════════ */
+.set-cap{font-size:13.5px;font-weight:600;padding:16px 20px 0}   /* подпись живёт внутри панели */
+/* ── ВКЛАДКИ НАСТРОЕК ── */
+.tab-sm{display:none}           /* короткие подписи — только мобайл */
+.stab-pane{display:grid;gap:20px}
+#v-settings .panel{padding:4px 0}   /* вертикаль блока = боковым 20: 4 + 16 опции */
+.set-note{margin:0 0 16px;padding:0 20px;font-size:12.5px;color:var(--mut-2);line-height:1.55}
+/* ── 7Л · РАЗДЕЛ «СПИСКИ» (решение человека 19.09, В4; правка 20.09) ──
+   Селектор режима — .seg с тремя кнопками; подписи полные (.lm-lg) и
+   короткие (.lm-sm), короткие — только на 480 px, чтобы кнопки не
+   переносились (title держит полные). Под селектором — подпись luD со
+   значком ⓘ, отделена воздухом от блоков (правка человека 20.09).
+   Два блока списков (.list-box) — рядом при ≥ 947 px, столбиком при
+   ≤ 946 px (порог страницы, как у остальных блоков); поля во всю ширину.
+   Блок действующего режима (.active) — рамка цвета акцента и подпись
+   «действует»; второй — обычный, не серый: он редактируем.
+   Иерархия внутри блока (правка 20.09): заголовок с меткой и подпись
+   смысла — одной группой (тесно); подпись поля и поле — второй группой;
+   импорт и экспорт — под полем, к нему и относятся; подсказка о масках —
+   тише всех, с воздухом сверху */
+.lm-note{display:flex;align-items:flex-start;gap:8px;margin:-2px 0 20px;color:var(--mut-2)}
+.lm-note svg{flex-shrink:0;margin-top:2px;color:var(--mut)}
+.lm-sm{display:none}
+/* выбранные «Чёрный» и «Белый» — зеленоватой плашкой с обводкой, как в попапе
+   (правка человека 20.09, 6); «Выкл» — плашкой цвета окна, как прежде */
+.lm-seg button[data-lm="black"][aria-pressed="true"],
+.lm-seg button[data-lm="white"][aria-pressed="true"]{color:var(--acc);background:var(--acc-tint);box-shadow:inset 0 0 0 1px var(--acc-edge)}
+/* ── 7З · строка «Уведомления о сроках» (блок «Аккаунт»; правка человека
+   22.09, 1 и 3) ──
+   Своя сетка вместо flex-переноса: значок · текст · органы. Органы — строка
+   с выпадающим списком прокси (40px) и под ней селектор области той же ширины
+   и высоты (.seg, как у режима списков: выбранное положение, кроме «Выкл», —
+   зеленоватой плашкой; запертые без ключа — aria-disabled, как кнопки
+   протокола: гаснут, но подсказка открывается); список сверху — раскрываясь
+   вверх, он не перекрывает селектор (правка человека 22.09). На узких экранах органы
+   уходят под текст — в колонку текста, не под значок (правка 3: при переносе
+   flex ставил их к левому краю). Порог 946 — тот же, что у героя: шире него
+   строка с четырьмя положениями помещается справа от текста всегда */
+.opt.ns{display:grid;grid-template-columns:36px minmax(0,1fr) auto;column-gap:16px;row-gap:12px;align-items:center}
+.opt.ns .opt-i{grid-column:1;grid-row:1}
+.opt.ns .opt-t{grid-column:2;grid-row:1}
+.ns-ctl{grid-column:3;grid-row:1;justify-self:end;display:grid;gap:8px;width:max-content;max-width:100%}
+.ns-seg button:not([data-ns="off"])[aria-pressed="true"]{color:var(--acc);background:var(--acc-tint);box-shadow:inset 0 0 0 1px var(--acc-edge)}
+/* строка списка: колодец, как .seg (та же рамка и радиус), высота 40 = селектор */
+.ns-dd-btn{
+  display:flex;align-items:center;gap:8px;width:100%;height:40px;padding:0 10px 0 12px;
+  background:var(--well);border:1px solid var(--line);border-radius:var(--r-el);
+  font-size:12.5px;font-weight:500;color:var(--ink);text-align:left;
+  transition:border-color .15s,background .15s;
+}
+.ns-dd-btn:hover{border-color:var(--line-2)}
+.ns-dd-btn[aria-expanded="true"]{border-color:var(--acc-edge)}
+.ns-dd-btn[aria-disabled="true"]{opacity:.4;cursor:default}
+.ns-dd-btn[aria-disabled="true"]:hover{border-color:var(--line)}
+.ns-dd-btn span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ns-dd-btn svg{flex-shrink:0;color:var(--mut);transition:transform .15s}
+.ns-dd-btn[aria-expanded="true"] svg{transform:rotate(180deg)}
+/* выпадающий список — общее .menu под строкой, во всю её ширину; .up —
+   раскрыт вверх (скрипт мерит по месту: внизу окна не помещается) */
+.menu.nsm{left:0;right:0;min-width:0;padding:6px}
+.menu.nsm.up{top:auto;bottom:calc(100% + 6px);animation-name:popUp}
+@keyframes popUp{from{opacity:0;transform:translateY(4px) scale(.98)}to{opacity:1;transform:none}}
+.nsm-list{max-height:212px;overflow:auto;overscroll-behavior:contain;display:grid;gap:1px}
+.nsm-list::-webkit-scrollbar{width:8px}
+.nsm-list::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:4px;border:2px solid var(--ovl)}
+/* строки — поверх общих правил .menu button (высота, отступы, ховер): у
+   запертой строки ховера нет (disabled мышь не получает, но :hover в CSS
+   совпал бы) */
+.menu.nsm .nsm-row{
+  display:flex;align-items:center;gap:9px;width:100%;height:34px;padding:0 4px 0 8px;
+  border-radius:var(--r-chip);text-align:left;font-size:12.5px;font-weight:400;color:var(--ink);
+  transition:background .12s;
+}
+.menu.nsm .nsm-row .fl{flex-shrink:0;border-radius:2.5px;outline:1px solid rgba(255,255,255,.16);outline-offset:-.5px}
+html[data-theme="light"] .menu.nsm .nsm-row .fl{outline-color:rgba(0,0,0,.15)}
+.menu.nsm .nsm-row b{flex:1;min-width:0;font-family:var(--mono);font-weight:400;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.menu.nsm .nsm-row b .dt,.menu.nsm .nsm-row b .pt{color:var(--mut-2)}
+.menu.nsm .nsm-row i{font-style:normal;font-size:10.5px;color:var(--mut-2);flex-shrink:0}
+.menu.nsm .nsm-bell{display:grid;place-items:center;width:26px;height:26px;border-radius:7px;flex-shrink:0;transition:background .12s}
+/* в разметке оба колокольчика — целый и перечёркнутый; виден один по классу
+   строки (узлы не подменяются: щелчок по иконке не должен закрывать меню) */
+.menu.nsm .nsm-bell svg:first-child{display:none}
+.menu.nsm .nsm-row.on .nsm-bell svg:first-child{display:block}
+.menu.nsm .nsm-row.on .nsm-bell svg:last-child{display:none}
+.menu.nsm .nsm-row svg{color:var(--mut-2)}
+.menu.nsm .nsm-row.on svg{color:var(--acc)}
+.menu.nsm .nsm-row:hover{background:transparent}
+.menu.nsm .nsm-row:not(.lock):hover{background:var(--hov)}
+.menu.nsm .nsm-row:not(.lock):hover .nsm-bell{background:var(--hov-2)}
+.menu.nsm .nsm-row:not(.lock):hover svg{color:var(--ink)}
+.menu.nsm .nsm-row.on:not(.lock):hover svg{color:var(--acc-hi)}
+/* запертая строка — целиком: ручные всегда, остальные по области */
+.menu.nsm .nsm-row.lock{opacity:.45;cursor:default}
+@media (max-width:946px){
+  .ns-ctl{grid-column:2;grid-row:2;justify-self:start}
+}
+.lists-two{display:grid;grid-template-columns:1fr;gap:14px;padding:0 20px 20px}
+.list-box{
+  display:flex;flex-direction:column;align-items:stretch;padding:16px 18px 18px;
+  border:1px solid var(--line);border-radius:var(--r-block);background:var(--srf-low);
+  transition:border-color .15s,box-shadow .15s;
+}
+.list-box.active{border-color:var(--acc-edge);box-shadow:inset 0 0 0 1px var(--acc-edge)}
+.lb-hd{display:flex;align-items:center;gap:10px;min-height:22px}
+.lb-hd h3{font-size:15px;font-weight:600;letter-spacing:-.01em}
+.lb-act{
+  display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:var(--r-chip);
+  background:var(--acc-tint);color:var(--acc-hi);font-size:11px;font-weight:600;letter-spacing:.02em;text-transform:uppercase;
+}
+.lb-d{margin:4px 0 0;font-size:12.5px;color:var(--mut-2);line-height:1.55}
+.lb-lbl{margin:18px 0 6px;font-size:12px;color:var(--mut)}
+.list-box .finp.area{height:208px;min-height:72px}   /* 7З (решение человека 22.09): вдвое выше — список из десятка доменов виден целиком; min-height прежний, тянется руками (resize у .finp.area) */
+.lb-act-row{display:flex;align-items:center;gap:8px;margin-top:8px}
+.list-box .lb-note{margin:16px 0 0;padding:0;font-size:12px;line-height:1.55}
+/* 7Л (правка 20.09): шапки поля .led-hd/.led-act больше нет — кнопки импорта
+   и экспорта стоят под полем (.lb-act-row), оформление кнопок прежнее */
+.led-btn{
+  display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;
+  border-radius:var(--r-chip);background:var(--hov);
+  font-size:12.5px;font-weight:500;color:var(--mut);
+  transition:background .15s,color .15s,opacity .15s;
+}
+.led-btn:hover{background:var(--hov-2);color:var(--ink)}
+.led-btn svg{display:block}
+/* заблокированный экспорт кликабелен — клик объясняет, чего не хватает */
+.led-btn[aria-disabled="true"]{opacity:.45}
+.led-btn[aria-disabled="true"]:hover{background:var(--hov);color:var(--mut)}
+/* «Очистить список» (правка человека 20.09, 5): у правого края ряда, отдельно
+   от импорта/экспорта; на наведении — цвет опасности, взведённая («Точно
+   очистить?») — плашка опасности, как «Удалить всё» героя */
+.lb-clear{margin-left:auto}
+.lb-clear:hover{color:var(--bad);background:var(--bad-tint)}
+.lb-clear.armed,.lb-clear.armed:hover{background:var(--bad-tint);color:var(--bad);box-shadow:inset 0 0 0 1px var(--bad)}
+.lb-clear[aria-disabled="true"]:hover{color:var(--mut);background:var(--hov)}
+.opt{display:flex;align-items:center;gap:16px;padding:16px 20px;flex-wrap:wrap}
+/* 7Ж (18.09) · блок «Проксирование по сайтам»: главный тумблер siteRow и под
+   ним подстройка siteTrack — тот же .opt, но со смещением под значок
+   главной строки и пунктирной направляющей от него; выключен главный —
+   подстройка гаснет и не нажимается (aria-disabled) */
+.opt.sub{position:relative;padding:12px 20px 12px 56px}
+.opt.sub:last-child{padding-bottom:16px}   /* низ блока — как у остальных плашек (правка человека 18.09) */
+.opt.sub::before{content:'';position:absolute;left:37px;top:-6px;bottom:50%;border-left:1px dashed var(--line-2)}
+.opt.sub::after{content:'';position:absolute;left:37px;top:50%;width:11px;border-top:1px dashed var(--line-2)}
+.opt.sub .opt-i{width:30px;height:30px;border-radius:8px}
+.opt.sub .opt-i svg{width:15px;height:15px}
+.opt.sub .opt-t h3{font-size:13px}
+.opt.sub .opt-t p{font-size:12px}
+.opt.sub[aria-disabled="true"]{opacity:.42}
+.opt.sub[aria-disabled="true"] .sw{pointer-events:none}
+.opt.main + .opt.sub{margin-top:-4px}
+.opt .opt-t{flex:1 1 240px}
+/* разделители строк временно сняты — вернуть одной строкой:
+.opt + .opt{border-top:1px solid var(--line)} */
+.opt-i{
+  display:grid;place-items:center;width:36px;height:36px;flex-shrink:0;
+  border-radius:10px;background:var(--well);border:1px solid var(--line);
+  color:var(--mut);transition:color .25s,border-color .25s,background .25s;
+}
+.opt-i.warn{color:var(--bad);border-color:rgba(229,107,89,.35);background:var(--bad-tint)}
+.opt-i.ok{color:var(--acc);border-color:var(--acc-edge);background:var(--acc-tint)}
+.opt-i.org{color:var(--org);border-color:rgba(229,145,90,.35);background:rgba(229,145,90,.1)}
+.opt-t{flex:1;min-width:0}
+.opt-t h3{font-size:13.5px;font-weight:500;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.opt-t p b{color:var(--ink);font-weight:600}
+/* ссылка на страницу клавиш: акцент, пунктирное подчёркивание */
+.kb-link{
+  display:inline;padding:0;font:inherit;color:var(--acc);
+  border-bottom:1px dashed var(--acc-edge);cursor:pointer;
+  transition:color .15s,border-color .15s;
+}
+.kb-link:hover{color:var(--acc-hi);border-bottom-style:solid}
+.opt-t p{font-size:12px;color:var(--mut-2);line-height:1.5;margin-top:2px}
+.opt-t p.mono{font-family:var(--mono);color:var(--mut)}
+.pin{
+  font-size:10px;font-weight:500;color:var(--bad);
+  background:var(--bad-tint);border:1px solid rgba(229,107,89,.3);
+  border-radius:6px;padding:1px 7px;
+}
+/* 7Д (правка человека 21.09): бейдж «сейчас запрещено» в заголовке карточки
+   помощи про инкогнито — отступ от текста заголовка и значок «стоп» слева
+   внутри; :not([hidden]) — иначе правило display перебило бы атрибут hidden */
+.hacc-tt .pin:not([hidden]){display:inline-flex;align-items:center;gap:4px;margin-left:8px;vertical-align:middle}
+.hacc-tt .pin svg{flex-shrink:0}
+/* тумблер: живой — кноб едет с лёгкой пружинкой,
+   при удержании вытягивается, как физическая кнопка */
+.sw{
+  position:relative;width:42px;height:24px;flex-shrink:0;
+  border-radius:999px;background:var(--well);border:1px solid var(--line-2);
+  transition:background .3s var(--e),border-color .2s,transform .12s;
+}
+.sw:hover{border-color:rgba(255,255,255,.26)}
+.sw:active{transform:scale(.96)}
+.sw::after{
+  content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;
+  border-radius:999px;background:var(--dim);
+  box-shadow:0 1px 3px rgba(0,0,0,.45);
+  transition:left .3s cubic-bezier(.34,1.4,.64,1),width .2s var(--e),background .3s;
+}
+.sw:active::after{width:23px}
+.sw[aria-checked="true"]{background:var(--acc);border-color:transparent}
+.sw[aria-checked="true"]::after{left:20px;background:#EEEEEE}
+.sw[aria-checked="true"]:active::after{left:15px}
+/* клавиши хоткея */
+.keys{display:flex;gap:5px;align-items:center;flex-shrink:0}
+.key{
+  font-family:var(--mono);font-size:11px;color:var(--mut);
+  padding:4px 9px;border-radius:6px;
+  background:var(--well);border:1px solid var(--line-2);border-bottom-width:2px;
+}
+
+/* ════════ ПОМОЩЬ ════════
+   Раздельный аккордеон. Ховер отзывается всей карточкой,
+   свернутая высота — честный ноль, цветные темы окрашивают
+   и шаги, и кнопки внутри себя. */
+.acc-list{display:grid;gap:16px}
+.hacc{border:1px solid transparent;overflow:hidden;transition:border-color .2s,background .2s}
+.hacc-hd{
+  display:flex;align-items:center;gap:13px;width:100%;
+  padding:16px 20px;text-align:left;
+}
+.hacc-tw{flex:1;min-width:0;display:grid;gap:3px}
+.hacc-tt{font-size:14px;font-weight:600}
+.hacc-s{font-size:12px;color:var(--mut);line-height:1.45}
+.hacc-ch{color:var(--mut-2);margin-left:4px;transition:transform .3s var(--e),color .15s}
+.hacc.on .hacc-ch{transform:rotate(180deg)}
+.hacc-hd:hover .hacc-ch{color:var(--mut)}
+/* отклик на ховер — вся карточка, а не полоса внутри неё */
+.hacc:has(.hacc-hd:hover){border-color:var(--line-2)}
+/* раскрытие: grid 0fr→1fr, весь внутренний ритм на контентном слое */
+.hacc-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .35s var(--e)}
+.hacc.on .hacc-body{grid-template-rows:1fr}
+.hacc-in{min-height:0;overflow:hidden}
+.hacc-cnt{padding:12px 20px 20px;display:grid;gap:16px}   /* заголовок→контент: 28 */
+/* кнопки помощи: без обводки, тихая заливка чуть светлее панели;
+   цветные темы аварийных аккордеонов сильнее и сохраняют кромку */
+.acc-list .btn-ft,.hsupport .btn-ft{border-color:transparent;background:rgba(255,255,255,.05)}
+.acc-list .btn-ft:hover,.hsupport .btn-ft:hover{border-color:transparent;background:rgba(255,255,255,.09)}
+.hacc .steps{margin-top:0}
+
+/* ── красный блок: «не отвечает» ── */
+.hacc.bad{background:rgba(229,107,89,.06);border-color:rgba(229,107,89,.3)}
+.hacc.bad:has(.hacc-hd:hover){background:rgba(229,107,89,.085);border-color:var(--bad-edge)}
+.hacc.bad .hacc-tt{color:var(--bad)}
+.hacc.bad .hacc-ch{color:rgba(229,107,89,.55)}
+.hacc.bad .hacc-hd:hover .hacc-ch{color:var(--bad)}
+.hacc.bad .steps li + li{border-top-color:rgba(229,107,89,.14)}
+.hacc.bad .steps li::before{
+  color:var(--bad);background:var(--bad-tint);border-color:rgba(229,107,89,.3);
+}
+.hacc.bad .h-act .btn-ft{border-color:transparent;background:rgba(229,107,89,.08);color:var(--bad)}
+.hacc.bad .h-act .btn-ft:hover{background:rgba(229,107,89,.14);border-color:transparent}
+
+/* ── оранжевый блок: «утечки» ── */
+.hacc.org{background:rgba(229,145,90,.06);border-color:rgba(229,145,90,.3)}
+.hacc.org:has(.hacc-hd:hover){background:rgba(229,145,90,.085);border-color:var(--org-edge)}
+.hacc.org .hacc-tt{color:var(--org)}
+.hacc.org .hacc-ch{color:rgba(229,145,90,.55)}
+.hacc.org .hacc-hd:hover .hacc-ch{color:var(--org)}
+.hacc.org .h-note .hl-ok{color:var(--ink)}
+.hacc.org .h-act .btn-ft{border-color:transparent;background:rgba(229,145,90,.08);color:var(--org)}
+.hacc.org .h-act .btn-ft:hover{background:rgba(229,145,90,.14);border-color:transparent}
+.h-note{font-size:12.5px;color:var(--mut);line-height:1.65}
+.h-note b{color:var(--ink);font-weight:500}
+.h-note .hl-ok{color:var(--acc-hi);font-weight:500}
+/* форматы: клик копирует строку */
+.fmt{display:grid;gap:8px}
+.fmt button{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  text-align:left;font-family:var(--mono);font-size:12px;
+  padding:8px 12px;border-radius:var(--r-chip);
+  background:var(--well);border:1px solid var(--line);color:var(--mut);
+  transition:border-color .15s,color .15s,background .15s;
+}
+.fmt .ic{color:var(--mut-2);flex-shrink:0;transition:color .15s}
+.fmt button:hover .ic{color:var(--ink)}
+.fmt .ic-ok{display:none;color:var(--acc-hi)}
+.fmt button.hit .ic-cp{display:none}
+.fmt button.hit .ic-ok{display:block}
+.fmt button:hover{border-color:var(--line-2);color:var(--ink)}
+.fmt button.hit{border-color:var(--acc-edge);color:var(--acc-hi);background:var(--acc-tint)}
+.fmt b{font-weight:500;color:var(--ink)}
+.fmt i{font-style:normal;color:var(--mut-2)}
+/* шаги с номерами-кружками */
+.steps{counter-reset:st;padding:0;margin:3px 0 0}
+.steps li{
+  list-style:none;position:relative;
+  padding:8px 0 8px 32px;
+  font-size:12.5px;color:var(--mut);line-height:1.55;
+}
+.steps li + li{border-top:1px solid var(--line)}   /* лёгкие разделители */
+.steps li:first-child{padding-top:0}
+.steps li:last-child{padding-bottom:0}
+/* номер на квадратной плашке — в наш стиль скруглений */
+.steps li::before{
+  counter-increment:st;content:counter(st);
+  position:absolute;left:0;top:8px;
+  width:20px;height:20px;border-radius:6px;
+  display:grid;place-items:center;
+  font-size:11px;font-weight:600;line-height:1;color:var(--acc);
+  background:var(--acc-tint);border:1px solid rgba(72,180,87,.25);
+}
+.steps li:first-child::before{top:1px}
+.steps b{color:var(--ink);font-weight:500}
+.h-act{display:grid;gap:8px;margin-top:16px}   /* контент→кнопки: 32 с гэпом сетки */
+.h-act .btn-ft{
+  width:100%;justify-content:space-between;
+  height:40px;padding:0 12px 0 16px;
+}
+.h-act .btn-ft .go{opacity:.6;transition:opacity .15s}
+.h-act .btn-ft:hover .go{opacity:1}
+/* полоса поддержки */
+.hsupport{display:flex;align-items:center;gap:16px;padding:16px 24px}
+.hsupport p{flex:1;font-size:12.5px;color:var(--mut);line-height:1.55}
+.hsupport p b{color:var(--ink);font-weight:500}
+/* подсветка строки настроек, куда привёл мостик */
+.opt.flash{animation:optflash 1.8s var(--e)}
+@keyframes optflash{0%,100%{background:transparent}20%,60%{background:var(--acc-tint)}40%,80%{background:transparent}}
+/* 7З (решение человека 22.09): строка прокси, куда привёл мостик из попапа
+   (шестерёнка → go:'proxy'). Три плавных вспышки за 1,8 с (ease-in-out на
+   каждом цикле), рамкой, кольцом и лёгкой заливкой цвета окна — НЕ зелёными:
+   зелёные заливка и рамка — язык выбранной строки (.row.on), и адресат
+   обязан читаться иначе. Раскладку не сдвигает: рамка у .row есть всегда
+   (прозрачная), кольцо — тень. У выбранной строки зелёное остаётся, мигает
+   только кольцо (свои кадры) — так вспышка видна поверх. Класс снимает
+   скрипт по окончании; повторный переход к той же строке ставит его заново
+   (снять, reflow, поставить — как у .opt.flash). Кому движение неприятно —
+   одна ровная подсветка без мигания (общее правило в конце файла гасит
+   анимации, поэтому там подсветка статичная) */
+.row.flash{animation:rowflash .6s ease-in-out 3}
+.row.on.flash{animation-name:rowflashOn}
+@keyframes rowflash{50%{background:var(--hov-2);border-color:var(--line-2);box-shadow:0 0 0 3px var(--line-2)}}
+@keyframes rowflashOn{50%{box-shadow:0 0 0 3px var(--line-2)}}
+@media (prefers-reduced-motion:reduce){
+  .row.flash{animation:none;background:var(--hov-2);border-color:var(--line-2);box-shadow:0 0 0 3px var(--line-2)}
+  .row.on.flash{background:var(--acc-tint);border-color:var(--acc-edge)}
+}
+
+/* ════════ ЗАГЛУШКИ ════════ */
+
+/* ════════ ТОСТ ════════ */
+.toast{
+  /* десктоп: вровень с шапкой, левым краем в 20px от правой
+     кромки контейнера — рядом с «Купить», а не у края экрана */
+  position:fixed;left:calc(50% + 500px);right:auto;top:32px;transform:translateY(-12px);
+  display:flex;align-items:center;gap:12px;padding:12px 20px;
+  border-radius:var(--r-block);background:var(--ovl);border:1px solid var(--line-2);
+  font-size:13.5px;box-shadow:0 22px 50px -16px rgba(0,0,0,.9);
+  max-width:min(380px, calc(100vw - 32px));
+  opacity:0;pointer-events:none;transition:.25s var(--e);z-index:80;
+}
+.toast.on{opacity:1;transform:translateY(0)}
+/* экран едва шире контейнера: поля нет — прижимаемся к краю */
+@media(max-width:1280px){.toast{left:auto;right:24px}}
+.toast .t-dot{width:8px;height:8px;border-radius:50%;background:var(--acc);flex-shrink:0}   /* этап 6: длинный текст тоста сплющивал точку (находка человека 10.09, проверка 5) */
+.toast.err .t-dot{background:var(--bad)}
+
+/* ════════ ПОДСКАЗКА: один пузырь на страницу (7Е) ════════
+   Решение человека 21.09: подсказки data-tip рисуются как в попапе — один
+   узел #tip в конце body, координаты ставит showTip() в options.js (верх или
+   низ по data-tip-at либо по свободному месту, прижим к краю окна, остриё на
+   носителе, ширина не шире самой длинной строки). Прежнего правила для
+   псевдоэлемента носителя у страницы не было — от механизма оставалась одна
+   тень светлой темы, и подсказки не рисовались. Материал — надстройка, как у
+   меню;
+   position:fixed — координаты от окна, страница прокручивается (пузырь
+   уходит при прокрутке); z-index между меню (30) и тостом (80); pre-line —
+   подсказки могут перечислять построчно, как в попапе. Тень светлой темы —
+   в блоке светлой темы выше. */
+.tip{
+  position:fixed;z-index:60;left:0;top:0;max-width:280px;
+  padding:9px 11px;border-radius:var(--r-el);
+  background:var(--ovl);border:1px solid var(--line-2);
+  box-shadow:0 18px 44px -12px rgba(0,0,0,.8);
+  font-size:12px;line-height:1.45;color:var(--ink);white-space:pre-line;
+  opacity:0;pointer-events:none;transform:translateY(3px);
+  transition:opacity .15s var(--e),transform .15s var(--e);
+}
+.tip.on{opacity:1;transform:none}
+.tip::after{
+  content:'';position:absolute;left:var(--ax,20px);margin-left:-5px;
+  width:10px;height:10px;transform:rotate(45deg);
+  background:var(--ovl);border:1px solid var(--line-2);
+}
+.tip[data-side="top"]::after{bottom:-6px;border-top:none;border-left:none}
+.tip[data-side="bottom"]::after{top:-6px;border-bottom:none;border-right:none}
+
+
+/* ════════ ВКЛАДКА «ПО КЛЮЧУ»: ПЯТЬ СОСТОЯНИЙ ════════
+   Ключ — это не «загрузить всё», а «покажи, что есть». Поэтому
+   вкладка живёт пятью экранами в одном месте: ввод → загрузка →
+   выбор, и две тупиковые ветки — ошибка и пустой список. Все
+   пять лежат в одной .fgrid и переключаются атрибутом hidden:
+   правая колонка формы не прыгает по ширине, вкладка не
+   перерисовывается целиком. */
+.kst{display:grid;gap:16px}
+.kst[hidden]{display:none}   /* свой display перебивает UA-правило */
+
+/* КОРОТКИЕ ЭКРАНЫ ЗАНИМАЮТ КОЛОНКУ ЦЕЛИКОМ.
+   Загрузка, ошибка и «пусто» короче формы ввода, и, прижатые
+   к верху, оставляли под собой пустую треть панели — блок
+   выглядел брошенным посреди пустоты. Теперь они растягиваются
+   до границ колонки, а содержимое внутри центрируется: рамка
+   ошибки совпадает с рамкой панели, отступы сверху и снизу
+   одинаковые. Экраны ввода и выбора остаются наверху — они и
+   так занимают всю высоту. */
+#am-key[data-st="load"],
+#am-key[data-st="err"],
+#am-key[data-st="empty"]{align-content:stretch}
+
+/* — загрузка — */
+.kload{justify-items:center;align-content:center;gap:14px;padding:34px 12px}
+.kload p{font-size:13px;color:var(--mut)}
+.spin.big{width:22px;height:22px;border-width:2.5px}
+
+/* — ошибка и пустой список: общая рамка тупика —
+   Содержимое по центру, а не по левому краю: это не форма, где
+   глаз идёт сверху вниз по одной вертикали, а сообщение во всю
+   ширину колонки. Прижатые влево значок, текст и кнопка
+   выглядели тремя разными блоками, а не одним. */
+.kdead{
+  justify-items:center;text-align:center;align-content:center;gap:14px;padding:24px 20px;
+  border-radius:var(--r-block);border:1px solid var(--line);background:var(--well);
+}
+.kdead p{font-size:12.5px;color:var(--mut);line-height:1.65;max-width:44ch}
+.kdead-i{
+  display:grid;place-items:center;width:36px;height:36px;
+  border-radius:10px;color:var(--mut);background:var(--dip);
+}
+.kerr{border-color:rgba(229,107,89,.3);background:rgba(229,107,89,.06)}
+.kerr .kdead-i{color:var(--bad);background:var(--bad-tint);border:1px solid rgba(229,107,89,.3)}
+.kerr p{color:var(--ink)}
+.kdead-act{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}   /* этап 6: две кнопки экрана отказа в ряд */
+
+/* — выбор — */
+.kp-hd{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.kp-cnt{font-size:14px;font-weight:600;color:var(--ink)}
+/* «Изменить ключ», «Выбрать все», «Снять все» — один класс:
+   это ссылки-действия, не кнопки, плашка им не нужна */
+.kp-link{
+  font-size:12.5px;color:var(--acc);
+  border-bottom:1px dashed var(--acc-edge);
+  transition:color .15s,border-color .15s;
+}
+.kp-link:hover{color:var(--acc-hi);border-bottom-style:solid}
+.kp-act{display:flex;gap:16px;margin-top:-8px}
+.kp-act .kp-link{color:var(--mut-2);border-bottom-color:transparent}
+.kp-act .kp-link:hover{color:var(--ink);border-bottom-color:var(--line-2);border-bottom-style:dashed}
+
+.kp-list{
+  display:grid;max-height:296px;overflow:auto;overscroll-behavior:contain;
+  border-radius:var(--r-block);border:1px solid var(--line);background:var(--well);
+}
+.kp-list::-webkit-scrollbar{width:8px}
+.kp-list::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:4px;border:2px solid var(--well)}
+.kp-row{
+  display:flex;align-items:center;gap:11px;
+  padding:11px 14px;cursor:pointer;
+  transition:background .13s;
+}
+.kp-row + .kp-row{border-top:1px solid var(--line)}
+.kp-row:hover{background:var(--hov)}
+/* уже добавленные: строка на месте — человек видит, что мы про
+   неё знаем, — но выбрать её нельзя и в счётчик она не идёт */
+.kp-row.had{cursor:default;opacity:.5}
+.kp-row.had:hover{background:transparent}
+.kp-box{
+  display:grid;place-items:center;width:18px;height:18px;flex-shrink:0;
+  border-radius:6px;border:1.5px solid var(--line-2);color:transparent;
+  transition:background .13s,border-color .13s,color .13s;
+}
+.kp-row:hover .kp-box{border-color:var(--mut-2)}
+.kp-box.on{background:var(--acc);border-color:var(--acc);color:var(--on-acc)}
+.kp-row.had .kp-box{border-style:dashed}
+.kp-row.had:hover .kp-box{border-color:var(--line-2)}
+.kp-ip{font-family:var(--mono);font-size:13px;color:var(--ink);white-space:nowrap}
+.kp-ip .dt,.kp-ip .pt{color:var(--mut-2)}
+.kp-x{margin-left:auto;font-size:11.5px;color:var(--mut-2);white-space:nowrap}
+.kp-x.warn{color:var(--warn)}
+.kp-x.bad{color:var(--bad)}
+/* у добавленных справа две подписи — «уже добавлен» и срок.
+   Прижимаем к правому краю пару целиком, а не каждую по
+   отдельности: иначе пометка липнет к адресу и строки
+   с ней и без неё разъезжаются по разметке */
+.kp-had{margin-left:auto;font-size:11.5px;color:var(--mut-2);white-space:nowrap}
+.kp-row.had .kp-x{margin-left:12px}
+
+.kp-ft{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.kp-ft .btn-acc{padding:0 20px}
+.kp-ft .btn-ft{height:46px;padding:0 16px}
+
+/* ════════ АККАУНТ В НАСТРОЙКАХ ════════ */
+.acc-st{font-size:12px;color:var(--mut-2);line-height:1.5;margin-top:6px}
+/* «есть новые» — единственная строка блока, которая зовёт
+   что-то сделать: поднимаем её акцентом, остальное молчит */
+.acc-st.fresh{color:var(--acc);font-weight:500}
+.opt-end{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+/* оговорка к «Отвязать»: живёт в описании строки, а не под
+   кнопкой — справа для неё нет ширины, а прочитать её надо
+   ДО нажатия */
+.opt-t .set-sub{margin:8px 0 0;padding:0;font-size:11.5px;color:var(--dim);line-height:1.5;max-width:52ch}
+/* третье состояние WebRTC: браузер разрешения не дал. Тумблер
+   остаётся выключенным — врать про «включено» нельзя, — а под
+   описанием появляется строка о том, что делать дальше */
+.opt-deny{
+  margin-top:8px;font-size:11.5px;color:var(--org);line-height:1.5;
+  display:flex;align-items:flex-start;gap:7px;
+}
+.opt-deny svg{flex-shrink:0;margin-top:1px}
+
+/* 2.2: состояние часового пояса под описанием тумблера — та же строка,
+   что opt-deny, но своей окраски: найденный пояс нейтральный (это факт,
+   а не предупреждение), поиск и «не нашли» — приглушённый и оранжевый.
+   Пояс — IANA-имя и смещение, оба моноширинные: так читается ровнее. */
+.opt-tz{
+  margin-top:8px;font-size:11.5px;color:var(--mut);line-height:1.5;
+  display:flex;align-items:center;gap:7px;
+  font-variant-numeric:tabular-nums;
+}
+.opt-tz svg{flex-shrink:0;opacity:.75}
+.opt-tz.mute{color:var(--dim)}
+.opt-tz.warn{color:var(--org)}
+.opt-tz.warn svg{opacity:1}
+/* 2.1: чип типа в строке настроек стоит первым — разделительная черта .tp
+   (она отделяет тип от адреса в строке списка) здесь была бы чертой из
+   ниоткуда. В разборе вставки (.read .bl) она, наоборот, нужна и остаётся. */
+.opt-tz .tp{padding-left:0;margin-left:0;border-left:none}
+
+/* ════════ ПОЧЕМУ НЕТ ВНЕШНЕГО АДРЕСА ════════
+   Здесь стояла строка «внешний адрес» с тем IP, который якобы
+   видят сайты. Её убрали: узнать этот адрес расширение не может.
+   Нужна страница, которая отразит запрос обратно, а её нет и
+   не будет. Подставить туда адрес самого прокси из настроек —
+   хуже, чем ничего: он известен заранее и покажется одинаково,
+   работает прокси или мёртв. Получилось бы подтверждение,
+   которое ничего не подтверждает.
+
+   По той же причине расширение не определяет и страну выхода:
+   спросить некого (см. комментарий к hasGeo). */
+
+/* ── стенд: не переносится в расширение ──
+   3Б.3: стенда здесь нет — .stand, .stand-t, .stand-b, .stand-g, .stand-r
+   и их медиазапрос остались в прототипе (леса разработки в графите). */
+
+
+/* ════════ ГЕРОЙ: ТРИ КОЛОНКИ ════════
+   Инфо · кнопка · доступы. Кнопка стоит посередине не ради
+   симметрии: она единственное действие в блоке, и по обе
+   стороны от неё лежит то, к чему она относится — слева адрес,
+   справа доступы к нему.
+   Блока «Соединение» справа больше нет: состояние показывает
+   сама кнопка, а второй индикатор рядом с ней только спорил
+   с первым. */
+.hero{padding:24px}
+/* Колонки прижаты друг к другу равными промежутками, вся группа
+   стоит по центру блока. Раньше левая колонка была резиновой и
+   съедала весь свободный запас: расстояние от адреса до кнопки
+   выходило втрое больше, чем от кнопки до доступов, хотя
+   промежуток в сетке был один и тот же. */
+/* ── РЕЗЕРВЫ КОЛОНОК ──
+   Крайние колонки заданы числом, средняя забирает остаток. Так
+   и адрес, и доступы меняются на каждом переключении прокси, не
+   сдвигая ничего вокруг, а весь свободный запас достаётся
+   кнопке — единственному, чему размер идёт на пользу.
+
+   Числа не подобраны на глаз, а посчитаны от худшего содержимого:
+
+   --conn-w   адрес. 255.255.255.255 — 15 знаков моноширинным
+              33px — это 279px. Резерв 292. Страна и «истёк»
+              бывают длиннее (United Arab Emirates · SOCKS5 —
+              259px, плюс плашка срока), но их строка переносится
+              на второй ярус: растёт высота колонки, не ширина.
+   --creds-w  доступы. Подпись (58px — самое длинное «Password»)
+              + зазор 14 + поле 146: плашка пароля 110 и глаз 36.
+              Логин упирается в те же 146 и уходит в многоточие.
+
+   Раньше здесь стояло 296 + minmax(230,290) + 300 при зазорах
+   36: минимумы складывались в 898 против 856 доступных. Сетка
+   переполнялась на 42px, доступы срезало кромкой блока, а
+   кнопка навсегда оставалась на своём минимуме 230. */
+.hero-grid{
+  --conn-w:292px;
+  /* ── ПОТОЛКИ ПЛАШЕК ──
+     Считаны от знака, а не подобраны: моноширинный 13px даёт
+     34px полей плашки + 7.8px на знак логина и + 9.4px на точку
+     пароля (у пароля свой letter-spacing).
+       пароль  6 знаков = 34 + 6×9.4  = 90, плюс глаз 36 = 126
+       логин   9 знаков = 34 + 10×7.83 = 112 (десятый глиф —
+              многоточие), влезает в те же 126
+     Потолок пароля считается по раскрытому виду, а не по маске:
+     под глазом лежит настоящий текст, и разрядка .12em у плашки
+     действует и на него. Маска из пяти точек занимает 81px и
+     плашку не заполняет — она обнимает содержимое, — а вот
+     шестизначный пароль требует все 90. По маске потолок вышел
+     бы 81, и раскрытый пароль обрывался бы многоточием ровно
+     тогда, когда его и открыли, чтобы прочитать.
+     Обе переменные обязаны быть объявлены здесь: правила ниже
+     ссылаются на них, а незаданная переменная делает max-width
+     невалидным — потолок пропадает целиком, и длинное значение
+     уезжает за кромку блока. Именно это и происходило. */
+  /* Ширина плашки логина кратна знаку — иначе после многоточия
+     остаётся хвост. Обрезка идёт по границе знака, поэтому поле
+     занимает целое число глифов, а разница между ним и шириной
+     поля превращается в лишний зазор справа: при прежних 140px
+     влезало 12 знаков с многоточием, и правое поле выходило 20px
+     против 16px левого. Теперь: 34px полей плашки (16+16 отступа
+     и две кромки) плюс ровно десять глифов — девять знаков
+     и многоточие, которое в моноширинном шрифте занимает такой
+     же глиф — итого девять знаков значения. */
+  --well-glyph:7.83px;
+  --well-pass:90px;
+  --well-login:calc(34px + 10 * var(--well-glyph));
+  --creds-fld:max(var(--well-login), calc(var(--well-pass) + 36px));
+  --creds-w:calc(58px + var(--creds-gap) + var(--creds-fld));
+
+  /* ── ЧТО УЖИМАЕТСЯ ПЕРВЫМ ──
+     .wrap упирается в 960px, поэтому сетка героя стоит на 856
+     для всех экранов от 975px и шире, а ниже сужается ровно на
+     столько, на сколько сузился экран. Этот дефицит и есть
+     --squeeze.
+
+     Раньше он целиком доставался кнопке: доступы держали
+     фиксированную ширину, кнопка была 1fr и сжималась первой,
+     хотя вокруг подписей стояли самые большие отступы в блоке.
+     Теперь первые 28px дефицита выбираются из отступов —
+     зазоры сетки с 32 до 20, зазор подпись↔плашка с 14 до 10, —
+     и до экрана 947px кнопка не теряет ни пикселя. Дальше
+     ужиматься нечему без ущерба читаемости, и место начинает
+     отдавать уже кнопка.
+
+     Доли 3/7 и 1/7 подобраны не на глаз: зазоров сетки два, а
+     зазор подписи один, поэтому 3/7 + 3/7 + 1/7 = 1 — отступы
+     съедают дефицит ровно, без остатка на кнопку. */
+  --squeeze:clamp(0px, calc(975px - 100vw), 28px);
+  --creds-gap:calc(14px - var(--squeeze) / 7);
+  --hero-gap:calc(32px - var(--squeeze) * 3 / 7);
+  gap:var(--hero-gap);
+  align-items:center;
+
+  /* ── КУДА ДЕВАЕТСЯ ЛИШНЯЯ ШИРИНА ──
+     Кнопка стоит фиксированной ширины, доступы меряются по
+     содержимому, а весь остаток забирает колонка адреса.
+     Порядок важен. Раньше остаток лежал в колонке доступов:
+     она держала резерв под самый длинный логин, содержимое
+     занимало его не целиком, и разница — до сорока пикселей —
+     ложилась слева от подписей. Вместе с зазором сетки между
+     кнопкой и словом «Логин» получался ров вдвое шире всех
+     остальных отступов в блоке.
+     Теперь между ними ровно зазор сетки, а лишняя ширина ушла
+     вправо от адреса — туда, где её не видно: адрес прижат к
+     левой кромке, справа от него и так пусто. */
+  grid-template-columns:var(--conn-w) minmax(260px, 1fr) max-content;
+}
+/* Отступ справа даёт сам запас внутри колонки доступов: при
+   коротком значении он стоит воздухом до кромки, при длинном
+   съедается ростом плашки. Отдельная пустая колонка тут была
+   лишней — воздух складывался дважды. Запас теперь размером с
+   одну плашку, а не с половину колонки. */
+.conn{width:auto;min-width:0}
+
+/* ── ПУСТОЕ СОСТОЯНИЕ ──
+   Пока прокси не добавлен, колонка адреса несёт только
+   приглашение. Строка правки из неё уходит совсем: скрытая
+   через hidden, она всё равно занимала свои 26px плюс 10px
+   отступа, а пустая строка плашек — ещё 13px отступа снизу.
+   Приглашение из-за этого стояло на 11px ниже середины блока —
+   ровно на половину разницы между этими двумя остатками. */
+.hero[data-empty] .conn-hd{display:none}
+
+/* Приглашение сжимается по своему тексту, а не занимает всю
+   колонку. Иначе стрелку не под чем центрировать: колонка
+   адреса на десктопе шире текста втрое, и значок, выровненный
+   по её середине, уезжал бы от надписи. Теперь блок ровно по
+   ширине текста — и центр блока совпадает с центром надписи. */
+.hero[data-empty] .conn{
+  /* Приглашение и стрелка стоят в строку, а не столбиком:
+     значок читается как часть фразы — «добавьте адрес ↓», — и
+     блок выходит вдвое ниже, отчего лучше держится по центру
+     своей клетки. Ширина по содержимому: колонка адреса шире
+     текста, и без max-content центрировать было бы нечего. */
+  display:flex;align-items:center;gap:14px;
+  width:max-content;max-width:100%;justify-self:start;
+}
+.hero[data-empty] .chips{margin-top:0}
+/* Кегль приглашения на ступень меньше адресного. В строку со
+   стрелкой оно требует 300px против 292px колонки — и при 33px
+   переносилось на две строки, а расширять колонку значило
+   отнимать полсотни пикселей у кнопки. Это подпись, а не адрес:
+   разбирать её посимвольно не нужно, и 28px ей хватает. Заодно
+   появляется запас, из которого и складываются равные просветы
+   слева и справа.
+   Перенос по словам разрешён на случай совсем тесной колонки:
+   nowrap нужен адресу, а не этой фразе. */
+.hero[data-empty] .ip{font-size:28px;white-space:normal}
+
+/* На десктопе приглашение стоит посередине пролёта между кромкой
+   блока и кнопкой. Считать надо от видимой кромки, а не от края
+   колонки: слева к ней добавляется поле блока в 24px, справа —
+   зазор сетки. Центровка по колонке давала 56px слева против
+   32px справа, и левый просвет читался вдвое шире.
+   Отрицательная поправка в разницу этих двух величин сдвигает
+   точку отсчёта ровно настолько, чтобы просветы сошлись.
+   Только для трёх колонок: ниже приглашение стоит под доступами
+   и равняется по ним, а не по кнопке. */
+@media (min-width:947px){
+  .hero[data-empty] .conn{
+    justify-self:center;
+    margin-left:calc(var(--hero-gap) - 24px);   /* 24px — поле блока */
+  }
+}
+
+/* Указатель справа от приглашения. Текста «добавьте адрес» мало: он
+   говорит, что делать, но не где. Стрелка отвечает на второй
+   вопрос — вместе с подсветкой панели ниже она ведёт взгляд
+   туда, где прокси и добавляют.
+   Это именно значок, а не кнопка: нажимать нечего, сама панель
+   и так на виду. Поэтому он вынут из дерева доступности —
+   скринридеру он ничего не добавит к тексту рядом.
+   Высота держится на 32px — ровно та, что занимает плашка
+   страны в заполненном состоянии, — чтобы колонка адреса не
+   меняла высоту при появлении первого прокси. */
+.empty-arrow{
+  display:inline-flex;align-items:center;justify-content:center;
+  height:32px;color:var(--acc);
+  animation:emptyNudge 2.4s var(--e) infinite;
+}
+@keyframes emptyNudge{
+  0%,58%,100%{transform:translateY(0)}
+  76%{transform:translateY(4px)}
+}
+
+/* Подсветка панели, пока список пуст. Кромка внутренняя, а не
+   border: рамка сдвинула бы содержимое на пиксель, а тень —
+   нет. Снаружи лежит второй, широкий и почти прозрачный слой:
+   он отделяет панель от фона, не утолщая саму кромку. */
+/* Подсветка держится на двух условиях сразу: список пуст И
+   открыта вкладка добавления. Панель одна на обе вкладки, и без
+   второй проверки обводка оставалась на месте, когда человек
+   уходил в «Мои прокси» — обводить там нечего, добавление на
+   этой вкладке не показано. Условие взято из самой разметки
+   (:has по видимости панели добавления), а не заведено вторым
+   классом: так оно не может разъехаться с тем, что на экране. */
+body.no-proxy .panel.low:has(#paneAdd:not([hidden])){
+  /* Кромка тише акцентной (.45 у --acc-edge): подсветка тут
+     подсказывает, а не требует внимания, и рядом с зелёной
+     кнопкой «Добавить» полная яркость спорила бы с ней. */
+  box-shadow:inset 0 0 0 1px rgba(72,180,87,.3), 0 0 0 4px rgba(72,180,87,.05);
+  transition:box-shadow .45s var(--e);
+}
+html[data-theme="light"] body.no-proxy .panel.low:has(#paneAdd:not([hidden])){
+  box-shadow:inset 0 0 0 1px rgba(42,128,56,.3), 0 0 0 4px rgba(42,128,56,.05);
+}
+
+/* ── шапка колонки адреса ──
+   На месте прежнего статуса стоит правка. Она относится к
+   адресу под собой, а не к паролю, рядом с которым лежала
+   раньше: там её принимали за правку одного пароля. */
+.conn-hd{display:flex;align-items:center;gap:10px;margin-bottom:10px;min-height:26px}
+.hero-edit{
+  display:inline-flex;align-items:center;gap:7px;height:26px;padding:0 10px 0 8px;
+  border-radius:var(--r-chip);color:var(--mut);
+  font-size:13px;line-height:1;
+  transition:color .15s,background .15s;
+}
+.hero-edit:hover{color:var(--ink);background:var(--hov)}
+.hero-edit svg{flex-shrink:0}
+.hero-edit[hidden]{display:none}
+
+.ip{font-size:33px;min-height:37px}
+.chips{margin-top:13px}
+
+/* ── доступы: своя колонка, поля друг под другом ──
+   В строку они лезли только пока делили место с адресом.
+   Отдельной колонкой вертикаль читается быстрее: подпись —
+   значение, подпись — значение. */
+/* Подписи стоят слева от плашек, а не над ними: так пара
+   «логин — пароль» занимает вдвое меньше высоты, и обе плашки
+   выстраиваются по одной вертикали. Ради этого .cred растворён
+   в сетке (display:contents) — иначе подпись и поле остались бы
+   в своей ячейке и не выровнялись бы между строками. */
+.creds{
+  /* Колонка поля меряется по содержимому (max-content), а не
+     стоит числом. Разница видна на длинном логине: раньше поле
+     было ровно --creds-fld, плашка упиралась в его правый край
+     и обрывалась многоточием, а слева, между кнопкой и
+     подписями, лежал нетронутый отступ. Теперь при росте
+     значения колонка расширяется, и вся пара «подпись — плашка»
+     съезжает влево в этот отступ. Правая кромка при этом
+     приколочена (justify-content:end): она совпадает с кромкой
+     блока в любом случае, и многоточие включается только когда
+     плашка добрала свой потолок — то есть слева уже съедено. */
+  display:grid;grid-template-columns:auto minmax(0,max-content);
+  gap:12px var(--creds-gap);align-items:center;align-content:center;margin-top:0;
+  /* Плашки обнимают содержимое, а не растягиваются на ячейку.
+     Растянутые пробовались и не годятся: у логина нет глаза
+     рядом, поэтому его плашка выходила на 36px длиннее пароля
+     и висела почти пустой — 80px текста в поле на 158px.
+     Ячейка нужна только как потолок роста. */
+  justify-items:start;
+  /* Весь свободный запас колонки собран слева от подписей.
+     Правая кромка поля всегда совпадает с кромкой блока, а
+     разница длины подписей между языками — русские на 10px
+     короче английских — не видна вовсе. */
+  justify-content:end;
+  /* Ширину задаёт колонка сетки, а не сам блок: внутри у плашек
+     остаётся запас, и длинный логин съедает сначала его — а не
+     отнимает место у кнопки. Пока колонка росла по содержимому,
+     одно длинное значение толкало соседей: кнопка ужималась до
+     минимума, и вся сцена коннектора вместе с ней. */
+}
+.cred{display:contents}
+.creds .lbl{margin-bottom:0}
+/* ── ПОТОЛКИ ПЛАШЕК ──
+   Потолки заданы числом, а не долей. Так было не всегда, и вот
+   чем это кончалось: здесь стояло max-width:100%, и по
+   специфичности эта строка перебивала .pw .well{max-width:110px}
+   выше — обе (0,2,0), а эта ниже по файлу. Пароль оставался
+   вообще без потолка: «100%» внутри .pw считается от самой .pw,
+   а её ширину задаёт содержимое — ссылка на саму себя, которая
+   разрешается в max-content. Длинный пароль растягивал плашку
+   до 184px, вместе с глазом это 220px в ячейке на 146 — блок
+   уезжал за кромку на 74px.
+
+   Логин от 100% страдал меньше (доля считалась от ячейки), но
+   и он упирался в её край, а не в собственный потолок.
+
+   Ширины подобраны от знака: моноширинные 13px — это 8px на
+   знак логина и 9.7px на точку пароля, плюс 32px полей плашки. */
+.creds .well{max-width:var(--well-login);min-width:0}
+/* Пароль делит ячейку с глазом: 100 + 36 = 136 — это и есть
+   --creds-fld. Селектор длиннее .creds .well, иначе потолок
+   логина перебил бы его так же, как раньше. */
+.creds .pw{min-width:0}
+.creds .pw .well:not(.sq){max-width:var(--well-pass)}
+
+/* ════════ ПЛАШКА ИКОНКИ В КНОПКЕ ════════
+   Иконка получила подложку: без неё она висела на сцене
+   коннектора и в светлых состояниях терялась в свечении.
+   Радиус считается от родителя — внутренний угол равен
+   внешнему минус отступ, иначе плашка выглядит вставленной
+   из другого набора.
+   Отступы по бокам равны: слева до кромки кнопки столько же,
+   сколько сверху. */
+.power{--cn-ic-inset:12px;--cn-ic-size:40px}
+.cn-ic{
+  position:absolute;top:var(--cn-ic-inset);left:var(--cn-ic-inset);
+  width:var(--cn-ic-size);height:var(--cn-ic-size);display:grid;place-items:center;
+  border-radius:calc(var(--r-block) - var(--cn-ic-inset) / 2);
+  /* фон кнопки — колодец, самый тёмный слой блока. Плашка на
+     нём должна читаться отдельной деталью, поэтому светлее его,
+     а не в тон; кромка на ступень ярче обычной линии */
+  background:var(--hov-2);border:1px solid var(--line-2);
+  transition:background .35s,border-color .35s,box-shadow .35s;
+}
+.cn-ic svg{display:block;width:21px;height:21px;overflow:visible}
+.icgl{stroke-width:1.5}   /* тоньше прежнего: на плашке линия читается и так */
+
+/* Состояния плашки. Цвет берут те же переменные, что и
+   остальной блок, — отдельной палитры у неё нет. */
+.hero[data-power="busy"] .cn-ic{background:var(--warn-tint);border-color:rgba(216,164,74,.3)}
+.hero[data-power="on"]   .cn-ic{background:var(--acc-tint);border-color:var(--acc-edge);box-shadow:0 0 22px -8px rgba(72,180,87,.6)}
+.hero[data-power="err"]  .cn-ic{background:var(--bad-tint);border-color:rgba(229,107,89,.3)}
+.power:hover .cn-ic{border-color:var(--line-2)}
+
+/* Согласование — единственное состояние с постоянным
+   движением: там процесс идёт и его видно. Остальные статичны,
+   блок висит перед глазами всё время. */
+@keyframes icBreathe{0%,100%{opacity:.75}50%{opacity:1}}
+.hero[data-power="busy"] .cn-ic{animation:icBreathe 1.5s ease-in-out infinite}
+/* Смена состояния помечается одной короткой вспышкой —
+   характер взят у cnSpark в самой кнопке. */
+@keyframes icPop{0%{transform:scale(1)}38%{transform:scale(1.09)}100%{transform:scale(1)}}
+.cn-ic.pop{animation:icPop .42s var(--e)}
+@media (prefers-reduced-motion:reduce){
+  .cn-ic,.cn-ic.pop{animation:none}
+}
+
+/* Подпись стоит серединой на середине плашки: считаем от её
+   отступа и половины высоты, а не подбираем число на глаз —
+   поменяется размер плашки, подпись поедет следом. */
+.cn-t{
+  top:calc(var(--cn-ic-inset) + var(--cn-ic-size) / 2);
+  transform:translateY(-50%);
+  left:calc(var(--cn-ic-inset) + var(--cn-ic-size) + 12px);
+  max-width:150px;
+}
+.cn-s{bottom:13px;left:14px}
+/* ── КНОПКА: ОДНО СООТНОШЕНИЕ НА ВСЕ ШИРИНЫ ──
+   Высота больше не задана числом. Задано отношение сторон, а
+   высота считается от ширины — кнопка тянется вместе с колонкой
+   и на любом экране остаётся той же формы.
+
+   Это чинит и наезд подписей на коннектор. Раньше высота была
+   фиксированной, а ширина плавала: сцена пересчитывалась под
+   новую пропорцию, а подписи оставались в пикселях — на узкой
+   кнопке они и налезали. Теперь внутри всё меряется в долях
+   высоты самой кнопки (cqh), поэтому плашка, подписи и сцена
+   уменьшаются и растут одним движением, а расстояния между
+   ними не меняются никогда. */
+.power{
+  /* 3/2. Ширину кнопка не выбирает — забирает остаток колонки,
+     высота идёт за пропорцией. На десктопе это 312×208. */
+  aspect-ratio:3 / 2;height:auto;min-height:0;
+  container-type:size;
+}
+/* кнопка выше остальных колонок — высоту блока задаёт она */
+.ctl{align-self:center}
+
+@supports (height:1cqh){
+  /* Единица разметки накладок. Была просто 1cqh — размер брался
+     от высоты кнопки. Пока пропорция держалась, это работало;
+     стоило растянуть кнопку по высоте блока, и подписи полезли
+     вверх вместе с ней, а сцена осталась при своей ширине —
+     «Включить» доезжало до панели и уходило под неё.
+     Теперь единица берётся по меньшей из сторон, приведённых к
+     штатной пропорции 3/2. На ней 1cqw/1.5 равно 1cqh и ничего
+     не меняется; на узкой высокой кнопке верх берёт ширина, и
+     подписи остаются соразмерны сцене, а не высоте. */
+  .power{--cqu:min(1cqh, 1cqw / 1.5)}
+  .power{--cn-ic-inset:calc(7.4 * var(--cqu));--cn-ic-size:calc(24.5 * var(--cqu))}
+  .cn-ic svg{width:calc(12.9 * var(--cqu));height:calc(12.9 * var(--cqu))}
+  /* Кегль 8.2 вместо 9.2 и зазор от плашки 5 вместо 7.4.
+     Подписи стали длиннее: вместо действия «Включить» в восемь
+     знаков они называют состояние, и «Подключение» в одиннадцать
+     наезжало на панель коннектора на каждой ширине — от 10px на
+     десктопе до 21px на планшете. Тесно было именно по ширине,
+     поэтому ужаты обе величины, которые её съедают. */
+  .cn-t{font-size:calc(8.2 * var(--cqu));left:calc(var(--cn-ic-inset) + var(--cn-ic-size) + 5 * var(--cqu));max-width:none}
+  .cn-s{bottom:calc(8 * var(--cqu));left:calc(8.6 * var(--cqu));font-size:calc(6.1 * var(--cqu))}
+}
+
+/* ── АДАПТИВ ГЕРОЯ ──
+   Две ступени: доступы уходят на вторую строку целиком, потом
+   всё встаёт в одну колонку. Промежуточной ступени, которая
+   ужимала колонки, больше нет — и вот почему.
+
+   .wrap упирается в max-width:960px, значит сетка героя равна
+   856px на любом экране шире 960: от 1000px до 4K содержимое
+   стоит неподвижно. Прежние ступени на 1180 и 1120 срабатывали
+   в этой мёртвой зоне — ужимали адрес до 250 и 240px и роняли
+   шрифт IP до 28px там, где не убавилось ни пикселя. Заодно
+   250px не хватало под 255.255.255.255 (279px): адрес выезжал в
+   зазор перед кнопкой.
+
+   Ступени привязаны к тому, где место кончается на самом деле:
+   сетка = min(960, экран) − 119. Из них 56 — поля .wrap, 48 —
+   поля героя и 15 — полоса прокрутки, для которой зарезервировано
+   место (scrollbar-gutter:stable). Три колонки живут, пока в них
+   помещаются минимумы 292 + 230 + 220 + 64 = 806px, то есть до
+   экрана 925px. Ступень стоит на 930 — с запасом в одну ступеньку,
+   чтобы кнопка не упиралась в свой минимум перед самым переносом. */
+/* Порог стоит там, где в три колонки у кнопки кончается запас:
+   до 947px её держат отступы доступов, ниже она начала бы
+   ужиматься. Переносить доступы вниз именно здесь дешевле, чем
+   сжимать кнопку, — и стык выходит почти незаметным: 311px
+   против 420px вместо прежнего скачка с 230 на 426.
+   Потолок 420px не случаен: при нём высота кнопки 254px, а
+   колонка адреса с доступами под ним — 238px. Кнопка ровно
+   накрывает блок по высоте и не лезет выше без нужды. */
+@media (max-width:946px){
+  .hero-grid{
+    gap:24px 28px;align-items:center;
+    /* Адрес держит тот же резерв, кнопка забирает весь остаток —
+       без потолка. Потолок в 420px здесь и был главным
+       производителем дыр: на 946px колонки складывались в 740 из
+       827 доступных, и 87 лишних пикселей уходили в зазор между
+       адресом и кнопкой. */
+    grid-template-columns:var(--conn-w) minmax(0, 1fr);
+  }
+  /* ── КНОПКА НА ОБЕ СТРОКИ ──
+     Доступы уходят вниз, под адрес, и правая колонка остаётся
+     пустой на всю вторую строку. Кнопка, стоявшая только в
+     первой, висела в правом верхнем углу, а под ней зияло место
+     высотой с целую строку. Растянутая на обе, она занимает
+     правую половину блока целиком.
+     Пропорцию она здесь отпускает: ширину задаёт колонка,
+     высоту — соседняя пара «адрес + доступы». Раньше это было
+     нельзя — сцена размечена от высоты кнопки и на растянутой
+     разъезжалась, — но теперь у кадра есть пол по ширине, а у
+     накладных подписей единица считается по меньшей стороне. */
+  .ctl{grid-column:2;grid-row:1 / 3}
+
+  /* Доступы остаются в две строки, как и в три колонки, и
+     встают под адрес в его же колонку. В одну строку четырьмя
+     ячейками они здесь не годятся: подпись — плашка — подпись —
+     плашка это 382px против 292px колонки, строка вылезала за
+     неё и заезжала под кнопку — глаз пароля пропадал под сценой
+     коннектора. Вертикаль вдобавок оставляет кнопке на 90px
+     больше ширины. */
+  .creds{grid-column:1;grid-row:2;justify-self:start}
+}
+/* ── КНОПКА ПО ВЫСОТЕ БЛОКА ──
+   В две колонки слева стоят адрес и доступы — 238px, — а кнопка
+   по своей пропорции выходила заметно ниже: справа под ней
+   оставалась полоса пустоты в четверть блока. Здесь она
+   отпускает пропорцию и тянется на всю высоту.
+   Нижней границы у диапазона нет. Прежде она стояла на 800px:
+   кадр сцены строится от пропорции кнопки, и чем та уже, тем
+   крупнее в кадре коннектор — к 700px он наезжал на подпись.
+   Теперь у кадра есть пол по ширине (--cq-wmin), ниже которого
+   он не пережимается, а растёт по высоте. Сцена на узкой
+   кнопке мельчает и набирает воздух, но целиком остаётся в
+   кадре, и тянуть кнопку можно на всём диапазоне двух колонок.
+   Отсечка снизу — 661px, ровно граница одной колонки: там строк
+   нет, .ctl не растянут, и height:100% от неопределённой высоты
+   схлопнул бы кнопку в двухпиксельную полоску. Прежде отсечка
+   стояла на 750px, потому что ниже панель начинала перекрывать
+   подпись «Включить». Причина была не в растяжке, а в том, что
+   подписи мерились от высоты кнопки: теперь они мерятся по
+   меньшей стороне и растут вместе со сценой, а не отдельно от
+   неё. */
+@media (min-width:661px) and (max-width:946px){
+  .ctl{align-self:stretch}
+  .power{aspect-ratio:auto;height:100%}
+  /* ── ПУСТОЕ СОСТОЯНИЕ: ПРИГЛАШЕНИЕ ВНИЗ ──
+     Стрелка указывает на панель добавления под героем, поэтому
+     ей место у нижней кромки блока, а не у верхней: сверху она
+     целится в собственные доступы. Меняем строки местами —
+     логин с паролем поднимаются, приглашение опускается. */
+  .hero[data-empty] .creds{grid-row:1}
+  .hero[data-empty] .conn{grid-column:1;grid-row:2}
+}
+@media (max-width:660px){
+  .hero-grid{grid-template-columns:1fr;gap:20px}
+  /* ── ПУСТОЕ СОСТОЯНИЕ В ОДНУ КОЛОНКУ ──
+     Приглашение уходит под доступы и встаёт по центру: стрелка
+     оказывается ровно над панелью, к которой ведёт.
+     Ставить его сбоку от логина с паролем не вышло. Колонки
+     набирались автоматически, и на 520–480px каждая выходила
+     уже трёхсот пикселей, которые нужны фразе со стрелкой:
+     текст переносился на две строки, а значок уезжал к дальней
+     кромке и переставал читаться как часть фразы.
+     Порядок задан order, а не координатами клетки: строки в
+     сетке расставляются сами. */
+  .hero[data-empty] .ctl{order:1}
+  .hero[data-empty] .creds{order:2}
+  .hero[data-empty] .conn{order:3;justify-self:center}
+  /* Пустые логин и пароль — это два прочерка: держать их
+     столбиком незачем, вертикаль тут нечего выстраивать. В
+     строку они занимают вдвое меньше высоты и уравновешивают
+     приглашение под собой. */
+  .hero[data-empty] .creds{
+    grid-template-columns:auto max-content auto max-content;
+    justify-self:center;justify-content:center;
+  }
+  /* Кнопка возвращается в общий поток: в одну колонку тянуть её
+     не на что, а привязка к второй колонке и двум строкам с
+     прошлой ступени иначе утекла бы сюда и выкинула бы кнопку
+     из сетки. */
+  .ctl{grid-column:auto;grid-row:auto}
+  /* В одну колонку прижимать нечего: строка и так во всю
+     ширину блока, поле берёт весь остаток, а плашки внутри
+     по-прежнему обнимают значение */
+  .creds{grid-column:auto;grid-row:auto;grid-template-columns:auto minmax(0,1fr);justify-self:stretch;justify-content:normal}
+  .ip{font-size:26px;min-height:30px}
+}
+
+/* ════════ АДАПТИВ ════════ */
+/* ЗАМОРОЖЕНО: прежние правила героя под три колонки с блоком
+   «Соединение». Блок убран, схема другая — правила оставлены
+   рядом с остальным адаптивом, но отключены селектором, иначе
+   они перебивали бы новые. */
+@media(max-width:960px){
+  .no-such .hero-grid{grid-template-columns:minmax(0,1fr) 260px}
+  .no-such .ping{grid-column:1 / 3;grid-auto-flow:column;justify-content:start;align-items:center;gap:16px;padding:8px 0 0}
+}
+@media(max-width:760px){
+  /* свечение подключения: на узком герое исходная геометрия (56%×200%)
+     сжимается в вертикальную полосу — расправляем в широкий купол */
+  .hero::before{left:-25%;top:-30%;width:150%;height:80%}
+  .pane-add{grid-template-columns:1fr;gap:8px}
+  .ed-g{grid-template-columns:1fr 1fr}
+  .a-form{border-left:none;padding-left:0;padding-top:8px}
+  .amodes{grid-template-columns:repeat(3,1fr);gap:8px}
+  .amo{flex-direction:column;gap:8px;padding:12px 8px;text-align:center}
+  .amo-t{justify-items:center}
+  .amo-d{display:none}
+}
+/* ── ШАПКА: МЕНЮ ИКОНКАМИ ──
+   Шапка складывается в две строки, когда её содержимое перестаёт
+   помещаться в строку: лого 156 + меню 392 + правый блок 296 и
+   два зазора по 44 — это 932px против ширины экрана минус 63.
+   Перенос начинался около 995px, и целая строка уходила под
+   «Купить прокси» с языком и темой.
+   Меню подписями занимает 392px, иконками — 159. Убирая подписи
+   на том же пороге, где иначе случился бы перенос, мы держим
+   шапку в одну строку до 737px — то есть весь диапазон планшета.
+   Порог взят с запасом (1000 вместо 995), чтобы подписи не
+   мигали ровно на границе.
+   Подписи не выключены, а сняты с потока: кнопки остаются
+   названными для скринридера и голосового управления, иначе от
+   меню осталась бы тройка безымянных иконок. */
+@media(max-width:1000px){
+  .nav button{padding:0 16px;position:relative}
+  .nav button span{
+    position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+    overflow:hidden;clip-path:inset(50%);white-space:nowrap;
+  }
+}
+/* Одних иконок хватает до 762px, дальше в строку не помещается
+   уже правый блок с «Купить прокси». Зазор шапки с 44 до 20
+   отодвигает перенос до 714px — за следующую ступень, где шапка
+   и так перестраивается. Без этого между 721 и 760
+   оставалась щель, в которой шапка снова разъезжалась на две
+   строки. */
+@media(max-width:800px){ .bar{gap:20px} }
+@media(max-width:720px){
+  .bar{gap:16px;padding:20px 16px 4px}
+  /* мобильные: уведомления как исходно — снизу по центру */
+  .toast{right:auto;top:auto;left:50%;bottom:28px;transform:translate(-50%,16px)}
+  .toast.on{transform:translate(-50%,0)}
+  .buy{height:40px;padding:0 16px;font-size:13px}
+  .bar-end{flex-direction:row-reverse}   /* тема справа, «Купить» слева */
+  .thm{width:40px;height:40px}   /* 3Б.3: здесь стоял и .lng — глобуса нет */
+}
+@media(max-width:640px){
+  html{scrollbar-gutter:auto}   /* на узком экране ширина дороже стабильности */
+  .wrap{padding:16px 12px 56px;gap:16px}
+  .hero{padding:20px 16px}
+  .geo-name{display:none}
+  .hint{display:none}
+  .chk-lg{display:none}
+  .chk-sm{display:inline}
+  .tab-lg{display:none}
+  .tab-sm{display:inline}
+  /* футер: «Проверить все прокси» во всю ширину, пара кнопок под ним */
+  .list-ft{display:grid;grid-template-columns:1fr 1fr}
+  #btnCheckAll{grid-column:1/-1}
+  .list-ft .btn-ft{width:100%;justify-content:center}
+  /* табы по центру (подсказка скрыта); группа вдали от углов,
+     примыкание уступает место обычному правому вылету */
+  .list-hd{padding:0 16px}
+  .ltabs{margin:0 auto}
+  /* компакт вкладок: 13px, высота 40 → бейдж-зазор (40−24)/2=8,
+     плечи 20 = ½ высоты; сумма ряда укладывается в минимум 340 */
+  .ltabs button{gap:8px;height:40px;padding:0 8px 0 14px;font-size:13px;border-radius:20px 20px 0 0}
+  .ltabs button:last-child::after{content:none}
+  .ltabs button[aria-selected="true"]:last-child::after{
+    content:'';right:-8px;left:auto;top:auto;bottom:0;width:8px;height:8px;
+    background:radial-gradient(circle at 100% 0,transparent 7.5px,var(--tab-srf) 8px);
+  }
+}
+@media(max-width:480px){
+  .ip{font-size:30px;min-height:36px}
+  .ip.long{font-size:17px}
+  /* 7Л: кнопки селектора режима списков не переносятся — короткие подписи */
+  .lm-lg{display:none}
+  .lm-sm{display:inline}
+  .lm-seg button{padding:0 10px}
+  .ns-seg button{padding:0 10px}   /* 7З: четыре положения области — теснее, как у списков */
+  .ns-ctl{width:100%}              /* 7З: уже колонки текста — селектор переносит положения в две строки, список во всю колонку */
+  .ns-seg{width:100%;flex-wrap:wrap}
+}
+/* 7Л: два блока списков рядом — тот же порог, что у остальных блоков (946/947) */
+@media (min-width:947px){
+  .lists-two{grid-template-columns:1fr 1fr}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+
+/* ── 2.1 · ТИП ПРОКСИ ────────────────────────────────────────────────
+   Цвета четырёх протоколов. Один набор на чип строки, счётчики фильтра и
+   разбор вставки: человек учит цвет один раз и дальше узнаёт тип по нему,
+   не читая подпись. HTTP намеренно нейтральный — это большинство. */
+.tp{font-family:var(--mono);font-size:10.5px;font-weight:500;letter-spacing:.03em;
+  padding-left:7px;margin-left:1px;border-left:1px solid var(--line-2);white-space:nowrap}
+.tp[data-pt="HTTPS"]{color:#7FB4E8}
+.tp[data-pt="SOCKS5"]{color:#C6A4F2}
+.tp[data-pt="SOCKS4"]{color:#E3BE7C}
+html[data-theme="light"] .tp[data-pt="HTTPS"]{color:#1E5E9E}
+html[data-theme="light"] .tp[data-pt="SOCKS5"]{color:#6136A8}
+html[data-theme="light"] .tp[data-pt="SOCKS4"]{color:#8A5A0E}
+
+/* фильтр по типу — над списком, рядом с поиском */
+.ltypes{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 2px}
+.ltypes[hidden]{display:none}
+.ltypes button{
+  height:27px;padding:0 10px;border-radius:8px;border:1px solid var(--line);
+  background:var(--well);color:var(--mut);cursor:pointer;
+  display:inline-flex;align-items:center;gap:7px;
+  font-size:11.5px;font-weight:500;font-family:var(--ui);
+  transition:color .15s,border-color .15s,background .15s;
+}
+.ltypes button:hover{color:var(--ink);border-color:var(--line-2)}
+.ltypes button b{font-family:var(--mono);font-weight:500;font-size:10.5px;color:var(--dim)}
+.ltypes button[aria-pressed="true"]{color:var(--ink);border-color:var(--acc-edge);background:var(--acc-tint)}
+.ltypes button[aria-pressed="true"] b{color:var(--acc-hi)}
+/* 2.3: категория с нулём видна всегда, но приглушена и не нажимается —
+   иначе SOCKS4 выглядел бы отсутствующим, пока нет ни одного прокси этого типа */
+.ltypes button[data-empty]{opacity:.45;cursor:default}
+.ltypes button[data-empty]:hover{color:var(--mut);border-color:var(--line)}
+.ltypes button[aria-pressed="true"][data-empty]{opacity:.45}
+/* на узком экране строка фильтра не разъезжается: кнопки переносятся */
+@media (max-width:520px){ .ltypes{margin-top:8px} .ltypes button{height:25px;padding:0 8px} }
+
+/* разбор вставки: тип в общем ряду .rc, цвет — тот же, что у чипа */
+.type-rc[data-pt="HTTPS"] b{color:#7FB4E8}
+.type-rc[data-pt="SOCKS5"] b{color:#C6A4F2}
+.type-rc[data-pt="SOCKS4"] b{color:#E3BE7C}
+html[data-theme="light"] .type-rc[data-pt="HTTPS"] b{color:#1E5E9E}
+html[data-theme="light"] .type-rc[data-pt="SOCKS5"] b{color:#6136A8}
+html[data-theme="light"] .type-rc[data-pt="SOCKS4"] b{color:#8A5A0E}
+
+/* 2.1: кнопка проверки типа — во всю ширину колодца вставки, под разбором */
+.btn-ft.typeck{width:100%;justify-content:center;height:38px;margin-top:2px}
+.btn-ft.typeck[hidden]{display:none}

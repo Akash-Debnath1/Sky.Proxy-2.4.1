@@ -1,0 +1,124 @@
+/* src/requests/requests.css — страница «Запросы адреса» (7Л, шаг 3).
+   Своя короткая таблица стилей на токенах общего слоя (tokens.css): шапка,
+   панель и тумблер — язык страницы настроек (options.css), но без её
+   2400 строк: странице нужны заголовок, две строки подписи, тумблер
+   фильтра, сводка и таблица. Лестница скруглений — как у страницы:
+   панель 24, контролы 10, малое 8. Светлая тема — html[data-theme="light"]
+   (атрибут ставит theme.js), переменные — в tokens.css. Этап 9: ячейка
+   «Путь» — обёртка .pw (flex внутри td, а не td:flex — фиксированная
+   раскладка таблицы остаётся), кнопка адреса .pth одной строкой с
+   многоточием, в раскрытой строке (tr.open) — перенос целиком; кнопка
+   копирования .cp фиксированной ширины, приглушённая, ярче по наведению
+   и фокусу; .hit — вспышка после копирования; .sr — визуально скрытая
+   живая область. */
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;scrollbar-gutter:stable}
+body{
+  min-width:340px;
+  font-family:var(--ui);font-size:14px;line-height:1.5;color:var(--ink);
+  background:var(--bg);min-height:100vh;-webkit-font-smoothing:antialiased;
+}
+html[data-theme="light"] body{
+  background-image:radial-gradient(72% 58% at 2% -8%, rgba(42,128,56,.14), rgba(42,128,56,0) 96%);
+  background-attachment:fixed;
+}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px;border-radius:6px}
+[hidden]{display:none!important}
+svg{flex-shrink:0}
+/* визуально скрытая живая область (#live): читается вслух, места не занимает */
+.sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
+
+/* ── шапка: только логотип, по центру, как на странице настроек ── */
+.bar{display:flex;align-items:center;justify-content:center;padding:32px 24px 8px}
+/* 2.2: знак Sky.Proxy — форма в shared/brand.css, здесь кегль */
+.brand .bw{font-size:25px}
+
+/* ── панель ── */
+.wrap{max-width:960px;margin:0 auto;padding:28px 28px 72px}
+.panel{background:var(--srf);border-radius:var(--r-panel);padding:22px 24px 24px;animation:in .3s var(--e)}
+@keyframes in{from{opacity:0;transform:translateY(6px)}}
+.hd{display:flex;align-items:flex-start;justify-content:space-between;gap:16px 24px;flex-wrap:wrap}
+.hd-t{min-width:0}
+h1{font-size:18px;font-weight:700;letter-spacing:-.01em;line-height:1.3;word-break:break-all}
+.sub{margin-top:4px;font-size:12.5px;color:var(--mut-2)}
+.sep{color:var(--mut-2)}
+/* ссылка «все адреса этой вкладки» — язык .sp-link попапа: пунктир акцентом */
+.lnk{display:inline;padding:0;font:inherit;color:var(--acc);border-bottom:1px dashed var(--acc-edge);cursor:pointer}
+.lnk:hover{color:var(--acc-hi)}
+html[data-theme="light"] .lnk:hover{color:#1E672B}
+/* фильтр «Только с ошибками» — подпись и тумблер, как строка опции страницы */
+.ctl{display:flex;align-items:center;gap:10px;flex-shrink:0;padding-top:2px}
+.ctl .lbl{font-size:13px;font-weight:500;color:var(--mut)}
+.sw{
+  position:relative;width:42px;height:24px;flex-shrink:0;
+  border-radius:999px;background:var(--well);border:1px solid var(--line-2);
+  transition:background .3s var(--e),border-color .2s,transform .12s;
+}
+.sw:hover{border-color:rgba(255,255,255,.26)}
+html[data-theme="light"] .sw:hover{border-color:rgba(0,0,0,.3)}
+.sw:active{transform:scale(.96)}
+.sw::after{
+  content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;
+  border-radius:999px;background:var(--dim);
+  box-shadow:0 1px 3px rgba(0,0,0,.45);
+  transition:left .3s cubic-bezier(.34,1.4,.64,1),width .2s var(--e),background .3s;
+}
+.sw:active::after{width:23px}
+.sw[aria-checked="true"]{background:var(--acc);border-color:transparent}
+.sw[aria-checked="true"]::after{left:20px;background:#EEEEEE}
+.sw[aria-checked="true"]:active::after{left:15px}
+/* сводка: «запросов N, с ошибками M, через прокси K» */
+.sum{margin:14px 0 0;font-size:12.5px;color:var(--mut)}
+.sum:empty{display:none}
+
+/* ── таблица ── */
+.tbl-w{margin-top:14px;overflow-x:auto;border-radius:var(--r-el);background:var(--srf-low);border:1px solid var(--line)}
+table.rq{width:100%;min-width:640px;border-collapse:collapse;table-layout:fixed;font-size:12.5px}   /* fixed: путь режется многоточием, а не растягивает таблицу */
+.rq col.w-t{width:96px}.rq col.w-ty{width:116px}.rq col.w-h{width:176px}.rq col.w-r{width:192px}.rq col.w-v{width:100px}
+.rq th{
+  padding:9px 12px;text-align:left;white-space:nowrap;
+  font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--mut-2);
+  border-bottom:1px solid var(--line);
+}
+.rq td{padding:7px 12px;vertical-align:top;border-bottom:1px solid var(--line)}
+.rq tr:last-child td{border-bottom:none}
+.rq tbody tr:hover td{background:var(--hov)}
+.rq .t{white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--mut)}
+.rq .ty{white-space:nowrap;color:var(--mut)}
+.rq .h{font-family:var(--mono);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--mut)}
+.rq .p{font-family:var(--mono);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rq .r{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.rq .r.bad{color:var(--bad);font-weight:600}
+.rq .r.blk{color:var(--mut-2)}
+.rq .v{white-space:nowrap;color:var(--mut)}
+.rq .v.on{color:var(--acc)}
+.rq tr.bad td.p{color:var(--ink)}
+/* колонка адреса — только когда адресов несколько (сайт, вся вкладка): при
+   одном адресе requests.js убирает её col и ячейки из разметки */
+/* ── этап 9: ячейка «Путь» — адрес кнопкой с раскрытием и кнопка копирования ── */
+.rq td.p{padding-top:4px;padding-bottom:4px}
+.rq .pw{display:flex;align-items:flex-start;gap:6px;min-width:0}
+.rq .pth{
+  flex:1 1 auto;min-width:0;padding:3px 0;text-align:left;
+  font:inherit;font-family:var(--mono);font-size:12px;line-height:1.5;color:inherit;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-radius:4px;
+}
+.rq .pth:hover{color:var(--acc-hi)}
+html[data-theme="light"] .rq .pth:hover{color:#1E672B}
+.rq tr.open td.p .pth{white-space:normal;word-break:break-all;overflow:visible;text-overflow:clip}
+.rq .cp{
+  flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;
+  width:24px;height:24px;border-radius:6px;color:var(--mut-2);
+  transition:color .15s,background .15s;
+}
+.rq .cp:hover,.rq .cp:focus-visible{color:var(--ink);background:var(--hov)}
+.rq td.p.hit .cp{color:var(--acc-hi);background:var(--acc-tint)}
+html[data-theme="light"] .rq td.p.hit .cp{color:#1E672B}
+/* нет данных: мониторинг выключен / запросов нет / ошибок нет */
+.empty{margin:18px 0 4px;font-size:13px;color:var(--mut-2);line-height:1.55}
+
+@media (max-width:660px){
+  .wrap{padding:16px 12px 48px}
+  .panel{padding:18px 16px 18px;border-radius:var(--r-block)}
+}

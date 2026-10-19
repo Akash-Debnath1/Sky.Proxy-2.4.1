@@ -1,0 +1,1193 @@
+/* src/popup/popup.css — стили окна попапа. Перенос прототипа
+   Попап_v13_2026-09-05.html на этапе 3Б.2 без изменений по существу:
+   все правила и комментарии прототипа на месте, кроме стенда (леса
+   разработки). Что изменилось, помечено «3Б.2» прямо в тексте:
+   селекторы темы получили префикс html[data-theme="light"], фон окна
+   задан на html, body стенда заменён на body окна. Шрифты подключает
+   fonts.css из src/assets/fonts/ — своих @font-face здесь нет.
+   3Б.6: переменные палитры (:root и светлая тема) — в src/shared/tokens.css,
+   общем для обоих окон; здесь их больше нет. */
+/* ════════════════════════════════════════════════════════════════
+   ПОПАП v1 — окно по клику на иконку расширения.
+   Токены и сцена коннектора пересажены из системы v187 как есть.
+
+   РАЗМЕР. Лимит браузеров на browser-action popup: 800×600
+   (Chrome/Edge/Opera и Firefox), минимум 25×25. Ширину задаёт
+   контент. Взято 340px — иллюстрация порта читается, окно
+   остаётся компактным. Высота собирается контентом (~270px),
+   с большим запасом до лимита.
+
+   В боевом расширении: manifest → "action":{"default_popup":
+   "popup.html"}; body{width:340px;margin:0}; стенд-обёртка
+   (.stage, .stand-note) не переносится. Окно попапа нельзя
+   плавно ресайзить после открытия — поэтому уведомления
+   выезжают ПОВЕРХ контента, не меняя габарит окна.
+
+   КНОПКА v2 (по референсу):
+   · большая иконка питания слева сверху, подпись Вкл/Выкл
+     крупно слева снизу, провод между ними до коннектора;
+   · коннектор — новые арты обеих тем (125×56), панель порта
+     прежняя из v187, масштаб сцены 0.85, viewBox 312×128;
+   · вся плашка — кнопка: курсор, ховер-вуаль, нажатие;
+   · под кнопкой — «Перейти к настройкам» (filled tonal v187).
+   ════════════════════════════════════════════════════════════════ */
+/* 3Б.6: токены палитры — блоки :root и html[data-theme="light"] — вынесены в
+   src/shared/tokens.css: в обоих окнах они совпадали побайтно. Файл
+   подключается в popup.html до этого; здесь остались только правила окна. */
+
+/* ── светлая тема ──
+   3Б.2: атрибут data-theme живёт на <html>, а не на .pop (решение 07.09):
+   переменные объявлены на html, остальные селекторы темы получили
+   префикс html[data-theme="light"] / html:not([data-theme="light"]).
+   3Б.6: сами переменные светлой темы — в src/shared/tokens.css ── */
+html[data-theme="light"] .pop{
+  background-image:radial-gradient(120% 74% at 0% -10%, rgba(42,128,56,.13), rgba(42,128,56,0) 92%);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--acc-edge);outline-offset:2px;border-radius:6px}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none !important;transition:none !important}
+}
+
+/* ── стенд: не переносится в расширение ──
+   3Б.2: стенда здесь нет — .stage, .stand, .states, .stand-note и его
+   body{display:grid…} остались в прототипе. В окне расширения документ и
+   есть окно: body — 340px без полей, как велит шапка файла; шрифт
+   интерфейса перешёл сюда с body стенда, своего font-family у .pop нет.
+   Фон стоит на html, а не только на body: окно попапа разбирается заново
+   при каждом клике по значку, и холст должен быть в цвет окна до первой
+   отрисовки — иначе вспышка белого. Цвет — тот же, что у карточки .pop в
+   «варианте 2» в конце файла (srf, в светлой теме белый): окно и есть
+   карточка, второго блока внутри нет. Форму окна, его прямые углы и
+   рамку рисует Chrome, расширению они не подвластны. Решение 07.09 при
+   проверке: вариант «карточка на фоне страницы --bg» показан и отклонён
+   (блок в блоке); скругление и тень самой карточки сняты — см. блок
+   «правки при проверке» в конце файла. */
+html{background:var(--srf)}
+html[data-theme="light"]{background:#FFFFFF}
+body{width:340px;margin:0;font-family:var(--ui)}
+
+/* ── окно попапа ── */
+/* Лестница скруглений попапа — В2 «мягче» (выбор человека 20.09, после
+   прототипа с тремя вариантами): окно 24 (--r-panel) → крупные блоки 16
+   (--r-block: кнопка питания) → карточки поверх 14 (меню, уведомление,
+   плашка выбора, тост) → контролы 40–48px 12 (--r-ctl: селектор прокси,
+   плашка адреса, колодец списков, «Настройки», кнопки панелей) → вложенные
+   в колодец 9 (--r-ctl-in: на 3 меньше колодца) → малые 34–38px 10 →
+   малые 28–30px 8 (--r-chip) → крошечные ≤ 24px 7. На странице настроек
+   контролы на ступень строже (10 / 7) — у окна 340px углы чуть мягче */
+.pop{
+  --r-ctl:12px;--r-ctl-in:9px;
+  position:relative;width:340px;overflow:hidden;
+  background:var(--bg);color:var(--ink);
+  border-radius:var(--r-panel);     /* 24: верх лестницы вложений; в браузере окно режет само */
+  box-shadow:0 30px 80px -30px rgba(0,0,0,.85);
+  display:flex;flex-direction:column;gap:12px;
+  padding:12px 14px 14px;
+}
+/* включение: лёгкий радиальный отсвет соединения в левом
+   верхнем углу окна — блум v187, локализованный */
+.pop::before{
+  content:'';position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+  background:radial-gradient(130% 88% at 0% 0%, var(--bloom), var(--bloom-0) 52%);
+  opacity:0;transition:opacity .6s;
+}
+/* Свечение всего окна во включённом состоянии снято. Оно лежало
+   поверх содержимого радиалом из левого верхнего угла и красило
+   зелёным как раз ту часть кнопки, где стоят плашка и подпись, —
+   это и читалось как заливка фона. Состояние держат провод,
+   обводка разъёма, светодиоды, плашка иконки, подпись и кромка
+   кнопки; окну зеленеть целиком незачем. */
+.pop[data-power="on"]::before{opacity:0}
+
+/* ── шапка ── */
+.phd{display:flex;align-items:center;gap:6px;min-height:36px}
+/* 2.2: знак Sky.Proxy — форма в shared/brand.css, здесь кегль под высоту
+   прежнего логотипа попапа (22px) */
+.brand{margin-right:auto}
+.pop .brand .bw{font-size:21px}
+
+.hbt{
+  position:relative;width:36px;height:36px;border-radius:10px;flex-shrink:0;
+  display:grid;place-items:center;color:var(--mut);
+  border:1px solid transparent;transition:background .15s,color .15s;
+}
+.hbt:hover{background:var(--hov);color:var(--ink)}
+.hbt:disabled{opacity:.35;pointer-events:none}
+.hbt svg{display:block}
+.bell-i{display:grid;place-items:center}
+.bdg{
+  position:absolute;top:1px;right:1px;min-width:15px;height:15px;padding:0 4px;
+  border-radius:8px;display:grid;place-items:center;
+  background:var(--bad);color:#fff;
+  font-size:9.5px;font-weight:700;font-family:var(--mono);line-height:1;
+  box-shadow:0 0 0 2px var(--bg);
+}
+.bdg.warn{background:var(--warn);color:#221A05}
+/* 7И (решение человека 23.09, поправка 23.09): нейтральные непрочитанные —
+   тёмное число, не жёлтое, ЦВЕТА ИЗ ТОКЕНОВ ТЕМЫ: тёмная тема — чёрная плашка
+   --well (#050505, на герое читается как чёрная — «по сути чёрная»), светлая
+   — светлая нейтральная --well (#E9E9E9; второй кандидат — --srf-low #F7F7F7)
+   с кольцом 1px --line-2 внутри; текст --ink; кольцо 2px --bg — как у
+   остальных состояний. Чёрной плашки на белом не делать */
+.bdg.info{background:var(--well);color:var(--ink);box-shadow:0 0 0 2px var(--bg),inset 0 0 0 1px var(--line-2)}
+.bdg[hidden]{display:none}
+
+/* смена темы — исходный контрол v187, ужат под шапку попапа */
+/* смена темы — контрол v187 (44 → 36 под шапку попапа);
+   плашка: золото страницы на подложке-дипе, чтобы на панели srf
+   глубина совпадала с видом v187; на свету — сизая, как в v187 */
+.thm{
+  width:36px;height:36px;border-radius:10px;
+  display:grid;place-items:center;flex-shrink:0;
+  border:1px solid transparent;
+  background:linear-gradient(rgba(242,185,60,.055),rgba(242,185,60,.055)),var(--dip);
+  transition:background .15s,border-color .15s;
+}
+.thm svg{display:block}
+.thm:hover{background:linear-gradient(rgba(242,185,60,.085),rgba(242,185,60,.085)),var(--dip)}
+html[data-theme="light"] .pop .thm{background:rgba(110,126,168,.10)}
+html[data-theme="light"] .pop .thm:hover{background:rgba(110,126,168,.16)}
+
+/* ── смена языка: глобус в шапке + меню с флагами ──
+   3Б.2: блока нет — решение 07.09 при проверке: язык расширения задаёт
+   браузер (chrome.i18n переключать нечем), кнопки языка нет. В прототипе
+   здесь стояли .lngw, .lng, .lmenu (z 55) и .chk; снимать их там же. */
+
+/* ── селектор прокси: главный контрол, первым ── */
+.psw{position:relative}
+.psel{
+  width:100%;min-height:48px;display:flex;align-items:center;gap:10px;
+  padding:0 12px 0 13px;text-align:left;
+  background:var(--srf-low);border:1px solid var(--line-2);border-radius:var(--r-ctl);   /* 7Л (лестница В2, выбор человека 20.09): контрол 48px — 12; было 16 */
+  transition:border-color .18s,background .18s;
+}
+.psel:hover{border-color:rgba(255,255,255,.26);background:var(--hov)}
+html[data-theme="light"] .pop .psel:hover{border-color:rgba(0,0,0,.3)}
+.psel[aria-expanded="true"]{border-color:var(--acc-edge)}
+/* 2.4: флаг — ячейка спрайта src/assets/flags.png; позицию задаёт
+   inline background-position из flag(), см. options.css */
+.fl{
+  display:block;flex-shrink:0;width:17px;height:12px;
+  border-radius:2.5px;outline:1px solid rgba(255,255,255,.16);outline-offset:-.5px;
+  background-image:url(../assets/flags.png);
+  background-repeat:no-repeat;
+  background-size:272px 192px;
+}
+html[data-theme="light"] .pop .fl{outline-color:rgba(0,0,0,.15)}
+
+/* ── СТРАНЫ ПОКА НЕТ ──
+   Раньше здесь стоял «?». Он спрашивал, хотя вопроса нет:
+   страна появится сама при первом подключении через этот прокси.
+   Знак вопроса читается как ошибка, серый квадрат — как флаг
+   несуществующей страны. Поэтому слот просто пустой: пунктирная
+   рамка ровно по габариту флага (17×12, тот же радиус). Место
+   занято — строки с флагом и без него собираются по одной
+   сетке, — но ничего не утверждается. Объясняет метку общий
+   пузырь .tip (см. ниже): окно и список режут содержимое по
+   краям, и подсказка у самой метки была бы обрезана. */
+.geo-q{
+  display:block;flex-shrink:0;
+  width:17px;height:12px;border-radius:2.5px;
+  border:1px dashed var(--line-2);background:none;
+  cursor:help;transition:border-color .14s,background .14s;
+}
+.geo-q:hover,.geo-q:focus{border-color:var(--mut-2);background:var(--hov);outline:none}
+.pm-row.on .geo-q{border-color:var(--acc-edge)}
+
+/* ── НЕТ В АККАУНТЕ ──
+   Прокси пришёл по ключу, но из аккаунта пропал. Из списка не
+   выкидываем — он ещё может работать. Пометка намеренно тихая
+   и ужимается первой: в 340px её место после адреса и заметок */
+.pm-na{
+  font-size:10.5px;color:var(--mut-2);cursor:help;white-space:nowrap;
+  min-width:0;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto;
+}
+.pm-row.on .pm-na{color:rgba(196,233,201,.6)}
+html[data-theme="light"] .pop .pm-row.on .pm-na{color:rgba(30,103,43,.7)}
+
+/* ── ПОДСКАЗКА: один пузырь на окно ──
+   Живёт прямо в окне, над меню (z выше .pmenu), координаты ставит
+   JS: сам выбирает верх или низ по свободному месту и прижимается
+   к полю окна, остриё остаётся на метке. Материал — надстройка,
+   тот же, что у выпадающего списка. */
+.tip{
+  position:absolute;z-index:70;left:0;top:0;max-width:230px;
+  padding:9px 11px;border-radius:var(--r-el);
+  background:var(--ovl);border:1px solid var(--line-2);
+  box-shadow:0 18px 44px -12px rgba(0,0,0,.8);
+  font-size:11.5px;line-height:1.45;color:var(--ink);
+  opacity:0;pointer-events:none;transform:translateY(3px);
+  transition:opacity .15s var(--e),transform .15s var(--e);
+}
+.tip.on{opacity:1;transform:none}
+.tip::after{
+  content:'';position:absolute;left:var(--ax,20px);margin-left:-5px;
+  width:10px;height:10px;transform:rotate(45deg);
+  background:var(--ovl);border:1px solid var(--line-2);
+}
+.tip[data-side="top"]::after{bottom:-6px;border-top:none;border-left:none}
+.tip[data-side="bottom"]::after{top:-6px;border-bottom:none;border-right:none}
+html:not([data-theme="light"]) .pop .tip,
+html:not([data-theme="light"]) .pop .tip::after{background:#1D1D1D}
+html[data-theme="light"] .pop .tip{box-shadow:0 18px 44px -12px rgba(30,42,33,.25)}
+.ps-ip{font-family:var(--mono);font-size:13.5px;font-weight:500;letter-spacing:-.01em;white-space:nowrap;flex-shrink:0}
+.ps-x{margin-left:auto;flex-shrink:0}
+.ps-ch{flex-shrink:0;color:var(--mut-2);transition:transform .22s var(--e)}
+.psel[aria-expanded="true"] .ps-ch{transform:rotate(180deg)}
+
+.chip{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:11px;font-weight:600;line-height:1;
+  padding:4px 7px;border-radius:var(--r-chip);white-space:nowrap;
+}
+
+/* выпадающий список */
+.pmenu{
+  position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:40;
+  background:var(--ovl);border:1px solid var(--line-2);border-radius:14px;
+  box-shadow:0 22px 48px -16px rgba(0,0,0,.75);
+  overflow:hidden;
+  animation:menuIn .18s var(--e);
+}
+.pm-sc{max-height:172px;overflow:auto;overscroll-behavior:contain;padding:6px;display:flex;flex-direction:column;gap:3px}
+/* ── ДЛИННЫЙ СПИСОК ──
+   Окно попапа нельзя ресайзить после открытия, и выпадающее
+   меню обязано уместиться в остаток высоты под селектором — это
+   ~166px, то есть четыре строки вместе с формой вставки. Пока
+   прокси мало, этого хватает.
+   С девяти записей арифметика перестаёт сходиться: шести-семи
+   строкам под селектором места нет ни при какой вёрстке. Тогда
+   меню перестаёт быть выпадающим и разворачивается на всё окно —
+   тем же приёмом, что и панель уведомлений. Окно от этого не
+   растягивается: панель лежит поверх него.
+   В такой панели наверху одна строка: назад, поиск и выход к
+   другим способам добавления. Форма быстрой вставки из неё
+   уходит — человеку с двадцатью прокси нужен выбор, а не поле
+   для вставки; быстрое добавление живёт там, где список
+   короткий. Освободившееся место целиком отдано строкам. */
+.pm-rows{
+  max-height:118px;overflow:auto;overscroll-behavior:contain;
+  padding:6px;display:flex;flex-direction:column;gap:3px;
+}
+.pm-rows::-webkit-scrollbar{width:8px}
+.pm-rows::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:4px;border:2px solid var(--ovl)}
+html:not([data-theme="light"]) .pop .pm-rows::-webkit-scrollbar-thumb{border-color:#1D1D1D}
+
+/* панель на всё окно. .psw держит выпадающее меню на себе, но
+   панели нужен отсчёт от самого окна — поэтому на время её
+   показа обёртка перестаёт быть точкой отсчёта */
+.pop.menufull .psw{position:static}
+.pmenu.full{
+  top:0;left:0;right:0;bottom:0;
+  border-radius:var(--r-panel);
+  padding:14px;display:flex;flex-direction:column;gap:8px;
+  animation:none;
+  /* это уже не надстройка над окном, а само окно: материал и
+     фон берём у него, кромку и тень снимаем — обводить нечего */
+  background:var(--bg);border-color:transparent;box-shadow:none;
+}
+html:not([data-theme="light"]) .pop .pmenu.full{background:var(--bg)}
+.pm-top{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.pm-back,.pm-plus{
+  width:34px;height:34px;border-radius:10px;flex-shrink:0;   /* В2: малые 34–38px — 10 */
+  display:grid;place-items:center;color:var(--mut);
+  background:var(--well);border:1px solid var(--line-2);
+  transition:background .15s,color .15s,border-color .15s;
+}
+.pm-back:hover,.pm-plus:hover{background:var(--hov);color:var(--ink)}
+.pm-plus{color:var(--acc);background:var(--acc-tint);border-color:transparent}
+.pm-plus:hover{background:var(--acc-tint-2);color:var(--acc-hi)}
+html[data-theme="light"] .pop .pm-plus{color:#1E672B}
+.pm-q{
+  flex:1;min-width:0;height:34px;padding:0 11px;
+  background:var(--well);border:1px solid var(--line-2);border-radius:10px;
+  font-family:var(--ui);font-size:12.5px;color:var(--ink);outline:none;
+  transition:border-color .15s;
+}
+.pm-q::placeholder{color:var(--mut-2)}
+.pm-q:focus{border-color:var(--acc-edge)}
+/* строки занимают весь остаток панели; в ней они чуть плотнее —
+   каждые сэкономленные 4px это ещё полстроки на виду */
+.pmenu.full .pm-rows{max-height:none;flex:1;padding:2px;gap:2px}
+.pmenu.full .pm-row{padding:7px 6px 7px 9px}
+.pm-none{
+  padding:12px 10px 8px;font-size:12px;line-height:1.45;
+  color:var(--mut-2);
+}
+html[data-theme="light"] .pop .pmenu{box-shadow:0 18px 44px -12px rgba(30,42,33,.25)}
+@keyframes menuIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.pm-row{
+  display:flex;align-items:center;gap:9px;width:100%;
+  padding:9px 6px 9px 9px;border-radius:10px;cursor:pointer;
+  transition:background .12s;
+}
+.tgs{display:flex;gap:5px;min-width:0;overflow:hidden;flex:0 1 auto}
+.chip.tagc{
+  display:block;font-size:10.5px;padding:3px 7px;
+  border:1px solid transparent;border-radius:7px;
+  max-width:92px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.x-ico{display:grid;place-items:center;flex-shrink:0}
+.x-ico.warn{color:var(--warn)}
+.x-ico.bad{color:var(--bad)}
+html[data-theme="light"] .pop .x-ico.warn{color:#D36300}
+.pm-row:hover{background:var(--hov)}
+.pm-row.on{background:var(--acc-tint)}
+.pm-row.on:hover{background:var(--acc-tint-2)}
+.pm-row.on .pm-ip{color:var(--acc-hi)}
+html[data-theme="light"] .pop .pm-row.on .pm-ip{color:#1E672B}
+.pm-ip{font-family:var(--mono);font-size:12.5px;font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pm-sp{margin-left:auto}
+.pm-gear{
+  width:28px;height:28px;border-radius:8px;flex-shrink:0;
+  display:grid;place-items:center;color:var(--mut-2);
+  transition:background .12s,color .12s;
+}
+.pm-gear:hover{background:var(--hov-2);color:var(--ink)}
+html:not([data-theme="light"]) .pop .pmenu{background:#1D1D1D}
+html:not([data-theme="light"]) .pop .pm-sc::-webkit-scrollbar-thumb{border-color:#1D1D1D}
+.psel.add{color:var(--ink);justify-content:flex-start}
+.psel.add #selFlag{display:grid;place-items:center;color:var(--acc)}
+.psel.add .ps-ip{font-family:var(--ui);font-size:13.5px;font-weight:600}
+.pm-sc.am{display:flex;flex-direction:column;gap:9px;padding:9px}
+.am-tail{
+  display:flex;flex-direction:column;gap:8px;
+  margin:7px 3px 3px;padding:10px 0 0;
+  border-top:1px solid var(--line);
+}
+.am-more{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  height:38px;border-radius:10px;
+  background:var(--acc-tint);color:var(--acc-hi);
+  font-size:13px;font-weight:600;
+  transition:background .15s;
+}
+.am-more:hover{background:var(--acc-tint-2)}
+html[data-theme="light"] .pop .am-more{color:#1E672B}
+/* 7З (решение человека 22.09): «Добавить прокси» под полем — по форме как
+   .am-more (38px, радиус 10, 13px/600, по центру), но БЕЗ заливки: обводка
+   --line-2 и цвет --ink, на наведении фон --hov — язык кнопки «Настройки»
+   (.btn-set); рядом с зелёной «Другие способы» читается как действие над
+   полем, а не как второй переход на страницу */
+.am-add{
+  display:flex;align-items:center;justify-content:center;
+  height:38px;border-radius:10px;
+  background:transparent;border:1px solid var(--line-2);color:var(--ink);
+  font-size:13px;font-weight:600;
+  transition:background .15s,border-color .15s;
+}
+.am-add:hover{background:var(--hov);border-color:rgba(255,255,255,.24)}
+html[data-theme="light"] .pop .am-add:hover{background:var(--hov);border-color:rgba(0,0,0,.3)}
+.am-cap{
+  margin-top:2px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--mut-2);
+}
+.am-ta{
+  resize:none;width:100%;padding:9px 11px;border-radius:10px;
+  background:var(--well);border:1px solid var(--line-2);color:var(--ink);
+  font-family:var(--mono);font-size:12px;line-height:1.5;outline:none;
+}
+.am-ta:focus{border-color:var(--acc-edge)}
+.am-ta::placeholder{color:var(--mut-2)}
+.am-note{font-size:11px;line-height:1.4;color:var(--mut-2);margin-top:-4px}
+.pm-sc::-webkit-scrollbar{width:8px}
+.pm-sc::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:4px;border:2px solid var(--ovl)}
+
+/* ── кнопка питания: сцена v187 ── */
+
+.power{
+  position:relative;min-height:104px;width:100%;overflow:hidden;
+  background:var(--well);border:1px solid var(--line-2);border-radius:var(--r-block);
+  transition:background .3s,border-color .3s;
+}
+.power:hover{border-color:var(--acc-edge)}
+/* Во включённом состоянии фон кнопки остаётся тем же колодцем,
+   что и в выключенном. Здесь стоял радиал от порта, уводивший
+   поверхность к краям в тёмный акцент (токен --acc-dark; снят из
+   tokens.css на 7К.2, Е-4): подсветка получалась двойной —
+   зелёный лился и от провода с обводкой разъёма, и от самой
+   подложки. Состояние по-прежнему читается: провод, обводка,
+   светодиоды, подпись, плашка иконки и кромка. */
+.pop[data-power="on"] .power{
+  border-color:rgba(72,180,87,.3);
+}
+.pop[data-power="on"] .power:hover{border-color:var(--acc-edge)}
+.pop[data-hold] .power{pointer-events:none}   /* 7К.2 (Г-1): только удержание и ответ фона, не проверка при подключении — та ставит data-power="busy" без data-hold */
+.power:disabled{opacity:.4;pointer-events:none}
+
+/* текст слева: #pLabel сверху (текст ведёт JS),
+   статусная строка снизу (ведёт CSS по data-power) */
+/* цвет пары «иконка + подпись» — единый источник, переменная --pwc.
+   Раньше stroke иконки и color подписи решались каскадом порознь
+   и расходились: у .cn-w ховер-правило (0,4,0) перебивало правила
+   состояний (0,3,0), у .icgl — наоборот (0,3,0 против 0,3,0, но
+   состояния ниже по файлу). Теперь состояние/ховер выбирает цвет
+   ОДИН раз на кнопке, оба элемента только читают переменную —
+   рассинхрон невозможен по построению; токены сами ведут тему. */
+.power{--pwc:var(--mut)}
+.power:hover{--pwc:var(--ink)}
+.pop[data-power="busy"] .power{--pwc:var(--warn)}
+.pop[data-power="err"] .power,
+.pop[data-power="err"] .power:hover{--pwc:var(--bad)}
+.pop[data-power="on"] .power{--pwc:var(--acc)}
+.pop[data-power="on"] .power:hover{--pwc:var(--acc-hi)}
+.icgl{fill:none;stroke:var(--pwc);stroke-width:1.9;stroke-linecap:round;transition:stroke .3s}
+/* призыв в покое: синхронная вспышка иконки и подписи — одинаковый
+   тайминг (5s linear) и одно условие старта, фазы совпадают.
+   Прежний градиентный пробег по тексту заменён вспышкой: он делал
+   цвет букв неоднородным и расходился с иконкой по механике. */
+.pop[data-power="off"] .power:not(:hover) .icgl{animation:pwrCallI 5s linear infinite}
+.pop[data-power="off"] .power:not(:hover) .cn-w{animation:pwrCallW 5s linear infinite}
+@keyframes pwrCallI{0%,7%,100%{stroke:var(--mut)}3%{stroke:var(--acc-hi)}}
+@keyframes pwrCallW{0%,7%,100%{color:var(--mut)}3%{color:var(--acc-hi)}}
+
+/* ════════ СЦЕНА КОННЕКТОРА ════════
+   Пришла на смену прежнему порту из примитивов: авторская
+   отрисовка, четыре комплекта на четыре состояния. Комплект —
+   панель плюс коннектор, между собой они согласованы по
+   координатам пинов и гнёзд, поэтому подмена ничего не сдвигает.
+
+   ── НАСТРОЙКИ ──
+   Все размеры живут в переменных ниже, пересчёт идёт от них.
+     --cq-panel-x  где стоит панель. Точка стыковки едет за ней,
+                   поэтому коннектор дойдёт при любом значении
+     --cq-gap      отвод коннектора в разъединённом состоянии
+     --cq-seat     доводка посадки: отрицательная — коннектор
+                   не доезжает. Ею ловится место, где торец
+                   останавливается перед светящейся рамкой:
+                   заедет глубже — накроет её, и рамка почернеет
+     --cq-pad      воздух сверху и снизу. Не растягивает блок,
+                   а сужает иллюстрацию: кадр растёт от правого
+                   края влево, правая стена не отходит
+   --cq-py вычислен из самих файлов (гнёзда против пинов) и
+   сходится до сотых — его не трогаем. */
+.power{
+  --cq-panel-x:170;
+  --cq-gap:46;
+  --cq-seat:0;
+  --cq-pad:0;    /* в попапе блок низкий: воздуха не берём вовсе */
+  /* Масштаб сцены. При zoom=1 и pad=0 панель занимает ровно всю
+     высоту блока — это предел, при котором она видна целиком.
+     Дальше растить можно, но панель начнёт срезаться сверху и
+     снизу: при 1.1 уходит по 5% с каждой стороны, при 1.2 — по
+     8%. Срезаются «лапки» корпуса, сама рамка с гнёздами
+     остаётся, так что запас есть. */
+  --cq-zoom:1.12;
+  --cq-py:-47.5;
+}
+.cq{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.cq svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+
+/* ── ПРОВОД ──
+   Кабель нарисован в самом коннекторе, но короткий. Эта линия —
+   его продолжение до левой кромки. Правый конец всегда перекрыт
+   корпусом, поэтому шва не видно ни в одной фазе движения. */
+.cq-wire rect{fill:var(--wire);transition:fill .5s}
+.pop[data-power="on"] .cq-wire rect{fill:rgba(102,205,114,.24)}
+
+/* ── КОМПЛЕКТЫ ──
+   Невидимые гасим display:none, а не прозрачностью: при
+   opacity:0 браузер всё равно держит растр. Нужный включается
+   на кадр раньше, поэтому кроссфейд остаётся плавным. */
+.cq-set{opacity:0;transition:opacity .42s ease}
+.cq-set[hidden]{display:none}
+.cq-set.on{opacity:1}
+
+/* ── ХОД КОННЕКТОРА ──
+   Двигается группа внутри svg, а не обёртка снаружи. Слоем было
+   бы дешевле, но маска обрезает пины по круглым входам гнезда и
+   обязана стоять на месте: уехав с коннектором, она срезала бы
+   пины и в отведённом положении. Корректность дороже такта.
+   Один длинный переход без покачиваний: разъём вставляют ровно,
+   дрожь на подлёте читалась бы неисправностью. */
+.cq-cn{transition:transform 1.05s cubic-bezier(.4,.5,.15,1)}
+.cq-cn.move{will-change:transform}
+
+@media (prefers-reduced-motion:reduce){
+  .cq-cn,.cq-set{transition:none}
+  .cq-wire::after{animation:none;opacity:0}
+}
+
+/* ── правки сцены под попап ── */
+.pop .power{min-height:128px;cursor:pointer;flex-shrink:0}
+.pop .power:active{transform:translateY(1px)}
+.pop.theming *,.pop.theming *::before,.pop.theming *::after{transition:none !important}
+
+/* большая иконка питания и подпись Вкл/Выкл — по левому краю */
+/* ════════ ПЛАШКА ИКОНКИ ════════
+   То же решение, что и на странице. Иконка висела прямо на
+   сцене коннектора и в светлых состояниях терялась в свечении;
+   на подложке она читается отдельной деталью.
+   Радиус считается от родителя — внутренний угол равен внешнему
+   минус половина отступа, иначе плашка выглядит вставленной из
+   другого набора. Отступы по бокам равны: слева до кромки
+   кнопки столько же, сколько сверху.
+   Размеры взяты от высоты блока: он тут низкий (128px), и доли
+   со страницы дали бы плашку в 31px — мельче нынешней голой
+   иконки. */
+.power{--cn-ic-inset:10px;--cn-ic-size:64px}
+.cn-big{
+  position:absolute;top:var(--cn-ic-inset);left:var(--cn-ic-inset);z-index:2;
+  width:var(--cn-ic-size);height:var(--cn-ic-size);
+  display:grid;place-items:center;pointer-events:none;
+  border-radius:calc(var(--r-block) - var(--cn-ic-inset) / 2);
+  /* Фон кнопки — колодец, самый тёмный слой блока. Плашка на нём
+     светлее, а не в тон; кромка на ступень ярче обычной линии.
+     Заливка непрозрачная, хотя цвет остаётся полупрозрачным:
+     он лежит слоем поверх того же колодца. Так плашка выглядит
+     ровно как раньше, но сквозь неё не просвечивает сцена — в
+     попапе блок низкий, провод коннектора идёт по середине и
+     проходил ровно за плашкой. */
+  background:linear-gradient(var(--plate-tint),var(--plate-tint)), var(--well);
+  border:1px solid var(--line-2);
+  --plate-tint:var(--hov-2);
+  transition:background .35s,border-color .35s,box-shadow .35s;
+}
+.pw-i{display:block;width:34px;height:34px;overflow:visible}
+.pw-i .icgl{stroke-width:1.45}
+
+/* Состояния плашки. Цвет берут те же переменные, что и весь
+   блок, — отдельной палитры у неё нет. */
+/* Состояния меняют только оттенок слоя — непрозрачность плашки
+   держится подложкой и от состояния не зависит. */
+.pop[data-power="busy"] .cn-big{--plate-tint:var(--warn-tint);border-color:rgba(216,164,74,.3)}
+.pop[data-power="on"]   .cn-big{--plate-tint:var(--acc-tint);border-color:var(--acc-edge);box-shadow:0 0 22px -8px rgba(72,180,87,.6)}
+.pop[data-power="err"]  .cn-big{--plate-tint:var(--bad-tint);border-color:rgba(229,107,89,.3)}
+.power:hover .cn-big{border-color:var(--line-2)}
+.cn-w{
+  /* Подпись встаёт под плашку и равняется по её левой кромке.
+     Кегль с 33px до 20: прежний был вровень с иконкой и вдвоём
+     они забирали всю левую половину кнопки, оставляя коннектору
+     обрезок. Теперь это подпись при значке, а не второй
+     заголовок. */
+  position:absolute;left:var(--cn-ic-inset);bottom:12px;z-index:2;pointer-events:none;
+  font-family:var(--ui);font-size:20px;line-height:1;font-weight:600;
+  letter-spacing:-.01em;color:var(--pwc);transition:color .3s;
+}
+
+/* кнопка настроек: filled tonal v187 (acc-list .btn-ft); 7Л (компоновка В2,
+   правка человека 20.09) — отдельной строкой под строкой «Списки», во всю
+   ширину, 40px — в ритм плашки адреса и селектора (было 46px рядом с селектором) */
+.btn-set{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  flex:0 0 auto;width:100%;box-sizing:border-box;height:40px;padding:0 14px;border-radius:var(--r-ctl);   /* В2: контрол 40px — 12 (было 16 при 46px) */
+  background:rgba(255,255,255,.065);
+  font-size:13px;font-weight:600;color:var(--ink);
+  transition:background .15s;
+}
+.btn-set span{position:relative;top:-1px}   /* по замеру чернил подпись у Onest сидит на 1,3px ниже центра кнопки — поднимаем на 1px: 2px глаз читал как «слишком высоко» и иконка казалась кривой (правка человека 20.09, 4, третья итерация) */
+.btn-set:hover{background:rgba(255,255,255,.11)}
+.btn-set:active{transform:translateY(1px)}
+.btn-set svg{color:var(--mut);transition:color .15s}
+.btn-set:hover svg{color:var(--ink)}
+html[data-theme="light"] .pop .btn-set{background:rgba(0,0,0,.06)}
+html[data-theme="light"] .pop .btn-set:hover{background:rgba(0,0,0,.10)}
+
+/* ── светлая тема: наведение на кнопку питания (адресные правила прежней
+   сцены v187 сняты 7К.3 — самой сцены нет с 7К.2) ── */
+html[data-theme="light"] .pop .power:hover{border-color:var(--acc-edge)}
+
+/* 7Л (решение человека 19.09; компоновка В2 — правка человека 20.09):
+   вместо группы «иконка, тип, тумблер» — строка «Списки»: подпись с иконкой
+   блокнота слева (текст, без плашки — чтобы не читалась кнопкой) и селектор
+   режима «Выкл · Чёрный · Белый» во всю оставшуюся ширину, три равные трети,
+   подписи полные. Колодец с тремя кнопками; выбранное «Выкл» — плашкой
+   цвета окна, выбранные чёрный и белый — зеленоватой плашкой с обводкой, как
+   плашка адреса при действующем прокси. Кнопка настроек — строкой ниже */
+.lists{display:flex;align-items:center;gap:10px;flex-shrink:0;padding:0 1px}
+/* подпись — кнопка в раздел списков страницы (правка человека 20.09, 7):
+   на наведении текст и иконка светлеют; иконка 16px, на 1px выше оси
+   текста — оптически так центр (правка 20.09, 2) */
+.ls-lbl{display:flex;align-items:center;gap:6px;flex-shrink:0;font-size:12px;font-weight:600;color:var(--mut);white-space:nowrap;border-radius:6px;transition:color .15s}
+.ls-lbl:hover{color:var(--ink)}
+.ls-i{display:grid;place-items:center;color:var(--mut-2);position:relative;top:-1px;transition:color .15s}
+.ls-lbl:hover .ls-i{color:var(--ink)}
+.ls-i svg{display:block}
+.lseg{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;padding:4px;flex:1 1 auto;min-width:0;   /* отступ колодца 4px — как .seg страницы (правка человека 20.09); промежуток 3px прежний; высота 40px прежняя — плашки 30px */
+  border-radius:var(--r-ctl);background:var(--well);border:1px solid var(--line);   /* В2: колодец 12, плашки внутри — на 3 меньше; обводка --line и плашка «Выкл» — как у .seg страницы (правка человека 20.09: один и тот же селектор на одном фоне) */
+}
+.lseg button{
+  position:relative;height:30px;padding:0 6px 2px;border-radius:var(--r-ctl-in);white-space:nowrap;   /* нижний отступ 2px: по замеру чернил текст Onest сидит на ~0,7px ниже центра кнопки; поднятый на 1px он, как в селекторе страницы, стоит на ~1px выше центра — так глаз читает «по центру» (правка человека 20.09, 3, вторая итерация) */
+  font-size:13px;font-weight:600;color:var(--mut);
+  transition:color .15s,background .15s,box-shadow .15s;
+}
+/* разделитель (правка человека 20.09): чёрточка 14px в промежутке между двумя
+   НЕвыбранными соседями — при «Выкл» между чёрным и белым, при белом между
+   «Выкл» и чёрным, при чёрном её нет; у выбранной плашки своя обводка */
+.lseg button + button::before{content:'';position:absolute;left:-2px;top:50%;width:1px;height:14px;margin-top:-7px;background:var(--line-2);pointer-events:none}
+.lseg button[aria-checked="true"]::before,.lseg button[aria-checked="true"] + button::before{display:none}
+.lseg button:hover{color:var(--ink)}
+.lseg button[aria-checked="true"]{background:var(--srf);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+.lseg button[data-mode="black"][aria-checked="true"],
+.lseg button[data-mode="white"][aria-checked="true"]{color:var(--acc);background:var(--acc-tint);box-shadow:inset 0 0 0 1px var(--acc-edge)}
+html[data-theme="light"] .pop .lseg button[data-mode="black"][aria-checked="true"],
+html[data-theme="light"] .pop .lseg button[data-mode="white"][aria-checked="true"]{background:var(--acc-tint)}
+.sw:disabled{cursor:default}
+.sw{
+  position:relative;width:42px;height:24px;flex-shrink:0;
+  border-radius:999px;background:var(--well);border:1px solid var(--line-2);
+  transition:background .3s var(--e),border-color .2s,transform .12s;
+}
+.sw:hover{border-color:rgba(255,255,255,.26)}
+html[data-theme="light"] .pop .sw:hover{border-color:rgba(0,0,0,.3)}
+.sw:active{transform:scale(.96)}
+.sw::after{
+  content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;
+  border-radius:999px;background:var(--dim);
+  box-shadow:0 1px 3px rgba(0,0,0,.45);
+  transition:left .3s cubic-bezier(.34,1.4,.64,1),width .2s var(--e),background .3s;
+}
+.sw:active::after{width:23px}
+.sw[aria-checked="true"]{background:var(--acc);border-color:transparent}
+.sw[aria-checked="true"]::after{left:20px;background:#EEEEEE}
+.sw[aria-checked="true"]:active::after{left:15px}
+
+/* ── панель уведомлений: выезжает поверх всего окна ── */
+.notif{
+  position:absolute;inset:0;z-index:60;
+  background:var(--bg);
+  display:flex;flex-direction:column;
+  transform:translateY(-104%);visibility:hidden;
+  transition:transform .32s var(--e),visibility 0s .32s;
+}
+html[data-theme="light"] .pop .notif{
+  background-color:var(--bg);
+  background-image:radial-gradient(120% 74% at 0% -10%, rgba(42,128,56,.13), rgba(42,128,56,0) 92%);
+}
+.notif.open{transform:translateY(0);visibility:visible;transition:transform .32s var(--e)}
+.nhd{
+  display:flex;align-items:stretch;justify-content:space-between;gap:8px;
+  margin:14px 14px 12px;flex-shrink:0;
+}
+.nback{
+  display:flex;align-items:center;gap:9px;
+  padding:0 15px 0 12px;height:40px;
+  background:var(--srf-low);border:1px solid var(--line-2);border-radius:var(--r-ctl);   /* В2: контрол 40px — 12 */
+  font-size:13.5px;font-weight:600;color:var(--mut);
+  transition:color .15s,border-color .15s,background .15s;
+}
+.nback:hover{color:var(--ink);background:var(--hov)}
+.nback svg{flex-shrink:0}
+.nclear{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:0 13px;height:40px;border-radius:var(--r-ctl);   /* В2 */
+  background:rgba(255,255,255,.05);
+  font-size:13px;font-weight:600;color:var(--mut);
+  transition:background .15s,color .15s;
+}
+.nclear:hover{background:rgba(255,255,255,.09);color:var(--ink)}
+.nclear:disabled{opacity:.35;pointer-events:none}   /* 7И (правка человека 24.09): в панели одни sticky-баннеры — закрывать нечего, как у .hbt */
+.nclear svg{flex-shrink:0}
+html[data-theme="light"] .pop .nclear{background:rgba(0,0,0,.05)}
+html[data-theme="light"] .pop .nclear:hover{background:rgba(0,0,0,.09)}
+.nlist{
+  flex:1;overflow:auto;overscroll-behavior:contain;
+  display:flex;flex-direction:column;gap:9px;
+  padding:2px 14px 16px;
+}
+.nlist::-webkit-scrollbar{width:8px}
+.nlist::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:4px}
+/* ── карточки панели: три тона по шаблонам человека 22.09 (макет «Шаблоны
+   карточек»). Строй один: значок 30 (--dip, радиус 8) · заголовок 13/600 ·
+   крестик 22 (значок 14) · подпись 12 · ряд кнопок 30. Нейтральная — фон
+   --srf-low с рамкой --line (чёрного --well больше нет); жёлтая — --warn-tint-2
+   и --warn-edge; красная — --bad-tint-2 и --bad-edge. Цвета только из
+   tokens.css, светлая тема — теми же токенами ── */
+.ncard{
+  background:var(--srf-low);box-shadow:inset 0 0 0 1px var(--line);border-radius:14px;padding:11px 12px 12px;
+  display:grid;grid-template-columns:auto 1fr auto;gap:4px 10px;
+}
+.ncard.warn{background:var(--warn-tint-2);box-shadow:inset 0 0 0 1px var(--warn-edge)}
+.ncard.bad{background:var(--bad-tint-2);box-shadow:inset 0 0 0 1px var(--bad-edge)}
+/* Закрыть по одному. Раньше был только «Закрыть всё» — оно
+   гасило и предупреждения о сроках, поэтому крестик у каждой
+   карточки появился вместе с раздельным закрытием. У сроков он
+   откладывает показ на сутки, а не убирает навсегда: прокси от
+   закрытия уведомления не продлится. Наведение — по тону карточки:
+   у нейтральной и красной крестик и плашка красные, у жёлтой — жёлтые
+   (макет 22.09) */
+.nx{
+  grid-column:3;grid-row:1;align-self:start;
+  width:22px;height:22px;margin:-3px -3px 0 0;border-radius:7px;   /* В2: крошечные — 7 */
+  display:grid;place-items:center;color:var(--mut-2);
+  transition:background .13s,color .13s;
+}
+.nx svg{width:14px;height:14px}
+.nx:hover{background:var(--bad-tint-2);color:var(--bad)}
+.ncard.warn .nx:hover{background:var(--warn-tint-2);color:var(--warn)}
+.ncard.bad .nx:hover{background:var(--bad-tint-2);color:var(--bad)}
+.n-i{
+  grid-row:1 / span 2;width:30px;height:30px;border-radius:var(--r-chip);margin-top:1px;   /* В2: малые 28–30px — 8 */
+  display:grid;place-items:center;color:var(--mut);
+  background:var(--dip);
+}
+/* 7И (правка человека 23.09): на цветных карточках плашка значка — по токенам
+   --warn-plate / --bad-plate (tokens.css): в тёмной теме это прежний --dip
+   (плашка темнее фона), в светлой — светлее фона карточки и с оттенком тона
+   (оранжеватый / розоватый), иначе на жёлтой карточке плашка не читалась;
+   цвет самого значка — прежний. Правила ложатся и на таблицы сроков
+   (.ncard.lvl.warn/.bad), и на баннеры по уровню */
+.ncard.warn .n-i{color:var(--warn);background:var(--warn-plate)}
+.ncard.bad .n-i{color:var(--bad);background:var(--bad-plate)}
+.n-t{font-size:13px;font-weight:600;line-height:1.35;align-self:center}
+.n-s{grid-column:2;font-size:12px;color:var(--mut);line-height:1.5}
+/* 7З (правка человека 22.09): «ближайший N дня» в шапке «Истекают» — сам срок цвета своей срочности */
+.n-near{font-weight:600}
+.n-near.bad{color:var(--bad)}
+.n-near.warn{color:var(--warn)}
+.n-a{grid-column:2;margin-top:7px;justify-self:start}
+.nact{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  height:30px;padding:0 11px 1px;border-radius:var(--r-ctl-in);   /* В2; 1px снизу — подъём текста Onest по замеру чернил, как у кнопок попапа (макет 22.09) */
+  font-size:12px;font-weight:600;line-height:1;
+  border:1px solid var(--line-2);color:var(--ink);
+  transition:background .15s,border-color .15s;
+}
+.nact:hover{background:var(--hov);border-color:rgba(255,255,255,.26)}
+html[data-theme="light"] .pop .nact:hover{border-color:rgba(0,0,0,.3)}
+/* второстепенная кнопка в цветной карточке — обводка и текст цвета тона */
+.ncard.warn .nact{border-color:var(--warn-edge);color:var(--warn)}
+.ncard.warn .nact:hover{background:var(--warn-tint-2)}
+.ncard.bad .nact{border-color:var(--bad-edge);color:var(--bad)}
+.ncard.bad .nact:hover{background:var(--bad-tint-2)}
+
+/* ── 7З · таблицы сроков «Истекли» / «Истекают» (макет человека 22.09,
+   правки по живому попапу 22.09) ──
+   Шапка — кнопка (.n-lv): значок, заголовок цвета тона и рядом серый счёт
+   «N заказов · M прокси» одной строкой (при нехватке места — многоточие, в
+   крестик не упирается: правый край строки на 41px левее края карточки, а
+   крестик занимает 9…31), под ней у «Истекают» — ближайший срок; стрелка в
+   правом нижнем углу, по одной вертикали с крестиком (правый отступ 9px у
+   обоих); крестик — отдельно, поверх угла, его наведение стрелку не трогает.
+   Плашки у стрелок в покое нет нигде — только при наведении (правка 3).
+   Изначально свёрнута; раскрытая — строки .n-row: сверху плашка «№заказа»,
+   флаг и срок справа, ниже адреса плашками во всю ширину (.n-ipb) со стрелкой
+   в конце — к строке прокси на странице; адрес только из аккаунта — подпись
+   «не добавлен» и стрелка на экран выбора; внизу «Продлить в кабинете» */
+.ncard.lvl{padding:0;grid-template-columns:minmax(0,1fr);gap:0;position:relative}
+.ncard.lvl .n-lv{
+  display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 10px;align-items:center;
+  padding:11px 9px 12px 12px;border-radius:14px;text-align:left;
+  transition:background .15s;
+}
+.ncard.lvl.open .n-lv{border-radius:14px 14px 0 0}
+.ncard.lvl .n-lv:hover{background:var(--hov)}
+.ncard.lvl .n-lv .n-i{grid-row:1 / span 2}
+.ncard.lvl .n-t{display:flex;align-items:baseline;gap:6px;min-width:0;color:var(--ink)}
+.ncard.lvl.bad .n-t{color:var(--bad)}
+.ncard.lvl.warn .n-t{color:var(--warn)}
+.n-c{font-size:12px;font-weight:400;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.n-c::before{content:'· ';color:var(--mut-2)}
+.ncard.lvl .nx{position:absolute;right:9px;top:8px;margin:0}   /* поверх правого верхнего угла шапки; ниже, той же вертикалью, — стрелка */
+.n-x{
+  width:22px;height:22px;border-radius:7px;
+  display:grid;place-items:center;color:var(--mut-2);
+  transition:background .13s,color .13s;
+}
+.ncard.lvl .n-lv .n-x{grid-column:3;grid-row:2;align-self:end;justify-self:end;margin-bottom:-2px}
+.n-x svg{transition:transform .15s}
+.n-lv[aria-expanded="true"] .n-x svg{transform:rotate(180deg)}
+.ncard.lvl .n-lv:hover .n-x{background:var(--hov-2);color:var(--ink)}
+.n-tbl{grid-column:1 / -1;display:flex;flex-direction:column;padding:0 12px 6px}
+.n-row{display:flex;flex-direction:column;gap:8px;padding:10px 0 12px;border-top:1px solid var(--line)}
+.n-rh{display:flex;align-items:center;gap:8px;width:100%;min-height:22px;text-align:left}
+/* шапка заказа из нескольких адресов — кнопка: счёт «N прокси», стрелка без
+   плашки в покое, при наведении — плашка у стрелки и подсветка шапки */
+button.n-rh{margin:-4px -6px;padding:4px 6px;border-radius:9px;width:calc(100% + 12px);transition:background .12s}
+button.n-rh:hover{background:var(--hov)}
+button.n-rh:hover .n-x{background:var(--hov-2);color:var(--ink)}
+button.n-rh[aria-expanded="true"] .n-x svg{transform:rotate(180deg)}
+.n-cnt{font-size:12px;color:var(--mut-2);white-space:nowrap}
+.n-ord{
+  display:inline-flex;align-items:center;height:22px;padding:0 7px;border-radius:7px;
+  background:var(--hov);box-shadow:inset 0 0 0 1px var(--line);
+  font-family:var(--mono);font-size:12px;font-weight:500;white-space:nowrap;
+}
+.n-rh .fl{flex-shrink:0;border-radius:2.5px;outline:1px solid rgba(255,255,255,.16);outline-offset:-.5px}
+html[data-theme="light"] .pop .n-rh .fl{outline-color:rgba(0,0,0,.15)}
+.n-when{margin-left:auto;font-size:12px;font-weight:600;white-space:nowrap}
+.n-rh .n-x{margin-right:-3px}
+.n-when.bad{color:var(--bad)}
+.n-when.warn{color:var(--warn)}
+.n-ips{display:flex;flex-direction:column;gap:6px}
+.n-ipb{
+  display:flex;align-items:center;gap:10px;width:100%;height:32px;padding:0 10px 0 11px;border-radius:9px;
+  background:var(--dip);box-shadow:inset 0 0 0 1px var(--line);text-align:left;
+  transition:background .13s,box-shadow .13s;
+}
+.n-ipb:hover{background:var(--hov);box-shadow:inset 0 0 0 1px var(--line-2)}
+.n-ipb .n-ip{flex:1;min-width:0}
+.n-ip{font-family:var(--mono);font-size:12.5px;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.n-ipb i{font-style:normal;font-size:11.5px;color:var(--mut-2);white-space:nowrap}
+.n-ipb svg{flex-shrink:0;color:var(--mut-2);transition:color .13s}
+.n-ipb:hover svg{color:var(--ink)}
+.n-cta{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  margin:6px 0 2px;height:36px;padding:0 12px 1px;border-radius:10px;
+  background:var(--acc);color:var(--on-acc);font-size:12.5px;font-weight:600;line-height:1;
+  transition:background .15s;
+}
+.n-cta:hover{background:var(--acc-hi)}
+.n-empty{
+  margin:auto;text-align:center;color:var(--mut-2);font-size:12.5px;line-height:1.7;
+  display:grid;justify-items:center;gap:8px;padding:10px 0 16px;
+}
+.n-empty svg{color:var(--dim)}
+
+/* ── 7Л (шаг 2, п. 3; вид — правка человека 20.09) · плашка выбора списка ──
+   Колодец того же тона, что селектор и поле прокси (--well, обводка --line-2),
+   встаёт ровно на место строк «Списки» и «Настройки» (top ставит openPick,
+   низ — поле окна), поверх панели (z выше .notif); остриё — к тумблеру строки,
+   из которого плашка вызвана. Вопрос и крестик в строке заголовка, ниже две
+   кнопки: «Чёрный» — заливка акцентом (как .n-cta), «Белый» — обводка
+   (язык .nact). Фокус при открытии — на самой плашке (tabindex=-1): двойной
+   обводки у кнопки нет, Tab ведёт по кнопкам. Не предупреждение — без красного */
+.pick{
+  position:absolute;left:14px;right:14px;bottom:14px;z-index:70;
+  display:flex;flex-direction:column;justify-content:center;gap:9px;padding:10px 12px 12px;
+  border-radius:14px;background:var(--well);border:1px solid var(--line-2);   /* В2: карточка поверх — 14, как меню */
+  box-shadow:0 14px 34px -14px rgba(0,0,0,.7);
+  animation:pickIn .2s var(--e);outline:none;
+}
+.pick[hidden]{display:none}
+.pick::before{
+  content:'';position:absolute;top:-6px;right:16px;width:10px;height:10px;transform:rotate(45deg);
+  background:var(--well);border-left:1px solid var(--line-2);border-top:1px solid var(--line-2);
+}
+@keyframes pickIn{from{opacity:0;transform:translateY(6px)}}
+html[data-theme="light"] .pop .pick{box-shadow:0 14px 34px -14px rgba(30,42,33,.3)}
+.pick-hd{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.pick-t{font-size:12.5px;font-weight:600;color:var(--ink);line-height:1.35}
+.pick-x{
+  width:24px;height:24px;flex-shrink:0;display:grid;place-items:center;border-radius:7px;   /* В2 */
+  color:var(--mut);transition:color .15s,background .15s;
+}
+.pick-x svg{display:block}
+.pick-x:hover{color:var(--ink);background:var(--hov-2)}
+.pick-b{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pick-btn{
+  height:34px;padding:0 12px 2px;border-radius:10px;font-size:12.5px;font-weight:600;   /* нижний отступ 2px — тот же подъём текста на 1px, что у селектора (замер чернил, правка 20.09, 3); В2: малые 34–38px — 10 */
+  color:var(--ink);border:1px solid var(--line-2);
+  transition:background .15s,border-color .15s,color .15s;
+}
+.pick-btn:hover{background:var(--hov);border-color:rgba(255,255,255,.26)}
+html[data-theme="light"] .pop .pick-btn:hover{border-color:rgba(0,0,0,.3)}
+.pick-btn.acc{background:var(--acc);border-color:transparent;color:var(--on-acc)}
+.pick-btn.acc:hover{background:var(--acc-hi)}
+
+/* ── тост ── */
+.toast{
+  position:absolute;left:50%;top:10px;transform:translate(-50%,-14px);   /* 7Л (правка человека 20.09): наверху окна, не над кнопками низа */
+  z-index:80;opacity:0;pointer-events:none;
+  background:var(--ovl);border:1px solid var(--line-2);border-radius:14px;   /* В2: карточка поверх — 14 */
+  padding:8px 13px;font-size:12px;font-weight:500;color:var(--ink);
+  white-space:nowrap;max-width:calc(100% - 24px);overflow:hidden;text-overflow:ellipsis;
+  box-shadow:0 14px 34px -12px rgba(0,0,0,.7);
+  transition:opacity .2s,transform .25s var(--e);
+}
+html[data-theme="light"] .pop .toast{box-shadow:0 14px 34px -12px rgba(30,42,33,.3)}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.toast.err{border-color:var(--bad-edge)}
+
+/* ═══════════════════════════════════════════════════════════
+   ВАРИАНТ 2 — палитра мейн-блока «Прокси» (герой v187):
+   окно = приподнятая панель srf, контролы = колодцы well,
+   кнопка настроек = язык btn-check (обводка на панели),
+   сверху — свечение страницы; светлая = белая карточка.
+   ═══════════════════════════════════════════════════════════ */
+.pop{background:var(--srf)}
+html[data-theme="light"] .pop{background:#FFFFFF;background-image:none}
+/* селектор — колодец, как поля героя */
+.psel{background:var(--well)}
+.psel:hover{background:var(--well);border-color:rgba(255,255,255,.3)}
+html[data-theme="light"] .pop .psel,
+html[data-theme="light"] .pop .psel:hover{background:var(--well)}
+/* кнопка настроек — язык btn-check героя: обводка, без заливки */
+.btn-set{background:transparent;border:1px solid var(--line-2)}
+.btn-set:hover{background:var(--hov);border-color:rgba(255,255,255,.24)}
+html[data-theme="light"] .pop .btn-set{background:transparent}
+html[data-theme="light"] .pop .btn-set:hover{background:var(--hov);border-color:rgba(0,0,0,.3)}
+/* панель уведомлений в тон окна, карточки — веллы */
+.notif{background:var(--srf)}
+html[data-theme="light"] .pop .notif{background:#FFFFFF;background-image:none}
+.nback,.nclear{background:var(--well)}
+.nclear:hover{background:var(--well);color:var(--ink)}
+.nback:hover{background:var(--well)}
+/* 7З (макет 22.09): чёрной карточки на --well больше нет — нейтральная карточка --srf-low с рамкой --line, тона — в блоке карточек выше */
+
+/* ═══════════════════════════════════════════════════════════
+   3Б.2 — ПРАВКИ ПРИ ПРОВЕРКЕ 07.09: решения человека на живом попапе.
+   Прототип Попап_v13 их ещё не содержит — внести при следующей правке
+   прототипа, иначе прототип и код разойдутся.
+   ═══════════════════════════════════════════════════════════ */
+/* Окно попапа Chrome режет прямоугольно; его углы и рамку расширение не
+   контролирует. Скруглённые углы .pop на прямоугольном окне были видны
+   только как уголки другого цвета внизу: туда ложилась тень карточки
+   (0 30px 80px -30px — смещена вниз, сверху её нет). Внутри окна тени
+   быть негде. Окно = карточка: без скругления и без тени; панель списка
+   на всё окно повторяет углы окна. */
+.pop{border-radius:0;box-shadow:none}
+.pmenu.full{border-radius:0}
+/* Шапка — логотип, колокольчик, тема — на 8px дальше от краёв окна */
+.phd{padding:0 8px}
+
+/* ═══════════════════════════════════════════════════════════
+   7Ж — ПРОКСИ ДЛЯ САЙТА ОТКРЫТОЙ ВКЛАДКИ (шаг 2′, макет v27, 18.09).
+   Против шага 2: в подписи — счёт загрузки #stLoad (жёлтый текст при
+   сбоях, фон плашки не меняется — правка 1); состояние коротко #stStateT
+   + значок ⓘ #stI с причиной; на плашке адреса #stWarn — значок «!» при
+   сбоях (правка 1). Панель — дерево: корень, разделы «Поддомены» и
+   «Сторонние адреса» плашками-заголовками (правка 4), при открытии
+   свёрнуты; строка со сбоем — фон желтее без цветной кромки (правка 2);
+   у свёрнутого раздела со сбоем — значок «!» (правка 3). Светлая тема —
+   селектор html[data-theme="light"] .pop (тема на <html>, 3Б.2). Длинный
+   адрес в панели переносится (сценарий 2). Тумблер один — .sw.
+
+   ── СТРОКА (над строкой «Списки») ── две линии, высота одинакова во всех
+   состояниях (окно после открытия не ресайзится):
+     Прокси для: [6 из 7 адресов] ······· состояние ⓘ
+     [ ◉ joyreactor.cc ····· ! › ]  ◯━●
+   ═══════════════════════════════════════════════════════════ */
+.site{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto 40px;
+  column-gap:8px;row-gap:6px;align-items:center;flex-shrink:0;padding:0 1px;
+}
+.site[hidden]{display:none}
+.st-lbl{
+  grid-column:1;grid-row:1;justify-self:start;display:flex;align-items:center;gap:6px;min-width:0;max-width:100%;overflow:hidden;
+  font-size:11px;font-weight:500;color:var(--mut-2);line-height:1.2;white-space:nowrap;
+}
+/* счёт загрузки — ярлык рядом с подписью; при сбоях жёлтый ТОЛЬКО текст,
+   фон и обводка плашки не меняются (правка 1); подсказка (data-tip) — кто и что */
+.st-load{
+  display:inline-block;height:16px;line-height:16px;padding:0 6px;border-radius:6px;min-width:0;overflow:hidden;text-overflow:ellipsis;
+  background:var(--dip);color:var(--mut);font-size:10px;font-weight:600;white-space:nowrap;cursor:help;
+}
+.st-load:empty{display:none}
+.st-load.warn{color:var(--warn)}
+/* состояние — коротко, справа; ⓘ — подсказка с причиной */
+.st-state{
+  grid-column:1 / span 2;grid-row:1;justify-self:end;display:flex;align-items:center;gap:5px;
+  white-space:nowrap;font-size:11px;font-weight:500;color:var(--mut);line-height:1.2;
+}
+.st-state.on{color:var(--acc)}
+.st-i{
+  width:15px;height:15px;border-radius:50%;display:grid;place-items:center;flex-shrink:0;
+  color:var(--mut-2);cursor:help;transition:color .15s,background .15s;
+}
+.st-i svg{display:block}
+.st-i[hidden]{display:none}
+/* подсказки строки и дерева перечисляют адреса построчно — пузырь .tip
+   уважает переводы строк (у остальных подсказок их нет) */
+.tip{white-space:pre-line}
+/* ⓘ в строке стороннего адреса — та же подсказка, что подпись раздела */
+.sp-kline .sp-i{width:14px;height:14px}
+.sp-kline .sp-i svg{width:12px;height:12px}
+.st-i:hover,.st-i:focus-visible{color:var(--ink);background:var(--hov)}
+
+/* плашка адреса */
+.st-addr{
+  grid-column:1;grid-row:2;display:flex;align-items:center;gap:8px;min-width:0;height:40px;
+  padding:0 9px 0 11px;border-radius:var(--r-ctl);   /* В2: контрол 40px — 12 */
+  background:var(--dip);color:var(--ink);text-align:left;transition:color .15s,background .15s;
+}
+.st-addr:hover{color:var(--acc-hi)}
+/* прокси действует на сайт — плашка зеленоватая, не только адрес (правка человека 18.09) */
+.site[data-on="true"] .st-addr{color:var(--acc);background:var(--acc-tint);box-shadow:inset 0 0 0 1px var(--acc-edge)}
+.site[data-on="true"] .st-addr:hover{color:var(--acc-hi)}
+html[data-theme="light"] .pop .st-addr:hover,
+html[data-theme="light"] .pop .site[data-on="true"] .st-addr:hover{color:#1E672B}
+/* значок сайта: фавикон или глобус; слот 16px занят всегда */
+.st-ico,.sp-ico{width:16px;height:16px;flex-shrink:0;display:grid;place-items:center;color:var(--mut)}
+.st-ico img,.sp-ico img{display:block;width:16px;height:16px;border-radius:3px}
+.st-ico svg,.sp-ico svg{display:block}
+.st-host{
+  font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:-.01em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+/* 7Л: жёлтой подсветки запертого тумблера (сценарий 10 — единственный сайт
+   белого списка) больше нет — сценарий снят вместе с моделью списков;
+   запертый при «Выкл» тумблер — обычный, причина в ⓘ */
+/* в плашке поддомен: своя часть обычным цветом, хвост «.сайт» приглушён — как в дереве панели */
+.st-host b{font-weight:500}
+.st-host s{text-decoration:none;color:var(--mut-2)}
+/* значок «!» на плашке при сбоях загрузки (правка 1): маленькая жёлтая
+   плашка с треугольником, подсказка та же, что у счёта; тот же значок —
+   у свёрнутого раздела дерева со сбоем (.sp-secw, правка 3) */
+.st-warn,.sp-secw{
+  width:20px;height:16px;flex-shrink:0;display:grid;place-items:center;border-radius:5px;
+  color:var(--warn);background:var(--warn-tint-2);border:1px solid var(--warn-edge);cursor:help;
+}
+.st-warn[hidden]{display:none}
+.st-warn svg,.sp-secw svg{display:block}
+.st-ch{margin-left:auto;flex-shrink:0;color:var(--mut-2);transition:color .15s,transform .15s}
+.st-warn + .st-ch{margin-left:2px}
+.st-addr:hover .st-ch{color:var(--ink);transform:translateX(1px)}
+.st-el{grid-column:2;grid-row:2;justify-self:end;display:flex;align-items:center;height:40px}
+
+/* приглушённые состояния */
+.site[data-dim="nosite"] .st-lbl,.site[data-dim="power"] .st-lbl{color:var(--mut-2)}
+.site[data-dim="nosite"] .st-addr,.site[data-dim="power"] .st-addr,
+.site[data-dim="nosite"] .st-addr:hover,.site[data-dim="power"] .st-addr:hover{color:var(--mut);cursor:default}
+.site[data-dim="nosite"] .st-ico,.site[data-dim="power"] .st-ico{opacity:.6}
+.site[data-dim="nosite"] .st-host{font-family:var(--ui);font-size:13px;font-weight:500}
+.site[data-dim="nosite"] .st-ch{visibility:hidden}
+.site[data-dim="power"] .st-ch{color:var(--mut-2)}
+.site[data-dim="power"]{cursor:pointer}
+.site[data-dim="power"] > *{pointer-events:none}
+.site[data-dim="power"] .st-state{color:var(--mut-2)}
+/* локальная сеть — плашка не нажимается, стрелки нет, цвет адреса не меняется */
+.site[data-dim="local"] .st-addr,.site[data-dim="local"] .st-addr:hover{color:var(--ink);cursor:default}
+.site[data-dim="local"] .st-ch{visibility:hidden}
+.site .sw:disabled,.sp-list .sw:disabled{opacity:.45;pointer-events:none;transition:opacity .15s,border-color .15s}   /* 7Л (правка 20.09): и ветки панели — они вне .sp-site; щелчок по запертому тумблеру уходит обёртке (.st-el / .sp-el) — браузер по disabled-кнопке событий не шлёт, а обёртка при «Выкл» открывает плашку выбора */
+/* 7Л (правка человека 20.09, 1): запертый при «Выкл» тумблер живой — у обёртки
+   курсор-рука и подсказка (data-tip lockTip, ставит JS вместе с классом lock),
+   на наведении тумблер светлеет: иначе не понять, что по нему можно нажать */
+.st-el.lock,.sp-el.lock{cursor:pointer}
+.st-el.lock:hover .sw,.sp-el.lock:hover .sw{opacity:.75;border-color:rgba(255,255,255,.3)}
+html[data-theme="light"] .pop .st-el.lock:hover .sw,html[data-theme="light"] .pop .sp-el.lock:hover .sw{border-color:rgba(0,0,0,.35)}
+
+/* ── панель сайта ── */
+.spanel .nhd{align-items:center}
+.sp-title{font-size:13px;font-weight:600;color:var(--mut);padding-right:2px}
+.sp-body{
+  flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;
+  display:flex;flex-direction:column;gap:9px;padding:2px 14px 14px;
+}
+.sp-body::-webkit-scrollbar{width:8px}
+.sp-body::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:4px}
+.sp-list{display:flex;flex-direction:column;gap:2px}
+/* корень */
+.sp-site{background:var(--well);border-radius:14px;padding:12px 12px 10px}
+.sp-root{display:grid;grid-template-columns:auto minmax(0,1fr) auto;column-gap:10px;align-items:center}
+.sp-ico{grid-column:1;grid-row:1;align-self:center}
+/* длинный адрес переносится на вторую строку, не режется (сценарий 2) */
+.sp-host{
+  grid-column:2;grid-row:1;font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:-.01em;line-height:1.3;
+  overflow-wrap:anywhere;
+}
+.sp-root.on .sp-host{color:var(--acc)}
+.sp-st{grid-column:2;grid-row:2;margin-top:5px;font-size:12.5px;font-weight:500;line-height:1.35;color:var(--ink)}
+.sp-root.on .sp-st{color:var(--acc)}
+.sp-why{grid-column:2;grid-row:3;margin-top:3px;font-size:11px;line-height:1.35;color:var(--mut-2)}
+.sp-why:empty{display:none}
+.sp-root.covered .sp-ico{opacity:.6}
+.sp-root.covered .sp-host{color:var(--mut)}
+.sp-root.covered .sp-st{color:var(--mut);font-weight:400}
+.sp-el{grid-column:3;grid-row:1 / span 3;display:flex;align-items:center;justify-self:end}
+.sp-rootload{margin:8px 0 0;display:flex;flex-wrap:wrap;gap:6px}
+.sp-rootload:empty{display:none}
+/* заголовок раздела — плашка-кнопка: шеврон, имя, значок «!», счётчики (правка 4) */
+.sp-sec{
+  margin:7px 0 0;padding:7px 9px;border-radius:var(--r-ctl-in);width:100%;background:var(--srf-low);   /* В2 */
+  display:flex;align-items:center;gap:7px;text-align:left;
+  font-size:11px;font-weight:600;color:var(--mut);letter-spacing:.01em;white-space:nowrap;
+  transition:background .15s,color .15s;
+}
+.sp-sec:hover{background:var(--hov-2)}
+.sp-sec-t{flex-shrink:0}
+.sp-sec i{font-style:normal;font-weight:500;color:var(--mut-2);margin-left:auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.sp-sec-ch{width:14px;height:14px;display:grid;place-items:center;flex-shrink:0;color:var(--mut-2);transition:transform .2s}
+.sp-sec-ch svg{display:block}
+.sp-sec[aria-expanded="false"] .sp-sec-ch{transform:rotate(-90deg)}
+/* строки дерева: плашки светлее колодца, на 4px шире контента */
+.sp-kids{margin:6px 0 0;display:flex;flex-direction:column;gap:6px}
+.sp-kid{
+  margin:0 -4px;padding:7px 4px 7px 10px;border-radius:10px;background:var(--srf-low);
+  display:grid;grid-template-columns:auto minmax(0,1fr) auto;column-gap:8px;align-items:center;
+}
+/* строка со сбоем: фон желтее, цветной кромки НЕТ (правка 2) */
+.sp-kid.bad{background:var(--warn-tint)}
+.sp-kico{grid-column:1;grid-row:1;width:14px;height:14px;color:var(--mut-2);display:grid;place-items:center}
+.sp-kico svg{display:block;width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.sp-khost{
+  grid-column:2;grid-row:1;font-family:var(--mono);font-size:13px;font-weight:500;letter-spacing:-.01em;line-height:1.3;
+  overflow-wrap:anywhere;color:var(--ink);
+}
+.sp-khost b{font-weight:500}
+.sp-khost s{text-decoration:none;color:var(--mut-2)}
+.sp-kid.on .sp-khost{color:var(--acc)}
+.sp-kline{grid-column:2;grid-row:2;display:flex;align-items:center;gap:6px;margin-top:3px;min-width:0;flex-wrap:wrap;row-gap:3px}
+.sp-tag{flex-shrink:0;font-size:10.5px;font-weight:600;line-height:1.2;color:var(--mut);padding:2px 6px;border-radius:6px;background:var(--dip)}
+/* 7Л, шаг 3: плашка «N запросов» — кнопка на страницу запросов: на наведении
+   светлеет, курсор-рука; остальные плашки — прежние надписи */
+.sp-rq{cursor:pointer;transition:color .15s,background .15s}
+.sp-rq:hover{color:var(--ink);background:var(--hov-2)}
+.sp-tag.fail{color:var(--warn);background:var(--warn-tint-2);border:1px solid var(--warn-edge);cursor:help;white-space:normal;flex-shrink:1;min-width:0}
+.sp-tag.blk{white-space:normal;flex-shrink:1;min-width:0}   /* серая метка блокировки — длинная, переносится */
+.sp-kst{font-size:12px;font-weight:500;line-height:1.35;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sp-kid.on .sp-kst{color:var(--acc)}
+.sp-kid.covered .sp-khost,.sp-kid.covered .sp-khost s{color:var(--mut-2)}
+.sp-kid.covered .sp-kico{opacity:.6}
+.sp-kid.covered .sp-kst{color:var(--mut);font-weight:400}
+.sp-kid .sp-el{grid-column:3;grid-row:1 / span 2}
+/* хосты стороннего сайта — второй строкой моно, тихо */
+.sp-khosts{grid-column:2;grid-row:3;margin-top:2px;font-family:var(--mono);font-size:10.5px;line-height:1.4;color:var(--mut-2);overflow-wrap:anywhere}
+.sp-kid.ext .sp-el{grid-row:1 / span 3}
+/* подпись раздела «Сторонние адреса» и строки «счёт выключен / данных нет» */
+.sp-note{margin:6px 2px 0;font-size:11px;line-height:1.45;color:var(--mut-2)}   /* под заголовком раздела, перед строками */
+.sp-none{margin:8px 2px 2px;font-size:11.5px;line-height:1.45;color:var(--mut-2)}
+.sp-link{display:inline;padding:0;font:inherit;color:var(--acc);border-bottom:1px dashed var(--acc-edge);cursor:pointer}
+.sp-link:hover{color:var(--acc-hi)}
+/* низ панели */
+.sp-foot{margin-top:auto;display:grid;gap:10px;padding-top:8px}
+.sp-mode{font-size:12px;line-height:1.5;color:var(--mut);padding:0 2px}
+.sp-all{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  height:40px;border-radius:var(--r-ctl);border:1px solid var(--line-2);   /* В2 */
+  font-size:13px;font-weight:600;color:var(--ink);
+  transition:background .15s,border-color .15s;
+}
+.sp-all:hover{background:var(--hov);border-color:rgba(255,255,255,.24)}
+html[data-theme="light"] .pop .sp-all:hover{border-color:rgba(0,0,0,.3)}
+.sp-all svg{color:var(--mut);flex-shrink:0}
+
+/* 7Л (шаг 2): плашки несохранённых изменений панели нет — панель пишет сразу */
+/* счётчики разделов: «через прокси» из всех — первая цифра зелёная, когда не ноль (правка человека 19.09) */
+.sp-sec i b{font-weight:600;color:var(--mut-2)}
+.sp-sec i b.on{color:var(--acc)}
+
+/* ── 2.1 · ТИП ПРОКСИ В ОКНЕ ─────────────────────────────────────────
+   Цвета те же, что на странице: HTTP нейтральный, HTTPS синий, SOCKS5
+   сиреневый, SOCKS4 песочный. В попапе всё мелкое — подписи 9.5–10px. */
+.ps-type{font-family:var(--mono);font-size:9.5px;font-weight:500;letter-spacing:.03em;
+  color:var(--mut-2);border:1px solid var(--line);border-radius:5px;
+  padding:1px 4px;margin-left:5px;flex-shrink:0}
+.ps-type[hidden]{display:none}
+.ps-type[data-pt="HTTPS"]{color:#7FB4E8;border-color:rgba(127,180,232,.3)}
+.ps-type[data-pt="SOCKS5"]{color:#C6A4F2;border-color:rgba(198,164,242,.3)}
+.ps-type[data-pt="SOCKS4"]{color:#E3BE7C;border-color:rgba(227,190,124,.3)}
+html[data-theme="light"] .ps-type[data-pt="HTTPS"]{color:#1E5E9E}
+html[data-theme="light"] .ps-type[data-pt="SOCKS5"]{color:#6136A8}
+html[data-theme="light"] .ps-type[data-pt="SOCKS4"]{color:#8A5A0E}
+
+.pm-type{font-family:var(--mono);font-size:9.5px;font-weight:500;letter-spacing:.02em;
+  color:var(--mut-2);border:1px solid var(--line);border-radius:4px;
+  padding:0 4px;flex-shrink:0;line-height:15px;margin-left:2px}
+.pm-type[data-pt="HTTPS"]{color:#7FB4E8;border-color:rgba(127,180,232,.28)}
+.pm-type[data-pt="SOCKS5"]{color:#C6A4F2;border-color:rgba(198,164,242,.28)}
+.pm-type[data-pt="SOCKS4"]{color:#E3BE7C;border-color:rgba(227,190,124,.28)}
+html[data-theme="light"] .pm-type[data-pt="HTTPS"]{color:#1E5E9E}
+html[data-theme="light"] .pm-type[data-pt="SOCKS5"]{color:#6136A8}
+html[data-theme="light"] .pm-type[data-pt="SOCKS4"]{color:#8A5A0E}
+
+/* строка разбора под полем быстрого добавления */
+.am-prev{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin-top:-2px}
+.am-prev[hidden]{display:none}
+.am-tp{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 6px;
+  border-radius:5px;border:1px solid var(--line);background:var(--well);
+  font-family:var(--mono);font-size:9.5px;font-weight:500;color:var(--mut)}
+.am-tp b{font-weight:500;color:var(--ink)}
+.am-tp[data-pt="HTTPS"]{color:#7FB4E8;border-color:rgba(127,180,232,.3)}
+.am-tp[data-pt="SOCKS5"]{color:#C6A4F2;border-color:rgba(198,164,242,.3)}
+.am-tp[data-pt="SOCKS4"]{color:#E3BE7C;border-color:rgba(227,190,124,.3)}
+html[data-theme="light"] .am-tp[data-pt="HTTPS"]{color:#1E5E9E}
+html[data-theme="light"] .am-tp[data-pt="SOCKS5"]{color:#6136A8}
+html[data-theme="light"] .am-tp[data-pt="SOCKS4"]{color:#8A5A0E}
+.am-guess,.am-skip{font-size:10px;line-height:1.3;color:var(--mut-2)}
+.am-guess{color:var(--warn)}

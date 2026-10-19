@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Запросы адреса</title>
+<!-- 7Л, шаг 3 · страница «Запросы адреса» — список последних запросов
+     вкладки по одному адресу, по сайту (несколько хостов) или по всей
+     вкладке. Открывает попап с плашки «N запросов» новой вкладкой:
+     requests.html?tab=<id>&host=<host> (или &site=<site>; &theme=light при
+     светлой теме). Данные — запись pageHosts вкладки из временной области
+     (reqs у каждого адреса, пишет фон при мониторинге запросов), страница читает их сама
+     (storage.sessionGet) и следит за изменениями (sessionSubscribe) —
+     команды фону нет. theme.js — общий синхронный скрипт, стоит первым:
+     ставит data-theme и lang до разбора разметки (первый кадр в теме);
+     кода внутри HTML нет (CSP). Шрифты и токены — общий слой. Тексты в
+     разметке — значения до первого прогона requests.js; заголовок окна
+     переставляет скрипт. Этап 9 (правка человека 29.09): в колонке «Путь»
+     — полный адрес запроса (запись reqs: p — схема, хост, путь, параметры;
+     до PAGE_REQS.MAX_LEN), адрес — кнопка: щелчок раскрывает строку
+     целиком, второй сворачивает; справа кнопка копирования адреса в буфер;
+     живая область #live (role=status, визуально скрыта) объявляет
+     «Скопировано» — строки таблицы рисует requests.js. -->
+<script src="../shared/theme.js"></script>
+<link rel="stylesheet" href="../assets/fonts/fonts.css">
+<link rel="stylesheet" href="../shared/tokens.css">
+<link rel="stylesheet" href="requests.css">
+<link rel="stylesheet" href="../shared/brand.css">   <!-- 2.2: знак Sky.Proxy — после файла окна: кегль задаёт окно -->
+<link rel="stylesheet" href="../shared/glass.css">   <!-- 2.2: стеклянная тема — последней: перекрывает плотные поверхности -->
+</head>
+<body>
+
+<header class="bar">
+  <div class="brand" role="img" aria-label="Sky.Proxy"><span class="bw" aria-hidden="true">Sky<span class="bw-dot">.</span>Pr<img src="../assets/icons/logo-ball.png" alt="">xy</span></div>
+</header>
+
+<main class="wrap">
+  <section class="panel">
+    <div class="hd">
+      <div class="hd-t">
+        <h1 id="title">Запросы адреса</h1>
+        <p class="sub"><span id="tab">вкладка</span><span class="sep" id="allSep"> · </span><button class="lnk" id="all">все адреса этой вкладки</button></p>
+      </div>
+      <div class="ctl">
+        <span class="lbl" id="onlyErrT">Только с ошибками</span>
+        <button class="sw" id="onlyErr" role="switch" aria-checked="false" aria-label="Только с ошибками"></button>
+      </div>
+    </div>
+    <p class="sum" id="sum"></p>
+    <div class="tbl-w">
+      <table class="rq" id="tbl">
+        <colgroup><col class="w-t"><col class="w-ty"><col class="w-h"><col><col class="w-r"><col class="w-v"></colgroup>
+        <thead>
+          <tr>
+            <th id="cTime">Время</th>
+            <th id="cType">Тип</th>
+            <th id="cHost">Адрес</th>
+            <th id="cPath">Путь</th>
+            <th id="cRes">Результат</th>
+            <th id="cRoute">Маршрут</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <p class="empty" id="empty" hidden></p>
+  </section>
+</main>
+<p id="live" role="status" aria-live="polite" class="sr"></p>
+
+<script type="module" src="requests.js"></script>
+</body>
+</html>

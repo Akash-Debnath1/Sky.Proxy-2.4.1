@@ -1,0 +1,179 @@
+/* src/shared/glass.css — СТЕКЛЯННАЯ ТЕМА (2.2).
+ *
+ * Один файл на три окна — настройки, попап, запросы. Подключается
+ * ПОСЛЕДНИМ, после файла окна: здесь только МАТЕРИАЛ (подложка, размытие,
+ * блики, тени). Раскладка, размеры и состояния остаются в файлах окон.
+ *
+ * ИЗ ЧЕГО СОСТОИТ СТЕКЛО
+ *   1. Подложка окна — не ровный цвет, а четыре мягких световых пятна:
+ *      зелень соединения сверху слева, холод сверху справа, глубина снизу
+ *      и синева по центру. Она закреплена (background-attachment:fixed):
+ *      при прокрутке пятна не едут, и панели читаются как стекло над сценой.
+ *   2. Панель — полупрозрачная (--srf, tokens.css) с размытием того, что
+ *      под ней. Поверх заливки лежат два блика: косой по верхнему левому
+ *      краю (--glass-spec) и вертикальная вуаль «свет сверху» (--glass-sheen).
+ *      Кромка — светлая верхняя грань плюс тонкое внутреннее кольцо.
+ *   3. Надстройки — меню, подсказки, тосты — плотнее и мутнее остальных:
+ *      под ними содержимое, текст обязан читаться.
+ *
+ * ЧЕГО ЗДЕСЬ НЕТ: цветов текста, статусов, знака, иллюстраций. Здесь
+ * только материал поверхности.
+ *
+ * ЧЕСТНАЯ ОГОВОРКА. Размытие (backdrop-filter) размывает только то, что
+ * лежит ПОД элементом внутри той же вкладки. Обои рабочего стола за окном
+ * браузера не размываются — этого не умеет ни одно расширение. Поэтому
+ * «прозрачность» здесь — прозрачность к подложке расширения, а не к
+ * рабочему столу; зато она видна всегда и не зависит от обоев.
+ */
+
+/* ── подложка ─────────────────────────────────────────────────────── */
+html{background-color:var(--bg)}
+body{
+  background-color:var(--bg);
+  background-image:
+    radial-gradient(52% 40% at 10% 6%,   var(--glass-1), transparent 72%),
+    radial-gradient(44% 32% at 94% 2%,   var(--glass-2), transparent 74%),
+    radial-gradient(64% 42% at 62% 108%, var(--glass-3), transparent 74%),
+    radial-gradient(38% 28% at 30% 58%,  var(--glass-4), transparent 76%);
+  background-repeat:no-repeat;
+  background-attachment:fixed;
+}
+
+/* ── размытие ─────────────────────────────────────────────────────── */
+/* ВАЖНО: строки настроек (.opt) в этот список НЕ входят. Своё размытие
+   у строки поверх уже размытой панели даёт двойной слой сатурации, и на
+   панели появляется горизонтальная ступень — заголовок светлее строк.
+   Строки лежат на стекле и наследуют его вид без собственного фильтра. */
+.panel,
+.nav,
+.list-wrap,
+.read,
+.seg,
+.menu,
+.tip,
+.toast,
+.pmenu,
+.notif,
+.card,
+.req-card,
+.req-row{
+  -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(165%);
+  backdrop-filter:blur(var(--glass-blur)) saturate(165%);
+}
+
+/* ── большие панели: блик, кромка, тень ───────────────────────────── */
+.panel,
+.card,
+.req-card{
+  background-image:
+    radial-gradient(130% 96% at 0% -26%, var(--glass-spec), transparent 62%),
+    var(--glass-sheen);
+  background-repeat:no-repeat;
+  box-shadow:
+    inset 0 1px 0 var(--glass-edge),
+    inset 0 0 0 1px var(--glass-hi),
+    var(--glass-shadow);
+}
+
+/* шапка-пилюля: кромка и блик те же; состояние подкраски остаётся за окном */
+.nav,
+body.lit .nav{
+  box-shadow:
+    inset 0 1px 0 var(--glass-edge),
+    inset 0 0 0 1px var(--glass-hi),
+    var(--glass-shadow);
+}
+body.lit .nav{
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.22),
+    inset 0 0 0 1px rgba(72,180,87,.24),
+    0 22px 52px -32px rgba(0,0,0,.8);
+}
+html[data-theme="light"] body.lit .nav{
+  box-shadow:
+    inset 0 1px 0 #FFFFFF,
+    inset 0 0 0 1px rgba(42,128,56,.26),
+    0 22px 52px -34px rgba(24,48,36,.4);
+}
+
+/* строки настроек лежат на панели — своя тень им не нужна, только верхний блик */
+.opt{box-shadow:inset 0 1px 0 var(--glass-hi)}
+/* активная вкладка продолжает панель: блик идёт по её верхней грани */
+.ltabs button[aria-selected="true"],
+#stabs button[aria-selected="true"]{
+  box-shadow:inset 0 1px 0 var(--glass-edge), inset 0 -1px 0 var(--glass-hi);
+}
+
+/* ── надстройки: плотнее и мутнее ─────────────────────────────────── */
+.menu,
+.pmenu,
+.tip,
+.toast{
+  -webkit-backdrop-filter:blur(30px) saturate(180%);
+  backdrop-filter:blur(30px) saturate(180%);
+  box-shadow:
+    inset 0 1px 0 var(--glass-edge),
+    inset 0 0 0 1px var(--glass-hi),
+    0 30px 70px -28px rgba(0,0,0,.75);
+}
+html[data-theme="light"] .menu,
+html[data-theme="light"] .pmenu,
+html[data-theme="light"] .tip,
+html[data-theme="light"] .toast{
+  box-shadow:
+    inset 0 1px 0 #FFFFFF,
+    inset 0 0 0 1px rgba(255,255,255,.9),
+    0 30px 70px -30px rgba(24,48,36,.42);
+}
+
+/* ── попап ────────────────────────────────────────────────────────── */
+/* Окно попапа — прямоугольник браузера, скруглений у него нет; стекло
+   начинается сразу за краем: .pop прозрачен, подложка на html и body,
+   панели внутри — стекло. Первый кадр уже в цвет подложки: html красится
+   --bg до отрисовки, поэтому белой вспышки при открытии нет. */
+.pop{
+  background:transparent;
+  background-image:radial-gradient(120% 80% at 6% -18%, var(--glass-spec), transparent 60%);
+  box-shadow:none;
+}
+html[data-theme="light"] .pop{
+  background-color:transparent;
+  background-image:radial-gradient(120% 80% at 6% -18%, var(--glass-spec), transparent 60%);
+}
+
+/* ── плотные остатки прежней палитры ──────────────────────────────── */
+/* Немногие поверхности были заданы литералами — здесь они переведены
+   на стекло, иначе на стеклянном фоне остались бы плотные заплаты. */
+html:not([data-theme="light"]) #stabs button[aria-selected="true"] .tico{background:rgba(255,255,255,.09)}
+html:not([data-theme="light"]) .nav button[aria-current="page"]{background:rgba(255,255,255,.10)}
+html[data-theme="light"] .nav button[aria-current="page"]{background:rgba(255,255,255,.80)}
+html[data-theme="light"] #stabs button[aria-selected="true"] .tico{background:rgba(255,255,255,.85)}
+
+/* неактивные вкладки списка и настроек — стеклянная вуаль, не заливка */
+html:not([data-theme="light"]) .ltabs button:not([aria-selected="true"]){background:rgba(255,255,255,.045)}
+html[data-theme="light"] .ltabs button:not([aria-selected="true"]){background:rgba(255,255,255,.40)}
+html[data-theme="light"] .ltabs button:not([aria-selected="true"]):hover{background-color:rgba(255,255,255,.68)}
+html[data-theme="light"] #stabs button:not([aria-selected="true"]):hover{background-color:rgba(255,255,255,.60)}
+html[data-theme="light"] .ltabs button:not([aria-selected="true"]):hover .tico,
+html[data-theme="light"] .ltabs button:not([aria-selected="true"]):hover .tally,
+html[data-theme="light"] .ltabs button:not([aria-selected="true"]):hover .tabplus{background:rgba(255,255,255,.92)}
+
+/* у меню и подсказок свой радиус — внутренняя кромка идёт по нему */
+.menu,.tip{border-radius:var(--r-block)}
+.pmenu{border-radius:14px}
+
+/* На мелких контролах размытие не видно, а слоёв становится много:
+   чипы, кнопки, тумблеры остаются с обычной заливкой. */
+.chip,.btn-ft,.btn-acc,.seg button,.sw,.ico,.hbt,.thm,.buy,.row{
+  -webkit-backdrop-filter:none;
+  backdrop-filter:none;
+}
+
+/* Системная настройка «уменьшить прозрачность»: возвращаем плотные
+   поверхности — читаемость важнее эффекта. */
+@media (prefers-reduced-transparency:reduce){
+  :root{--srf:#161A19;--srf-low:#121615;--ovl:#1B201F;--well:#0A0E0D;--glass-sheen:none;--glass-spec:transparent}
+  html[data-theme="light"]{--srf:#FFFFFF;--srf-low:#F4F6F5;--ovl:#FFFFFF;--well:#E7EAE9;--glass-sheen:none;--glass-spec:transparent}
+  .panel,.nav,.list-wrap,.opt,.read,.seg,.menu,.tip,.toast,.pmenu,.notif,.pop,.card,
+  .req-card,.req-row{-webkit-backdrop-filter:none;backdrop-filter:none}
+}

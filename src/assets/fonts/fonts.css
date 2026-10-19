@@ -1,0 +1,24 @@
+/* src/assets/fonts/fonts.css — локальные шрифты вместо Google Fonts:
+   в расширении загрузка с чужих доменов запрещена. Подключается из
+   popup.html, options.html и requests.html: <link rel="stylesheet" href="../assets/fonts/fonts.css">.
+
+   Оба файла вариативные (один файл вместо пяти и четырёх). Ось wght обрезана
+   до 400–700: в CSS прототипов используются 400, 500, 600, 700 и <b>;
+   вес 800 стоял в ссылке на Google Fonts, но не использовался нигде — в файлы
+   не попал. Подрезка: Latin + Cyrillic плюс знаки из текстов интерфейса
+   (→ ↔ ≈ ≠ ≤ ≥ ▾ ⚠). Курсивных начертаний в прототипах нет.
+   font-display: swap — как в прежней ссылке (&display=swap). */
+@font-face{
+  font-family:'Onest';
+  font-style:normal;
+  font-weight:400 700;
+  font-display:swap;
+  src:url('onest-var.woff2') format('woff2');
+}
+@font-face{
+  font-family:'JetBrains Mono';
+  font-style:normal;
+  font-weight:400 700;
+  font-display:swap;
+  src:url('jetbrains-mono-var.woff2') format('woff2');
+}

@@ -1,0 +1,3060 @@
+{
+  "add": {
+    "message": "Add"
+  },
+  "addedN_few": {
+    "message": "Added: $1 proxies",
+    "description": "$1 — count added; form picked by msgN() via Intl.PluralRules"
+  },
+  "addedN_many": {
+    "message": "Added: $1 proxies",
+    "description": "$1 — count added; form picked by msgN() via Intl.PluralRules"
+  },
+  "addedN_one": {
+    "message": "Added: $1 proxy",
+    "description": "$1 — count added; form picked by msgN() via Intl.PluralRules"
+  },
+  "addedN_other": {
+    "message": "Added: $1 proxies",
+    "description": "$1 — count added; form picked by msgN() via Intl.PluralRules"
+  },
+  "addProxy": {
+    "message": "Add proxy"
+  },
+  "allClosed": {
+    "message": "All notifications closed"
+  },
+  "amTypes": {
+    "message": "Mobile and residential — by hand only"
+  },
+  "apiKey": {
+    "message": "API key"
+  },
+  "apiLink": {
+    "message": "Paste the key"
+  },
+  "appDesc": {
+    "message": "Manage HTTP proxies in one click: switch servers, keep your list, and choose which sites bypass the proxy.",
+    "description": "Manifest description: \"description\": \"__MSG_appDesc__\""
+  },
+  "cmdToggle": {
+    "message": "Turn the proxy on or off",
+    "description": "Description of the toggle-proxy command in the manifest: shown on the browser’s shortcuts page"
+  },
+  "cmdNext": {
+    "message": "Next proxy",
+    "description": "Description of the next-proxy command in the manifest: shown on the browser’s shortcuts page"
+  },
+  "appName": {
+    "message": "Sky.Proxy",
+    "description": "Extension name: window titles (document.title). The manifest keeps name as a literal"
+  },
+  "back": {
+    "message": "Back"
+  },
+  "closeAll": {
+    "message": "Close all"
+  },
+  "connectedTo": {
+    "message": "Connected: $1",
+    "description": "$1 — proxy address"
+  },
+  "connErr": {
+    "message": "Connection error: ",
+    "description": "Prefix of the \"Connection error: …\" toast before the short error label (errShortAuth or errShortDead) in the popup and on the page while the proxy is on; trailing space intended. Consumer exists since stage 4 (description fixed at stage 6)"
+  },
+  "errDead": {
+    "message": "Proxy not responding"
+  },
+  "errExp": {
+    "message": "Rental expired"
+  },
+  "errShortAuth": {
+    "message": "Wrong login or password",
+    "description": "Short error label for state.lastError = 'auth'; consumer — the \"Connection error: …\" toast (connErr + this key) in the popup and on the page while the proxy is on. 4.1: was \"Wrong login\" — the toast also appeared after breaking only the password (decision of 09.09)"
+  },
+  "errShortDead": {
+    "message": "No response",
+    "description": "Short error label for state.lastError = 'dead'; consumer — the \"Connection error: …\" toast (connErr + this key) in the popup and on the page while the proxy is on (since stage 4). The 'dead' value itself is set at stage 7 (drop via onErrorOccurred) — until then the toast never shows this text; do not remove in a dead-key sweep"
+  },
+  "expInDays_few": {
+    "message": "expires in $1 days",
+    "description": "$1 — days; form picked by msgN() via Intl.PluralRules"
+  },
+  "expInDays_many": {
+    "message": "expires in $1 days",
+    "description": "$1 — days; form picked by msgN() via Intl.PluralRules"
+  },
+  "expInDays_one": {
+    "message": "expires in $1 day",
+    "description": "$1 — days; form picked by msgN() via Intl.PluralRules"
+  },
+  "expInDays_other": {
+    "message": "expires in $1 days",
+    "description": "$1 — days; form picked by msgN() via Intl.PluralRules"
+  },
+  "expShDays": {
+    "message": "$1d",
+    "description": "$1 — days, short form"
+  },
+  "expShToday": {
+    "message": "today"
+  },
+  "expShTomorrow": {
+    "message": "tmrw"
+  },
+  "expToday": {
+    "message": "expires today"
+  },
+  "expTomorrow": {
+    "message": "expires tomorrow"
+  },
+  "failExp": {
+    "message": "Plan expired — renew the proxy"
+  },
+  "gearT": {
+    "message": "Open extension settings"
+  },
+  "geoTipManPop": {
+    "message": "Only proxies from your account carry a country: their data arrives with the API key. For a manually added one you can set it yourself — on the extension page, under \"My proxies\".",
+    "description": "Two tips, not one (see geoTipPxs): the country arrives automatically only with the key. Nobody will send it for a manually added proxy — the person sets it, and that is done on the extension page, so this tip leads there"
+  },
+  "geoTipPxs": {
+    "message": "The country will arrive from your account with the next list update — it comes with the address via the API key."
+  },
+  "geoUnk": {
+    "message": "Country not known yet"
+  },
+  "lblLogin": {
+    "message": "Login"
+  },
+  "lblPass": {
+    "message": "Password"
+  },
+  "listsOff": {
+    "message": "Lists disabled",
+    "description": "7Л: тост селектора режима в попапе при выборе «Выкл»; в диагностике страницы — diagListsOff (не сводить)"
+  },
+  "listBlackOn": {
+    "message": "Black list enabled",
+    "description": "7Л: тост селектора режима в попапе"
+  },
+  "listWhiteOn": {
+    "message": "White list enabled",
+    "description": "7Л: тост селектора режима в попапе"
+  },
+  "pickListsT": {
+    "message": "Lists are off. Turn on:",
+    "description": "7Л (п. 3): заголовок плашки выбора списка в попапе"
+  },
+  "pickBlack": {
+    "message": "Black"
+  },
+  "pickWhite": {
+    "message": "White"
+  },
+  "listsLbl": {
+    "message": "Lists",
+    "description": "7Л (правки человека 20.09): подпись строки «Списки» в попапе — с иконкой, в одной строке с селектором режима, без двоеточия"
+  },
+  "lockTip": {
+    "message": "Lists are off — click to turn them on",
+    "description": "7Л (правка человека 20.09, 1): подсказка обёртки запертого при «Выкл» тумблера строки и панели — что по нему можно нажать (плашка выбора списка)"
+  },
+  "rqTitleHost": {
+    "message": "Requests of $1",
+    "description": "7Л, шаг 3: заголовок страницы запросов по одному адресу; $1 — хост"
+  },
+  "rqTitleSite": {
+    "message": "Requests of site $1",
+    "description": "7Л, шаг 3: заголовок по сайту (несколько хостов); $1 — сайт"
+  },
+  "rqTitleTab": {
+    "message": "Tab requests",
+    "description": "7Л, шаг 3: заголовок без адреса — все адреса вкладки"
+  },
+  "rqTab": {
+    "message": "tab $1",
+    "description": "7Л, шаг 3: подпись под заголовком; $1 — номер вкладки браузера"
+  },
+  "rqAllTab": {
+    "message": "all addresses of this tab",
+    "description": "7Л, шаг 3: ссылка со страницы адреса на страницу всей вкладки"
+  },
+  "rqSummary": {
+    "message": "requests $1, with errors $2, via proxy $3",
+    "description": "7Л, шаг 3: сводка над таблицей"
+  },
+  "rqOnlyErr": {
+    "message": "Errors only",
+    "description": "7Л, шаг 3: тумблер-фильтр"
+  },
+  "rqNone": {
+    "message": "No requests yet — reload the tab.",
+    "description": "7Л, шаг 3: нет записей у вкладки/адреса"
+  },
+  "rqNoneErr": {
+    "message": "No errors.",
+    "description": "7Л, шаг 3: фильтр включён, сбоев нет"
+  },
+  "rqNoTrack": {
+    "message": "Page request monitoring is off — turn it on in the extension settings.",
+    "description": "7Л, шаг 3: settings.siteTrack выключен"
+  },
+  "rqNoTab": {
+    "message": "No tab specified",
+    "description": "7Л, шаг 3: страница открыта без параметра tab"
+  },
+  "rqColTime": {
+    "message": "Time",
+    "description": "7Л, шаг 3: колонка"
+  },
+  "rqColType": {
+    "message": "Type",
+    "description": "7Л, шаг 3: колонка — тип запроса браузера (main_frame, script, image…)"
+  },
+  "rqColHost": {
+    "message": "Address",
+    "description": "7Л, шаг 3: колонка — хост (при сайте и всей вкладке)"
+  },
+  "rqColPath": {
+    "message": "Path",
+    "description": "7Л, шаг 3: колонка — с этапа 9 полный адрес запроса (заголовок прежний)"
+  },
+  "rqColResult": {
+    "message": "Result",
+    "description": "7Л, шаг 3: колонка — код HTTP или ошибка браузера"
+  },
+  "rqColRoute": {
+    "message": "Route",
+    "description": "7Л, шаг 3: колонка — через прокси / напрямую"
+  },
+  "rqVia": {
+    "message": "via proxy",
+    "description": "7Л, шаг 3: маршрут"
+  },
+  "rqDirect": {
+    "message": "direct",
+    "description": "7Л, шаг 3: маршрут"
+  },
+  "rqBlocked": {
+    "message": "blocked",
+    "description": "7Л, шаг 3: результат — запрос не пустил блокировщик или политика"
+  },
+  "rqOpen": {
+    "message": "Open the request list",
+    "description": "7Л, шаг 3: подсказка плашки «N запросов» в панели попапа"
+  },
+  "rqShowFull": {
+    "message": "Show in full",
+    "description": "этап 9 (правка человека 29.09): подсказка кнопки-адреса в колонке «Путь» — щелчок раскрывает строку целиком, второй сворачивает"
+  },
+  "rqCopy": {
+    "message": "Copy address",
+    "description": "этап 9 (правка человека 29.09): имя и подсказка кнопки копирования адреса в колонке «Путь»; после копирования в живой области — copied"
+  },
+  "listsOpen": {
+    "message": "Open the lists in settings",
+    "description": "7Л (правка человека 20.09, 7): подсказка подписи «Списки» в попапе — она кнопка в раздел списков страницы"
+  },
+  "andMoreN_one": {
+    "message": "$2 and $1 more site",
+    "description": "7Л (В3): тост тумблера строки, когда тот же жест применён к сторонним сайтам страницы; $1 — их число, $2 — сайт вкладки; форма выбирается msgN()"
+  },
+  "andMoreN_few": {
+    "message": "$2 and $1 more sites",
+    "description": "7Л (В3): тост тумблера строки, когда тот же жест применён к сторонним сайтам страницы; $1 — их число, $2 — сайт вкладки; форма выбирается msgN()"
+  },
+  "andMoreN_many": {
+    "message": "$2 and $1 more sites",
+    "description": "7Л (В3): тост тумблера строки, когда тот же жест применён к сторонним сайтам страницы; $1 — их число, $2 — сайт вкладки; форма выбирается msgN()"
+  },
+  "andMoreN_other": {
+    "message": "$2 and $1 more sites",
+    "description": "7Л (В3): тост тумблера строки, когда тот же жест применён к сторонним сайтам страницы; $1 — их число, $2 — сайт вкладки; форма выбирается msgN()"
+  },
+  "listsWord": {
+    "message": "Lists"
+  },
+  "luBlack": {
+    "message": "Black"
+  },
+  "luBlackShort": {
+    "message": "Black",
+    "description": "7Л: короткая подпись селектора режима на странице при 480 px; полная — luBlack"
+  },
+  "luWhite": {
+    "message": "White"
+  },
+  "luWhiteShort": {
+    "message": "White",
+    "description": "7Л: короткая подпись селектора режима на странице при 480 px; полная — luWhite"
+  },
+  "luOff": {
+    "message": "Off",
+    "description": "7Л: положение «списки выключены» селектора режима — попап и страница"
+  },
+  "connOn": {
+    "message": "Connect"
+  },
+  "connOff": {
+    "message": "Disconnected"
+  },
+  "connCut": {
+    "message": "Disconnect"
+  },
+  "connBusy": {
+    "message": "Connecting…"
+  },
+  "connOnTip": {
+    "message": "Route traffic through this proxy",
+    "description": "Tooltip of the red Disconnected pill in a list row"
+  },
+  "connOffTip": {
+    "message": "Stop using this proxy",
+    "description": "Tooltip of the green Connected pill in a list row"
+  },
+  "miCopy": {
+    "message": "Copy"
+  },
+  "miEdit": {
+    "message": "Edit"
+  },
+  "moreWays": {
+    "message": "More ways to add"
+  },
+  "naccT": {
+    "message": "not in account"
+  },
+  "naccTip": {
+    "message": "This proxy is no longer in your account: its expiry and country will not be updated. It stays in the list and keeps working."
+  },
+  "navSettings": {
+    "message": "Settings"
+  },
+  "nClearT": {
+    "message": "Hide all notifications"
+  },
+  "nEmpty": {
+    "message": "No notifications —<br>nothing needs your attention",
+    "description": "Inserted via innerHTML; <br> is the line break, as in the prototype"
+  },
+  "nHide": {
+    "message": "Dismiss — we will show it again when the number of new ones changes",
+    "description": "7К.2 (Ж-5, text approved by the human 26.09): the “new in the account” card returns when the number of new ones changes (nid carries the number), not when more appear"
+  },
+  "nHideDay": {
+    "message": "Hide for a day — we will remind you again"
+  },
+  "nNewS": {
+    "message": "They appeared after the last load. Add the ones you need."
+  },
+  "nNewT_few": {
+    "message": "$1 new proxies in your account",
+    "description": "$1 — count of new proxies; form picked by msgN() via Intl.PluralRules"
+  },
+  "nNewT_many": {
+    "message": "$1 new proxies in your account",
+    "description": "$1 — count of new proxies; form picked by msgN() via Intl.PluralRules"
+  },
+  "nNewT_one": {
+    "message": "$1 new proxy in your account",
+    "description": "$1 — count of new proxies; form picked by msgN() via Intl.PluralRules"
+  },
+  "nNewT_other": {
+    "message": "$1 new proxies in your account",
+    "description": "$1 — count of new proxies; form picked by msgN() via Intl.PluralRules"
+  },
+  "noSel": {
+    "message": "No proxy selected"
+  },
+  "notFound": {
+    "message": "Nothing found"
+  },
+  "notifT": {
+    "message": "Notifications"
+  },
+  "openInExt": {
+    "message": "Open on the extension page"
+  },
+  "openThisExt": {
+    "message": "Open this proxy on the extension page"
+  },
+  "pastePh": {
+    "message": "Paste proxies — one per line"
+  },
+  "phAddr": {
+    "message": "address"
+  },
+  "phLogin": {
+    "message": "login"
+  },
+  "phPass": {
+    "message": "password"
+  },
+  "phPort": {
+    "message": "port"
+  },
+  "pickFirst": {
+    "message": "Choose a proxy from the list"
+  },
+  "pmClose": {
+    "message": "Close the list"
+  },
+  "pmNoneAct": {
+    "message": "Nothing found — the active proxy is the only one below"
+  },
+  "pmSearch": {
+    "message": "Search"
+  },
+  "proxyList": {
+    "message": "Proxy list"
+  },
+  "pwrAria": {
+    "message": "Proxy"
+  },
+  "pwrBusy": {
+    "message": "Connecting"
+  },
+  "pwrFail": {
+    "message": "Fail",
+    "description": "The power button label names the state, not the action (like pwrBusy/pwrOff/pwrOn); the action stays in aria-label (pwrAria): for role=\"switch\" the name says what is controlled, aria-checked gives the state"
+  },
+  "pwrOff": {
+    "message": "Online"
+  },
+  "pwrOn": {
+    "message": "Offline"
+  },
+  "quickAdd": {
+    "message": "Quick add"
+  },
+  "renew": {
+    "message": "Renew"
+  },
+  "searchReset": {
+    "message": "Clear the search"
+  },
+  "selProxy": {
+    "message": "Choose a proxy"
+  },
+  "show": {
+    "message": "Show"
+  },
+  "themeToDark": {
+    "message": "Dark theme"
+  },
+  "themeToggle": {
+    "message": "Toggle theme"
+  },
+  "themeToLight": {
+    "message": "Light theme"
+  },
+  "wrongCreds": {
+    "message": "Wrong login or password"
+  },
+  "geo_AT": {
+    "message": "Austria"
+  },
+  "geo_AZ": {
+    "message": "Azerbaijan"
+  },
+  "geo_AM": {
+    "message": "Armenia"
+  },
+  "geo_BE": {
+    "message": "Belgium"
+  },
+  "geo_BG": {
+    "message": "Bulgaria"
+  },
+  "geo_BR": {
+    "message": "Brazil"
+  },
+  "geo_GB": {
+    "message": "United Kingdom"
+  },
+  "geo_HU": {
+    "message": "Hungary"
+  },
+  "geo_VN": {
+    "message": "Vietnam"
+  },
+  "geo_DE": {
+    "message": "Germany"
+  },
+  "geo_GR": {
+    "message": "Greece"
+  },
+  "geo_GE": {
+    "message": "Georgia"
+  },
+  "geo_DK": {
+    "message": "Denmark"
+  },
+  "geo_IL": {
+    "message": "Israel"
+  },
+  "geo_IN": {
+    "message": "India"
+  },
+  "geo_ID": {
+    "message": "Indonesia"
+  },
+  "geo_IE": {
+    "message": "Ireland"
+  },
+  "geo_ES": {
+    "message": "Spain"
+  },
+  "geo_IT": {
+    "message": "Italy"
+  },
+  "geo_KZ": {
+    "message": "Kazakhstan"
+  },
+  "geo_CA": {
+    "message": "Canada"
+  },
+  "geo_CN": {
+    "message": "China"
+  },
+  "geo_LV": {
+    "message": "Latvia"
+  },
+  "geo_LT": {
+    "message": "Lithuania"
+  },
+  "geo_LU": {
+    "message": "Luxembourg"
+  },
+  "geo_MX": {
+    "message": "Mexico"
+  },
+  "geo_MD": {
+    "message": "Moldova"
+  },
+  "geo_NL": {
+    "message": "Netherlands"
+  },
+  "geo_NO": {
+    "message": "Norway"
+  },
+  "geo_AE": {
+    "message": "United Arab Emirates"
+  },
+  "geo_PL": {
+    "message": "Poland"
+  },
+  "geo_PT": {
+    "message": "Portugal"
+  },
+  "geo_RO": {
+    "message": "Romania"
+  },
+  "geo_RU": {
+    "message": "Russia"
+  },
+  "geo_RS": {
+    "message": "Serbia"
+  },
+  "geo_SG": {
+    "message": "Singapore"
+  },
+  "geo_SK": {
+    "message": "Slovakia"
+  },
+  "geo_SI": {
+    "message": "Slovenia"
+  },
+  "geo_US": {
+    "message": "USA"
+  },
+  "geo_TH": {
+    "message": "Thailand"
+  },
+  "geo_TR": {
+    "message": "Turkey"
+  },
+  "geo_UA": {
+    "message": "Ukraine"
+  },
+  "geo_FI": {
+    "message": "Finland"
+  },
+  "geo_FR": {
+    "message": "France"
+  },
+  "geo_HR": {
+    "message": "Croatia"
+  },
+  "geo_CZ": {
+    "message": "Czechia"
+  },
+  "geo_CH": {
+    "message": "Switzerland"
+  },
+  "geo_SE": {
+    "message": "Sweden"
+  },
+  "geo_EE": {
+    "message": "Estonia"
+  },
+  "geo_ZA": {
+    "message": "South Africa"
+  },
+  "geo_KR": {
+    "message": "South Korea"
+  },
+  "geo_JP": {
+    "message": "Japan"
+  },
+  "geo_AD": {
+    "message": "Andorra"
+  },
+  "geo_AF": {
+    "message": "Afghanistan"
+  },
+  "geo_AG": {
+    "message": "Antigua & Barbuda"
+  },
+  "geo_AI": {
+    "message": "Anguilla"
+  },
+  "geo_AL": {
+    "message": "Albania"
+  },
+  "geo_AO": {
+    "message": "Angola"
+  },
+  "geo_AQ": {
+    "message": "Antarctica"
+  },
+  "geo_AR": {
+    "message": "Argentina"
+  },
+  "geo_AS": {
+    "message": "American Samoa"
+  },
+  "geo_AU": {
+    "message": "Australia"
+  },
+  "geo_AW": {
+    "message": "Aruba"
+  },
+  "geo_AX": {
+    "message": "Åland Islands"
+  },
+  "geo_BA": {
+    "message": "Bosnia & Herzegovina"
+  },
+  "geo_BB": {
+    "message": "Barbados"
+  },
+  "geo_BD": {
+    "message": "Bangladesh"
+  },
+  "geo_BF": {
+    "message": "Burkina Faso"
+  },
+  "geo_BH": {
+    "message": "Bahrain"
+  },
+  "geo_BI": {
+    "message": "Burundi"
+  },
+  "geo_BJ": {
+    "message": "Benin"
+  },
+  "geo_BL": {
+    "message": "St. Barthélemy"
+  },
+  "geo_BM": {
+    "message": "Bermuda"
+  },
+  "geo_BN": {
+    "message": "Brunei"
+  },
+  "geo_BO": {
+    "message": "Bolivia"
+  },
+  "geo_BQ": {
+    "message": "Caribbean Netherlands"
+  },
+  "geo_BS": {
+    "message": "Bahamas"
+  },
+  "geo_BT": {
+    "message": "Bhutan"
+  },
+  "geo_BV": {
+    "message": "Bouvet Island"
+  },
+  "geo_BW": {
+    "message": "Botswana"
+  },
+  "geo_BY": {
+    "message": "Belarus"
+  },
+  "geo_BZ": {
+    "message": "Belize"
+  },
+  "geo_CC": {
+    "message": "Cocos (Keeling) Islands"
+  },
+  "geo_CD": {
+    "message": "Congo - Kinshasa"
+  },
+  "geo_CF": {
+    "message": "Central African Republic"
+  },
+  "geo_CG": {
+    "message": "Congo - Brazzaville"
+  },
+  "geo_CI": {
+    "message": "Côte d’Ivoire"
+  },
+  "geo_CK": {
+    "message": "Cook Islands"
+  },
+  "geo_CL": {
+    "message": "Chile"
+  },
+  "geo_CM": {
+    "message": "Cameroon"
+  },
+  "geo_CO": {
+    "message": "Colombia"
+  },
+  "geo_CP": {
+    "message": "Clipperton Island"
+  },
+  "geo_CR": {
+    "message": "Costa Rica"
+  },
+  "geo_CU": {
+    "message": "Cuba"
+  },
+  "geo_CV": {
+    "message": "Cape Verde"
+  },
+  "geo_CW": {
+    "message": "Curaçao"
+  },
+  "geo_CX": {
+    "message": "Christmas Island"
+  },
+  "geo_CY": {
+    "message": "Cyprus"
+  },
+  "geo_DG": {
+    "message": "Diego Garcia"
+  },
+  "geo_DJ": {
+    "message": "Djibouti"
+  },
+  "geo_DM": {
+    "message": "Dominica"
+  },
+  "geo_DO": {
+    "message": "Dominican Republic"
+  },
+  "geo_DZ": {
+    "message": "Algeria"
+  },
+  "geo_EC": {
+    "message": "Ecuador"
+  },
+  "geo_EG": {
+    "message": "Egypt"
+  },
+  "geo_EH": {
+    "message": "Western Sahara"
+  },
+  "geo_ER": {
+    "message": "Eritrea"
+  },
+  "geo_ET": {
+    "message": "Ethiopia"
+  },
+  "geo_EU": {
+    "message": "European Union"
+  },
+  "geo_FJ": {
+    "message": "Fiji"
+  },
+  "geo_FK": {
+    "message": "Falkland Islands"
+  },
+  "geo_FM": {
+    "message": "Micronesia"
+  },
+  "geo_FO": {
+    "message": "Faroe Islands"
+  },
+  "geo_GA": {
+    "message": "Gabon"
+  },
+  "geo_GD": {
+    "message": "Grenada"
+  },
+  "geo_GF": {
+    "message": "French Guiana"
+  },
+  "geo_GG": {
+    "message": "Guernsey"
+  },
+  "geo_GH": {
+    "message": "Ghana"
+  },
+  "geo_GI": {
+    "message": "Gibraltar"
+  },
+  "geo_GL": {
+    "message": "Greenland"
+  },
+  "geo_GM": {
+    "message": "Gambia"
+  },
+  "geo_GN": {
+    "message": "Guinea"
+  },
+  "geo_GP": {
+    "message": "Guadeloupe"
+  },
+  "geo_GQ": {
+    "message": "Equatorial Guinea"
+  },
+  "geo_GS": {
+    "message": "South Georgia & South Sandwich Islands"
+  },
+  "geo_GT": {
+    "message": "Guatemala"
+  },
+  "geo_GU": {
+    "message": "Guam"
+  },
+  "geo_GW": {
+    "message": "Guinea-Bissau"
+  },
+  "geo_GY": {
+    "message": "Guyana"
+  },
+  "geo_HK": {
+    "message": "Hong Kong SAR China"
+  },
+  "geo_HM": {
+    "message": "Heard & McDonald Islands"
+  },
+  "geo_HN": {
+    "message": "Honduras"
+  },
+  "geo_HT": {
+    "message": "Haiti"
+  },
+  "geo_IC": {
+    "message": "Canary Islands"
+  },
+  "geo_IM": {
+    "message": "Isle of Man"
+  },
+  "geo_IO": {
+    "message": "British Indian Ocean Territory"
+  },
+  "geo_IQ": {
+    "message": "Iraq"
+  },
+  "geo_IR": {
+    "message": "Iran"
+  },
+  "geo_IS": {
+    "message": "Iceland"
+  },
+  "geo_JE": {
+    "message": "Jersey"
+  },
+  "geo_JM": {
+    "message": "Jamaica"
+  },
+  "geo_JO": {
+    "message": "Jordan"
+  },
+  "geo_KE": {
+    "message": "Kenya"
+  },
+  "geo_KG": {
+    "message": "Kyrgyzstan"
+  },
+  "geo_KH": {
+    "message": "Cambodia"
+  },
+  "geo_KI": {
+    "message": "Kiribati"
+  },
+  "geo_KM": {
+    "message": "Comoros"
+  },
+  "geo_KN": {
+    "message": "St. Kitts & Nevis"
+  },
+  "geo_KP": {
+    "message": "North Korea"
+  },
+  "geo_KW": {
+    "message": "Kuwait"
+  },
+  "geo_KY": {
+    "message": "Cayman Islands"
+  },
+  "geo_LA": {
+    "message": "Laos"
+  },
+  "geo_LB": {
+    "message": "Lebanon"
+  },
+  "geo_LC": {
+    "message": "St. Lucia"
+  },
+  "geo_LI": {
+    "message": "Liechtenstein"
+  },
+  "geo_LK": {
+    "message": "Sri Lanka"
+  },
+  "geo_LR": {
+    "message": "Liberia"
+  },
+  "geo_LS": {
+    "message": "Lesotho"
+  },
+  "geo_LY": {
+    "message": "Libya"
+  },
+  "geo_MA": {
+    "message": "Morocco"
+  },
+  "geo_MC": {
+    "message": "Monaco"
+  },
+  "geo_ME": {
+    "message": "Montenegro"
+  },
+  "geo_MF": {
+    "message": "St. Martin"
+  },
+  "geo_MG": {
+    "message": "Madagascar"
+  },
+  "geo_MH": {
+    "message": "Marshall Islands"
+  },
+  "geo_MK": {
+    "message": "North Macedonia"
+  },
+  "geo_ML": {
+    "message": "Mali"
+  },
+  "geo_MM": {
+    "message": "Myanmar (Burma)"
+  },
+  "geo_MN": {
+    "message": "Mongolia"
+  },
+  "geo_MO": {
+    "message": "Macao SAR China"
+  },
+  "geo_MP": {
+    "message": "Northern Mariana Islands"
+  },
+  "geo_MQ": {
+    "message": "Martinique"
+  },
+  "geo_MR": {
+    "message": "Mauritania"
+  },
+  "geo_MS": {
+    "message": "Montserrat"
+  },
+  "geo_MT": {
+    "message": "Malta"
+  },
+  "geo_MU": {
+    "message": "Mauritius"
+  },
+  "geo_MV": {
+    "message": "Maldives"
+  },
+  "geo_MW": {
+    "message": "Malawi"
+  },
+  "geo_MY": {
+    "message": "Malaysia"
+  },
+  "geo_MZ": {
+    "message": "Mozambique"
+  },
+  "geo_NA": {
+    "message": "Namibia"
+  },
+  "geo_NC": {
+    "message": "New Caledonia"
+  },
+  "geo_NE": {
+    "message": "Niger"
+  },
+  "geo_NF": {
+    "message": "Norfolk Island"
+  },
+  "geo_NG": {
+    "message": "Nigeria"
+  },
+  "geo_NI": {
+    "message": "Nicaragua"
+  },
+  "geo_NP": {
+    "message": "Nepal"
+  },
+  "geo_NR": {
+    "message": "Nauru"
+  },
+  "geo_NU": {
+    "message": "Niue"
+  },
+  "geo_NZ": {
+    "message": "New Zealand"
+  },
+  "geo_OM": {
+    "message": "Oman"
+  },
+  "geo_PA": {
+    "message": "Panama"
+  },
+  "geo_PE": {
+    "message": "Peru"
+  },
+  "geo_PF": {
+    "message": "French Polynesia"
+  },
+  "geo_PG": {
+    "message": "Papua New Guinea"
+  },
+  "geo_PH": {
+    "message": "Philippines"
+  },
+  "geo_PK": {
+    "message": "Pakistan"
+  },
+  "geo_PM": {
+    "message": "St. Pierre & Miquelon"
+  },
+  "geo_PN": {
+    "message": "Pitcairn Islands"
+  },
+  "geo_PR": {
+    "message": "Puerto Rico"
+  },
+  "geo_PS": {
+    "message": "Palestinian Territories"
+  },
+  "geo_PW": {
+    "message": "Palau"
+  },
+  "geo_PY": {
+    "message": "Paraguay"
+  },
+  "geo_QA": {
+    "message": "Qatar"
+  },
+  "geo_RE": {
+    "message": "Réunion"
+  },
+  "geo_RW": {
+    "message": "Rwanda"
+  },
+  "geo_SA": {
+    "message": "Saudi Arabia"
+  },
+  "geo_SB": {
+    "message": "Solomon Islands"
+  },
+  "geo_SC": {
+    "message": "Seychelles"
+  },
+  "geo_SD": {
+    "message": "Sudan"
+  },
+  "geo_SH": {
+    "message": "St. Helena"
+  },
+  "geo_SJ": {
+    "message": "Svalbard & Jan Mayen"
+  },
+  "geo_SL": {
+    "message": "Sierra Leone"
+  },
+  "geo_SM": {
+    "message": "San Marino"
+  },
+  "geo_SN": {
+    "message": "Senegal"
+  },
+  "geo_SO": {
+    "message": "Somalia"
+  },
+  "geo_SR": {
+    "message": "Suriname"
+  },
+  "geo_SS": {
+    "message": "South Sudan"
+  },
+  "geo_ST": {
+    "message": "São Tomé & Príncipe"
+  },
+  "geo_SV": {
+    "message": "El Salvador"
+  },
+  "geo_SX": {
+    "message": "Sint Maarten"
+  },
+  "geo_SY": {
+    "message": "Syria"
+  },
+  "geo_SZ": {
+    "message": "Eswatini"
+  },
+  "geo_TC": {
+    "message": "Turks & Caicos Islands"
+  },
+  "geo_TD": {
+    "message": "Chad"
+  },
+  "geo_TF": {
+    "message": "French Southern Territories"
+  },
+  "geo_TG": {
+    "message": "Togo"
+  },
+  "geo_TJ": {
+    "message": "Tajikistan"
+  },
+  "geo_TK": {
+    "message": "Tokelau"
+  },
+  "geo_TL": {
+    "message": "Timor-Leste"
+  },
+  "geo_TM": {
+    "message": "Turkmenistan"
+  },
+  "geo_TN": {
+    "message": "Tunisia"
+  },
+  "geo_TO": {
+    "message": "Tonga"
+  },
+  "geo_TT": {
+    "message": "Trinidad & Tobago"
+  },
+  "geo_TV": {
+    "message": "Tuvalu"
+  },
+  "geo_TW": {
+    "message": "Taiwan"
+  },
+  "geo_TZ": {
+    "message": "Tanzania"
+  },
+  "geo_UG": {
+    "message": "Uganda"
+  },
+  "geo_UM": {
+    "message": "U.S. Outlying Islands"
+  },
+  "geo_UN": {
+    "message": "United Nations"
+  },
+  "geo_UY": {
+    "message": "Uruguay"
+  },
+  "geo_UZ": {
+    "message": "Uzbekistan"
+  },
+  "geo_VA": {
+    "message": "Vatican City"
+  },
+  "geo_VC": {
+    "message": "St. Vincent & Grenadines"
+  },
+  "geo_VE": {
+    "message": "Venezuela"
+  },
+  "geo_VG": {
+    "message": "British Virgin Islands"
+  },
+  "geo_VI": {
+    "message": "U.S. Virgin Islands"
+  },
+  "geo_VU": {
+    "message": "Vanuatu"
+  },
+  "geo_WF": {
+    "message": "Wallis & Futuna"
+  },
+  "geo_WS": {
+    "message": "Samoa"
+  },
+  "geo_XK": {
+    "message": "Kosovo"
+  },
+  "geo_YE": {
+    "message": "Yemen"
+  },
+  "geo_YT": {
+    "message": "Mayotte"
+  },
+  "geo_ZM": {
+    "message": "Zambia"
+  },
+  "geo_ZW": {
+    "message": "Zimbabwe"
+  },
+  "docTitle": {
+    "message": "Sky.Proxy",
+    "description": "Tab title of the extension page (document.title) — “Sky.Proxy”, the name of the extension in the store (decision of 15.09, done in 7Е); the same text is in the <title> of options.html before the script runs. The __MSG_…__ substitution does not work in HTML, the script sets it"
+  },
+  "navAria": {
+    "message": "Sections"
+  },
+  "navProxy": {
+    "message": "Proxies",
+    "description": "\"Proxies\" section. Do not merge with pwrAria — different English (decision 05.09)"
+  },
+  "navHelp": {
+    "message": "Help"
+  },
+  "buy": {
+    "message": "Update Now"
+  },
+  "stBusy": {
+    "message": "Connecting…"
+  },
+  "stSwitch": {
+    "message": "Switching…"
+  },
+  "addAddr": {
+    "message": "add an address"
+  },
+  "showPass": {
+    "message": "Show password"
+  },
+  "hidePass": {
+    "message": "Hide password"
+  },
+  "heroEdit": {
+    "message": "Edit proxy"
+  },
+  "linkOff": {
+    "message": "no link"
+  },
+  "linkBusy": {
+    "message": "autonegotiation"
+  },
+  "linkOn": {
+    "message": "link up"
+  },
+  "linkErr": {
+    "message": "link error"
+  },
+  "chkLg": {
+    "message": "Test connection"
+  },
+  "chkSm": {
+    "message": "Check"
+  },
+  "chkBusy": {
+    "message": "Testing…"
+  },
+  "chkAuth": {
+    "message": "Wrong login or password",
+    "description": "Frozen behind CHECKERS.hero with chkDead and chkMs: do not merge with the live wrongCreds (decision 07.09)"
+  },
+  "chkDead": {
+    "message": "No response",
+    "description": "Frozen behind CHECKERS.hero with chkAuth and chkMs: do not merge with the live errShortDead (decision 07.09)"
+  },
+  "chkMs": {
+    "message": "Response $1 ms",
+    "description": "$1 — response in ms. Frozen together with the hero check button (CHECKERS.hero): do not merge with respOk or cqMs, do not remove in a dead-key sweep"
+  },
+  "lblPing": {
+    "message": "Connection",
+    "description": "Frozen key of the \"Connection\" block. Do not merge with capConn (decision 05.09)"
+  },
+  "cqGood": {
+    "message": "Good",
+    "description": "Frozen: the connection level is cancelled (decision 29.08), connLevel was not carried over on 3Б.3; no consumer, do not remove"
+  },
+  "cqMid": {
+    "message": "Fair",
+    "description": "Frozen: see cqGood"
+  },
+  "cqSlow": {
+    "message": "Slow",
+    "description": "Frozen: see cqGood"
+  },
+  "cqOk": {
+    "message": "Working",
+    "description": "Frozen key of the hidden \"Connection\" block. Do not merge with respOk: a frozen key is never merged with a live one (decision 05.09)"
+  },
+  "cqOff": {
+    "message": "Off"
+  },
+  "cqLost": {
+    "message": "No connection",
+    "description": "Frozen key of the \"Connection\" block. Do not merge with rcNoConn (decision 05.09)"
+  },
+  "cqMs": {
+    "message": "~$1 ms",
+    "description": "$1 — response in ms. FROZEN together with showing the response as a number (SHOW_MS): easy to delete, but bringing it back later means bringing back everything that kept the number out of trouble — the level thresholds and the note that this is page time through the proxy, not the distance to it. Never alone: a bare number gets compared with a VPN ping again. Not used in the page code since 3Б.3 — do not remove"
+  },
+  "tipConn": {
+    "message": "A rough sense of how quickly pages open through this proxy. This is not the distance to the proxy itself — a browser cannot measure that.",
+    "description": "The second sentence is mandatory: without it the number gets compared with a VPN ping, which is the distance to the server"
+  },
+  "tipConnOff": {
+    "message": "The proxy is off. Turn it on to route traffic through it."
+  },
+  "tipConnLost": {
+    "message": "The connection dropped. The reason is in the block on the left."
+  },
+  "tipConnBusy": {
+    "message": "Connecting to the proxy."
+  },
+  "respDead": {
+    "message": "proxy not responding"
+  },
+  "lmBlack": {
+    "message": "Black list: $1",
+    "description": "7Л: метка героя на странице; $1 — строк в поле чёрного списка"
+  },
+  "lmWhite": {
+    "message": "White list: $1",
+    "description": "7Л: метка героя на странице; $1 — строк в поле белого списка"
+  },
+  "lmOpen": {
+    "message": "Open list settings"
+  },
+  "expired": {
+    "message": "Expired",
+    "description": "Expiry chip. Do not merge with errShortExp: only the English text coincides"
+  },
+  "expClickRenew": {
+    "message": "click to renew"
+  },
+  "expiredRenewT": {
+    "message": "Rental expired — renew"
+  },
+  "expiredClickT": {
+    "message": "Rental expired — click to renew"
+  },
+  "renewFromMenu": {
+    "message": "Renew from the row menu"
+  },
+  "listHint": {
+    "message": "Click a row to switch"
+  },
+  "tabList": {
+    "message": "My proxies ",
+    "description": "Trailing space intended: the .tally counter follows"
+  },
+  "switchTo": {
+    "message": "Switch to $1",
+    "description": "$1 — address with port (IPv6 in square brackets, hostPort); the accessible name of a list row"
+  },
+  "rowActive": {
+    "message": "Active — $1",
+    "description": "$1 — address with port (IPv6 in square brackets, hostPort); the accessible name of the active row"
+  },
+  "rowMenu": {
+    "message": "Proxy actions"
+  },
+  "miDel": {
+    "message": "Delete"
+  },
+  "editing": {
+    "message": "editing"
+  },
+  "ariaAddr": {
+    "message": "Address"
+  },
+  "ariaPort": {
+    "message": "Port"
+  },
+  "save": {
+    "message": "Save"
+  },
+  "cancel": {
+    "message": "Cancel"
+  },
+  "tagPh": {
+    "message": "note"
+  },
+  "tagAdd": {
+    "message": "+ note"
+  },
+  "tagEditT": {
+    "message": "Edit note"
+  },
+  "tagRemove": {
+    "message": "Remove note $1",
+    "description": "$1 — note text"
+  },
+  "rcBusyA": {
+    "message": "testing"
+  },
+  "rcBusyB": {
+    "message": " the connection",
+    "description": "Leading space intended: the second half of the label hidden on mobile (.chk-lg)"
+  },
+  "rcChkA": {
+    "message": "Test"
+  },
+  "rcChkB": {
+    "message": " connection",
+    "description": "Leading space intended: see rcBusyB"
+  },
+  "rcNoConn": {
+    "message": "No connection"
+  },
+  "chkAgain": {
+    "message": "Test again"
+  },
+  "fixTitle": {
+    "message": "Open the editor and fix the credentials"
+  },
+  "msN": {
+    "message": "$1 ms",
+    "description": "$1 — response in ms, the state column of the list. FROZEN: comes back only as a set, see cqMs. Not used in code — do not remove"
+  },
+  "blank": {
+    "message": "The list is empty — add your first proxy."
+  },
+  "pgAllInfo": {
+    "message": "All $1 proxies",
+    "description": "$1 — number of proxies in the list (\"show all\" mode)"
+  },
+  "pgCollapse": {
+    "message": "Collapse"
+  },
+  "pgInfo": {
+    "message": "$1–$2 of $3",
+    "description": "$1 — first row on the page, $2 — last, $3 — total"
+  },
+  "pgFwd": {
+    "message": "Forward"
+  },
+  "pgShowAll": {
+    "message": "Show all $1",
+    "description": "$1 — number of proxies in the list"
+  },
+  "chkAll": {
+    "message": "Test all proxies"
+  },
+  "chkAllRun": {
+    "message": "Testing $1 of $2…",
+    "description": "$1 — checked, $2 — total. Mass check is frozen (CHECKERS.all)"
+  },
+  "dedup": {
+    "message": "Remove duplicates"
+  },
+  "dedupN": {
+    "message": "Duplicates removed: $1",
+    "description": "$1 — number of duplicates removed"
+  },
+  "dedupNone": {
+    "message": "No duplicates"
+  },
+  "exportList": {
+    "message": "Export",
+    "description": "List footer button. Do not merge with luExport (domain export) (decision 05.09)"
+  },
+  "searchPh": {
+    "message": "Search by address, login, note or country"
+  },
+  "pgFound": {
+    "message": "Found $1 of $2",
+    "description": "$1 — found by the search, $2 — total in the list"
+  },
+  "ftAll": {
+    "message": "The search does not affect this: the action covers all $1 proxies in the list",
+    "description": "$1 — number of proxies in the list"
+  },
+  "exportTip": {
+    "message": "For proxies from your account the country and expiry fill in again. For the ones you added by hand the country has to be set again."
+  },
+  "exportedN_one": {
+    "message": "$1 proxy exported",
+    "description": "$1 — count exported; form picked by msgN() via Intl.PluralRules"
+  },
+  "exportedN_few": {
+    "message": "$1 proxies exported",
+    "description": "$1 — count exported; form picked by msgN() via Intl.PluralRules"
+  },
+  "exportedN_many": {
+    "message": "$1 proxies exported",
+    "description": "$1 — count exported; form picked by msgN() via Intl.PluralRules"
+  },
+  "exportedN_other": {
+    "message": "$1 proxies exported",
+    "description": "$1 — count exported; form picked by msgN() via Intl.PluralRules"
+  },
+  "wipe": {
+    "message": "Delete all"
+  },
+  "wipeAsk": {
+    "message": "Delete all $1?",
+    "description": "$1 — number of proxies in the list"
+  },
+  "wiped": {
+    "message": "List cleared"
+  },
+  "doneAll": {
+    "message": "Done: all proxies respond"
+  },
+  "doneBad": {
+    "message": "Done: $1 of $2 not responding",
+    "description": "$1 — not responding, $2 — total. Mass check is frozen (CHECKERS.all)"
+  },
+  "aQ": {
+    "message": "How to add?"
+  },
+  "amPasteT": {
+    "message": "Paste list"
+  },
+  "amPasteD": {
+    "message": "Paste the whole list at once"
+  },
+  "amFieldsT": {
+    "message": "Manually"
+  },
+  "amFieldsD": {
+    "message": "One proxy by hand"
+  },
+  "amKeyT": {
+    "message": "By API key"
+  },
+  "amKeyD": {
+    "message": "Updates from your account"
+  },
+  "noteFormats": {
+    "message": "The format is detected automatically: <span class=\"mono\">ip:port</span>, <span class=\"mono\">ip:port@user:pass</span>, <span class=\"mono\">ip:port:user:pass</span>, <span class=\"mono\">user:pass@ip:port</span>.",
+    "description": "Inserted via innerHTML; <span class=\"mono\"> as in the prototype"
+  },
+  "lblAddrPort": {
+    "message": "Address and port"
+  },
+  "lblCreds": {
+    "message": "Login and password — if required"
+  },
+  "lblProto": {
+    "message": "Protocol"
+  },
+  "recognized": {
+    "message": "recognized"
+  },
+  "ofN": {
+    "message": "$1 of $2",
+    "description": "$1 — lines recognized, $2 — lines total"
+  },
+  "andMore": {
+    "message": "…and $1 more"
+  },
+  "noneMatched": {
+    "message": "No line matched — check the format"
+  },
+  "parseFail": {
+    "message": "Could not parse the line — at least ip:port is required"
+  },
+  "copied": {
+    "message": "Copied"
+  },
+  "proxyCopied": {
+    "message": "Proxy copied"
+  },
+  "formatCopied": {
+    "message": "Format copied"
+  },
+  "selected": {
+    "message": "Selected $1",
+    "description": "$1 — proxy address"
+  },
+  "connectedVia": {
+    "message": "Connected via $1",
+    "description": "$1 — proxy address"
+  },
+  "switchedTo": {
+    "message": "Switched to $1",
+    "description": "$1 — proxy address"
+  },
+  "tabReloaded": {
+    "message": " · tab reloaded",
+    "description": "Leading \" · \" intended: appended to the enable/switch toast (popup — connectedTo, page — connectedVia and switchedTo) only when the background replied reloaded: true — the tab was really reloaded (7Б)"
+  },
+  "reconnected": {
+    "message": "Reconnected with the new settings"
+  },
+  "direct": {
+    "message": "Traffic now goes direct"
+  },
+  "saved": {
+    "message": "Changes saved"
+  },
+  "proxyAdded": {
+    "message": "Proxy added"
+  },
+  "proxiesAdded": {
+    "message": "Proxies added: $1",
+    "description": "$1 — count added"
+  },
+  "noneFound": {
+    "message": "No proxies found in the text"
+  },
+  "needAddrPort": {
+    "message": "Address and port are required"
+  },
+  "pasteKey": {
+    "message": "Paste the API key"
+  },
+  "tagDup": {
+    "message": "This note already exists"
+  },
+  "tagMax": {
+    "message": "No more than $1 notes per proxy",
+    "description": "$1 — note limit per proxy (TAG_MAX)"
+  },
+  "deleted": {
+    "message": "Proxy deleted"
+  },
+  "deletedSwitched": {
+    "message": "Deleted, switched to $1",
+    "description": "$1 — address of the proxy switched to"
+  },
+  "lostSwitched": {
+    "message": "Connection lost — switched to $1",
+    "description": "$1 — address of the proxy switched to. First consumer — the frozen onCheckResult of the page (CHECKERS); since 7В (human decision 11.09, В2-а) — the popup and page toast for a switch made by the background on a drop: after the undocking picture instead of “Connection error”"
+  },
+  "dropExp": {
+    "message": "Plan expired — connection dropped"
+  },
+  "dropAuth": {
+    "message": "Wrong login or password — connection dropped"
+  },
+  "dropDead": {
+    "message": "Proxy not responding — connection dropped"
+  },
+  "tabBaseLg": {
+    "message": "Basic settings"
+  },
+  "tabBaseSm": {
+    "message": "Basic"
+  },
+  "tabKeysLg": {
+    "message": "Hotkeys"
+  },
+  "tabKeysSm": {
+    "message": "Keys"
+  },
+  "tabListsLg": {
+    "message": "Black & white lists"
+  },
+  "capConn": {
+    "message": "Connection"
+  },
+  "capUi": {
+    "message": "Interface"
+  },
+  "capAcc": {
+    "message": "Account"
+  },
+  "capSite": {
+    "message": "Per-site proxying"
+  },
+  "important": {
+    "message": "important"
+  },
+  "setWebrtcT": {
+    "message": "Block WebRTC"
+  },
+  "setWebrtcD": {
+    "message": "Otherwise sites can see your real IP bypassing the proxy."
+  },
+  "setVerifyT": {
+    "message": "Test proxy on connect"
+  },
+  "setVerifyD": {
+    "message": "Check that the proxy works with network requests right after connecting. Without this setting the proxy is connected even if it is down: the failure shows up later — from the connection errors the browser returns on real requests.",
+    "description": "7Е (the human’s edit of 21.09 after checking 7E-1): no request count and no mention of the diagnostics — a user does not need them and the count may change; the point — with the setting the check runs right on connect (7В, probe.js), without it a dead proxy is found only from the errors of real traffic (failure detection 7Б: three connection refusals within a minute; with failover on — switch to the next). The previous “one request… only in the diagnostics” had been wrong since 7В"
+  },
+  "setGeoAutoT": {
+    "message": "Country by IP"
+  },
+  "setGeoAutoD": {
+    "message": "Each address in the list gets a country flag and a name — the country and city are looked up once and kept for 30 days. Turn it off and countries are no longer looked up; the ones already found stay."
+  },
+  "setTzT": {
+    "message": "Timezone by proxy IP"
+  },
+  "setTzD": {
+    "message": "The browser will behave as if it were in the active proxy’s timezone. Only the timezone that websites see changes — your computer’s clock and other apps stay as they are."
+  },
+  "setProtocolT": {
+    "message": "Proxy type"
+  },
+  "setProtocolD": {
+    "message": "What protocol the active proxy speaks. A type taken from the address scheme is exact; a type taken from the port is only a guess (marked with *). A live check confirms it."
+  },
+  "typeRowNoProxy": {
+    "message": "No proxy selected yet."
+  },
+  "typeRowOn": {
+    "message": "Turn the proxy off to check its type — a running proxy occupies the browser."
+  },
+  "typeRowVerified": {
+    "message": "Confirmed by a live check."
+  },
+  "typeRowGuess": {
+    "message": "Guessed from the port — check it to be sure."
+  },
+  "typeRowScheme": {
+    "message": "Taken from the address scheme."
+  },
+  "tzRowOn": {
+    "message": "Page timezone: $1"
+  },
+  "tzRowLooking": {
+    "message": "Looking up the timezone of this address…"
+  },
+  "tzRowFail": {
+    "message": "Could not determine the timezone — pages keep the system one."
+  },
+  "tzRowIdle": {
+    "message": "Turns on together with the proxy."
+  },
+  "setFailoverT": {
+    "message": "Switch to the next on failure"
+  },
+  "setFailoverD": {
+    "message": "If the proxy stops responding, we take the next working one from the list."
+  },
+  "setReloadT": {
+    "message": "Reload tab on proxy change"
+  },
+  "setReloadD": {
+    "message": "The active page will reopen under the new address right away — when the proxy is turned on or switched, and when the site is toggled in the “Proxy for:” row. Hotkeys and automatic switching on failure do not reload the tab.",
+    "description": "7Б; 7Л (правка человека 20.09, 8): действует и для тумблера строки «Прокси для:» в попапе"
+  },
+  "setRestoreT": {
+    "message": "Restore state on startup"
+  },
+  "setRestoreD": {
+    "message": "When the browser opens, the connection comes back as it was."
+  },
+  "setMaskT": {
+    "message": "Hide passwords"
+  },
+  "setMaskD": {
+    "message": "Shown as dots until you press the eye."
+  },
+  "setSiteRowT": {
+    "message": "Rule for the current site in the extension window"
+  },
+  "setSiteRowD": {
+    "message": "The “Proxy for:” row in the window turns proxying on and off for the active tab’s site with one switch. The switch adds the site to the active list (black or white) or removes it from there, and also acts on the page’s third-party addresses (from request monitoring); while the lists are off the switch is locked. A rule is the same as adding the domain by hand and applies in every tab. The page’s subdomains and third-party hosts one by one are in the panel behind the site plate."
+  },
+  "setSiteTrackT": {
+    "message": "Page request monitoring"
+  },
+  "setSiteTrackD": {
+    "message": "The background records the hosts the tab contacted and failed requests — a browser error code or a 5xx response. The window shows the count of hosts without errors; the panel shows failure reasons and the request route: via proxy or direct. Data is kept in the browser’s temporary memory until it closes, erased when monitoring is turned off, and never sent anywhere. The requests of an address can be viewed via the “N requests” tag in the address panel.",
+    "description": "7Е: the wording “in the browser’s temporary memory” instead of jargon (same meaning — the temporary storage area lives until the browser closes); the rest — 7Ж/7Л as it was"
+  },
+  "setHotkeysT": {
+    "message": "Keyboard shortcuts",
+    "description": "The switch is the first row of the “Keyboard shortcuts” tab (7Д, decision of 19.09, item 6)"
+  },
+  "setHotkeysD": {
+    "message": "By default Ctrl+Shift+1 turns the proxy on and off, Ctrl+Shift+2 switches to the next one, Ctrl+Shift+5 opens the extension window. While the switch is off (the default), the shortcuts do nothing. You can change them on the browser’s shortcuts page — its address is shown below; clicking it copies the address.",
+    "description": "The three chords are the manifest defaults; the rows below show the live chords from the browser"
+  },
+  "hkSetT": {
+    "message": "Open the extension window"
+  },
+  "hkSetD": {
+    "message": "The extension window, the same as clicking the toolbar icon.",
+    "description": "Built-in _execute_action command — opens the popup, not the settings page (7Д)"
+  },
+  "hkOnT": {
+    "message": "Turn the proxy on or off"
+  },
+  "hkOnD": {
+    "message": "Turns on the active proxy from the list; press again to turn it off.",
+    "description": "One chord for both actions — the toggle-proxy command (7Д); the former hkOff* is gone"
+  },
+  "hkNextT": {
+    "message": "Next proxy"
+  },
+  "hkNextD": {
+    "message": "Switches to the next address in the list, round robin, skipping expired ones and those missing from the account.",
+    "description": "The next-proxy command (7Д)"
+  },
+  "hkNone": {
+    "message": "not assigned",
+    "description": "Chord cell on the shortcuts tab when the browser returned an empty chord (removed on the shortcuts page)"
+  },
+  "kbNote": {
+    "message": "Shortcuts are remapped in the browser: ",
+    "description": "Trailing space intended: the address button follows"
+  },
+  "kbFf": {
+    "message": "about:addons → \"Manage Extension Shortcuts\"",
+    "description": "Firefox is postponed, not rejected (decision 05.09): the key and the browser branches in code stay"
+  },
+  "copyAddr": {
+    "message": "Copy address",
+    "description": "One button in the hotkey settings and in the incognito help (the former help[4].btn \"Copy the address\" was merged here on 3Б.3): one action — copying a browser service address"
+  },
+  "addrCopied": {
+    "message": "Address copied — paste it into the address bar"
+  },
+  "webrtcWarn": {
+    "message": "Warning: sites will be able to see your real IP"
+  },
+  "luD": {
+    "message": "The mode is chosen here; the lists are kept independently — “Off” erases nothing."
+  },
+  "luBlackT": {
+    "message": "Black list",
+    "description": "7Л: заголовок блока чёрного списка на странице"
+  },
+  "luBlackD": {
+    "message": "Listed domains go direct, everything else goes via proxy."
+  },
+  "luWhiteT": {
+    "message": "White list",
+    "description": "7Л: заголовок блока белого списка на странице"
+  },
+  "luWhiteD": {
+    "message": "Only listed domains go via proxy."
+  },
+  "luActive": {
+    "message": "active",
+    "description": "7Л: метка на блоке списка выбранного режима"
+  },
+  "luMode": {
+    "message": "Mode"
+  },
+  "luModeD": {
+    "message": "<b>Off</b> — the lists are not in effect, all traffic goes via proxy. <b>Black</b> — the proxy works everywhere except the black-listed domains. <b>White</b> — only on the white-listed domains.",
+    "description": "Вставляется через innerHTML"
+  },
+  "luModeAria": {
+    "message": "List mode"
+  },
+  "luDomains": {
+    "message": "Domains — one per line"
+  },
+  "luImport": {
+    "message": "Import"
+  },
+  "luExport": {
+    "message": "Export"
+  },
+  "luClear": {
+    "message": "Clear list",
+    "description": "7Л (правка человека 20.09, 5): кнопка блока списка на странице — очистить поле; корзина"
+  },
+  "luClearAsk": {
+    "message": "Really clear?",
+    "description": "7Л (правка человека 20.09, 5): та же кнопка во взведённом состоянии — второй щелчок очищает"
+  },
+  "luMask": {
+    "message": "Masks are supported: <b>*.example.com</b> covers all subdomains. A line starting with “!” is an exception: <b>!img.example.com</b> takes the subdomain out of the example.com rule.",
+    "description": "Inserted via innerHTML"
+  },
+  "addDomainsFirst": {
+    "message": "Add domains first"
+  },
+  "listSaved": {
+    "message": "List saved to a file"
+  },
+  "noNewDomains": {
+    "message": "No new domains in the file"
+  },
+  "domainsAdded": {
+    "message": "Domains added: $1",
+    "description": "$1 — number of domains added"
+  },
+  "apiNone": {
+    "message": "not linked"
+  },
+  "apiUnlink": {
+    "message": "Unlink"
+  },
+  "keyUnlinked": {
+    "message": "Key unlinked"
+  },
+  "resetT": {
+    "message": "Reset settings"
+  },
+  "resetD": {
+    "message": "Only the switches are reset — here and on the “Hotkeys” tab. Proxies, notes, the key, the lists and expiry notifications stay.",
+    "description": "7К.2 (Д-3, text approved by the human 26.09): reset writes the ten switches, including hotkeys on the other tab; nothing else is touched"
+  },
+  "reset": {
+    "message": "Reset"
+  },
+  "resetAsk": {
+    "message": "Really reset?"
+  },
+  "resetDone": {
+    "message": "Settings reset"
+  },
+  "help0Tt": {
+    "message": "What can I paste?"
+  },
+  "help0S": {
+    "message": "Four record formats for the \"Bulk\" tab"
+  },
+  "help0Note": {
+    "message": "The extension understands four records — one proxy per line, and all of them are added at once. Click a format to copy it as a sample."
+  },
+  "help1Tt": {
+    "message": "How do I pull proxies from my account?"
+  },
+  "help1S": {
+    "message": "Keeping the list updated with an API key"
+  },
+  "help1Steps0": {
+    "message": "Sign in to your dashboard on <b>proxys.io</b>",
+    "description": "Inserted via innerHTML; <b> as in the prototype"
+  },
+  "help1Steps1": {
+    "message": "Open the <b>API</b> section and copy the key",
+    "description": "Inserted via innerHTML; <b> as in the prototype"
+  },
+  "help1Steps2": {
+    "message": "Paste it on the <b>\"By key\"</b> tab",
+    "description": "Inserted via innerHTML; <b> as in the prototype"
+  },
+  "help1Steps3": {
+    "message": "Expiry dates update on their own. New proxies from your account have to be added by hand."
+  },
+  "help1Note": {
+    "message": "Proxies loaded this way show their <b>country</b> and <b>expiry</b> — the ones you add by hand arrive without that data.",
+    "description": "Inserted via innerHTML; <b> as in the prototype"
+  },
+  "help2Tt": {
+    "message": "I bought mobile or residential proxies, they are not in the list"
+  },
+  "help2S": {
+    "message": "The key pulls datacenter proxies only"
+  },
+  "help2Note": {
+    "message": "Only datacenter proxies are pulled with the key. Mobile and residential ones are added by hand: take the address line from your dashboard and paste it on the <b>\"Bulk\"</b> tab. The address can be numeric — <b class=\"mono\">ip:port:login:password</b> — or a host name: <b class=\"mono\">proxy.example.com:8080</b>. The extension understands both.",
+    "description": "Inserted via innerHTML; <b> as in the prototype"
+  },
+  "help2Btn": {
+    "message": "Open \"Bulk\""
+  },
+  "help3Tt": {
+    "message": "I can only see some of my proxies"
+  },
+  "help3S": {
+    "message": "The shared key and a per-order key"
+  },
+  "help3Note": {
+    "message": "Your dashboard has one shared key for every proxy and a separate key for each order. A per-order key shows only that order. For the full list take the shared key from the <b>\"API\"</b> section.",
+    "description": "Inserted via innerHTML; <b> as in the prototype"
+  },
+  "help3Btn": {
+    "message": "Paste another key"
+  },
+  "help4Tt": {
+    "message": "It does not work in incognito"
+  },
+  "help4S": {
+    "message": "Why it matters and how to turn it on"
+  },
+  "help4Note": {
+    "message": "By default extensions do not run in incognito, so the proxy is not applied there — sites will see your real address. To turn it on, copy the settings address with the button below and paste it into the browser address bar."
+  },
+  "incogOff": {
+    "message": "currently not allowed",
+    "description": "Badge on the incognito help card when incognito access is not allowed (7Д)"
+  },
+  "incogWarn": {
+    "message": "In an incognito window the extension does not work — sites there see your real address. Allow it in the extension’s settings.",
+    "description": "Warning in the incognito help card, only while access is not allowed (7Д); fact from stage 2"
+  },
+  "help5Tt": {
+    "message": "Proxy not responding?"
+  },
+  "help5S": {
+    "message": "What to check when there is no connection"
+  },
+  "help5Steps0": {
+    "message": "Check the <b>login and password</b>: that is usually the cause",
+    "description": "Inserted via innerHTML; <b> as in the prototype"
+  },
+  "help5Steps1": {
+    "message": "Make sure the rental has not expired"
+  },
+  "help5Steps2": {
+    "message": "If your proxy provider restricts access by IP — <b>update your address</b> in their dashboard",
+    "description": "Inserted via innerHTML; <b> as in the prototype"
+  },
+  "help5Btns1": {
+    "message": "Open the proxy checker on proxys.io"
+  },
+  "help6Tt": {
+    "message": "Your IP is visible even with the proxy on?"
+  },
+  "help6S": {
+    "message": "WebRTC and DNS leaks — and how to close them"
+  },
+  "help6Notes0": {
+    "message": "The real address usually leaks through <b>WebRTC</b> — the browser opens a direct connection around the proxy. Turn on <span class=\"hl-ok\">\"Block WebRTC\"</span> in the settings and reload the tab.",
+    "description": "Inserted via innerHTML; <b> as in the prototype"
+  },
+  "help6Notes1": {
+    "message": "The second cause is <b>DNS</b>: your provider sees the queries even when traffic goes through the proxy. DNS-over-HTTPS in the browser settings helps.",
+    "description": "Inserted via innerHTML; <b> as in the prototype"
+  },
+  "help6Btn": {
+    "message": "Open the setting"
+  },
+  "help7Tt": {
+    "message": "Something is broken"
+  },
+  "help7S": {
+    "message": "Collect the details for support"
+  },
+  "help7Note": {
+    "message": "Press the button — the extension collects technical information and copies it. Paste the text into your support ticket, it speeds up the investigation a lot. Logins, passwords and the API key never get in."
+  },
+  "help7Btn": {
+    "message": "Copy diagnostics"
+  },
+  "hSupport": {
+    "message": "<b>Didn't find an answer?</b> proxys.io support replies within a couple of minutes.",
+    "description": "Inserted via innerHTML; <b> as in the prototype"
+  },
+  "hWrite": {
+    "message": "Contact us"
+  },
+  "geoTipMan": {
+    "message": "Only proxies from your account carry a country — it comes with the address via the API key. For a manually added one you can set it yourself.",
+    "description": "Page tip. Kept separate from the popup geoTipManPop on purpose: the popup has no country picker and must not promise the action (decision 03.09)"
+  },
+  "geoTipAuto": {
+    "message": "The country and city come from the address itself and are detected automatically. You can set the country by hand — your choice wins over the automatic one.",
+    "description": "Hint under the flag of a proxy whose country was filled in by geo.js (ccAuto)"
+  },
+  "geoTipSet": {
+    "message": "The country was set by hand. If this proxy turns out to be in your account, it will be replaced by the one that arrives with the key.",
+    "description": "Never promise the manual mark will stay: the account knows the country for sure, the person may have picked wrong. If the address turns out to be in the account the flag changes on its own — without this note the change would look like a bug"
+  },
+  "geoAriaSet": {
+    "message": "Country $1 — change",
+    "description": "$1 — country name"
+  },
+  "geoAriaPick": {
+    "message": "No country set — choose one"
+  },
+  "geoPickBtn": {
+    "message": "Pick a country flag by hand"
+  },
+  "geoChangeBtn": {
+    "message": "Change country"
+  },
+  "geoHeroT": {
+    "message": "Set the country — the picker opens in the list"
+  },
+  "gpAria": {
+    "message": "Proxy country"
+  },
+  "gpPh": {
+    "message": "Country or code"
+  },
+  "gpNone": {
+    "message": "Nothing found. Try the country code — NL, for example."
+  },
+  "gpClear": {
+    "message": "Clear country"
+  },
+  "geoLooking": {
+    "message": "Detecting the country…"
+  },
+  "geoFound": {
+    "message": "Country detected: $1",
+    "description": "$1 — country and city"
+  },
+  "geoNone": {
+    "message": "Could not detect the country of this address"
+  },
+  "geoMarked": {
+    "message": "Country set: $1",
+    "description": "$1 — country name"
+  },
+  "geoCleared": {
+    "message": "Country cleared"
+  },
+  "noteFormats2": {
+    "message": "Links like <b class=\"mono\">http://user:pass@ip:port</b> and host names such as <b class=\"mono\">proxy.example.com:8080</b> are understood too.",
+    "description": "Inserted via innerHTML"
+  },
+  "typeCheckBtn": {
+    "message": "Check type"
+  },
+  "noteProto": {
+    "message": "Type is detected from the scheme in the pasted line or from the port. You can change it before adding."
+  },
+  "tipSocks": {
+    "message": "Chrome cannot pass a login and password for SOCKS5. Use the HTTP port of the same proxy."
+  },
+  "tipHttps": {
+    "message": "HTTPS here means an encrypted connection to the proxy itself — a rare service the provider has to support separately. It does not affect whether sites open over https: they work through an ordinary HTTP proxy."
+  },
+  "noteGeoManual": {
+    "message": "You can set the country by hand in the list. For proxies from your account it fills in on its own."
+  },
+  "noteKey1": {
+    "message": "Shows the proxies from your account — you pick which ones to add. Added ones keep their expiry and country up to date on their own. The key is in your dashboard, section \"API\"."
+  },
+  "noteKey2": {
+    "message": "Only datacenter proxies are pulled automatically. A per-order key shows only that order — use the shared key to see them all."
+  },
+  "kShow": {
+    "message": "Show proxies"
+  },
+  "kLoading": {
+    "message": "Fetching the proxy list…"
+  },
+  "kErrBad": {
+    "message": "The key was not accepted. Check it in your dashboard."
+  },
+  "kErrExpired": {
+    "message": "The key has expired."
+  },
+  "kErrNet": {
+    "message": "Could not reach the server. If a proxy is on — try turning it off and repeat."
+  },
+  "kErrEmpty": {
+    "message": "No orders found for this key — the account has no proxies, the order is unpaid, or the key is invalid",
+    "description": "7И (human's edit 24.09): API code 1002 “Orders not found” — the fourth key failure (kind 'empty' from api.js); same path as kErrBad — the key is not linked. The same sentence is used by the popup's “key” card (nKeyEmptyT) when a refresh by key got 1002. 7К.3 (human's decision 28.09 after the developers' answer): without “the key is accepted”"
+  },
+  "kRetry": {
+    "message": "Try again"
+  },
+  "kChangeKey": {
+    "message": "Change key"
+  },
+  "kEmpty": {
+    "message": "No datacenter proxies found for this key. Mobile and residential proxies are not pulled automatically yet — add them by hand on the \"Bulk\" or \"Fields\" tab."
+  },
+  "kFound_one": {
+    "message": "$1 proxy found in your account",
+    "description": "$1 — count in the account; form picked by msgN() via Intl.PluralRules"
+  },
+  "kFound_few": {
+    "message": "$1 proxies found in your account",
+    "description": "$1 — count in the account; form picked by msgN() via Intl.PluralRules"
+  },
+  "kFound_many": {
+    "message": "$1 proxies found in your account",
+    "description": "$1 — count in the account; form picked by msgN() via Intl.PluralRules"
+  },
+  "kFound_other": {
+    "message": "$1 proxies found in your account",
+    "description": "$1 — count in the account; form picked by msgN() via Intl.PluralRules"
+  },
+  "kSelAll": {
+    "message": "Select all"
+  },
+  "kSelNone": {
+    "message": "Clear all"
+  },
+  "kAddSel": {
+    "message": "Add selected ($1)",
+    "description": "$1 — number of selected rows"
+  },
+  "kAddAll": {
+    "message": "Add all"
+  },
+  "kHad": {
+    "message": "already added"
+  },
+  "kExpOut": {
+    "message": "expired"
+  },
+  "kUntil": {
+    "message": "until $1",
+    "description": "$1 — expiry date (toLocaleDateString)"
+  },
+  "accAdded": {
+    "message": "$1 of $2 account proxies added",
+    "description": "$1 — added from the account, $2 — total in the account"
+  },
+  "accFresh": {
+    "message": "New in your account: $1",
+    "description": "$1 — new in the account"
+  },
+  "accUnlinkNote": {
+    "message": "Unlinking will not delete the proxies you added — they stay and keep working. The automatic expiry and country updates stop."
+  },
+  "accShow": {
+    "message": "Show proxies from account"
+  },
+  "webrtcDeny": {
+    "message": "Blocking WebRTC needs the browser's permission. Turn the switch on and confirm the request."
+  },
+  "webrtcOk": {
+    "message": "Permission granted — WebRTC is blocked"
+  },
+  "diagCopied": {
+    "message": "Diagnostics copied — paste it into your ticket"
+  },
+  "needProxyFirst": {
+    "message": "Add a proxy first"
+  },
+  "respOk": {
+    "message": "Working",
+    "description": "Toast checkActive (frozen block, the button was removed in 7В). Do not merge with the frozen cqOk (decision 05.09)"
+  },
+  "diagHead": {
+    "message": "proxys.io — extension diagnostics",
+    "description": "Diagnostics — text for a support ticket. diag* keys are never merged with interface keys (decision 07.09): editing a screen label must not silently change the report format"
+  },
+  "diagDate": {
+    "message": "Date"
+  },
+  "diagBrowser": {
+    "message": "Browser"
+  },
+  "diagVer": {
+    "message": "Extension version"
+  },
+  "diagIncognito": {
+    "message": "Allowed in incognito",
+    "description": "Diagnostics line: “Allowed in incognito: yes / no” from chrome.extension.isAllowedIncognitoAccess (7Д)"
+  },
+  "diagInList": {
+    "message": "Proxies in the list"
+  },
+  "diagByKey": {
+    "message": "by key"
+  },
+  "diagByHand": {
+    "message": "by hand"
+  },
+  "diagKey": {
+    "message": "API key",
+    "description": "Do not merge with apiKey (decision 07.09)"
+  },
+  "diagLinked": {
+    "message": "linked"
+  },
+  "diagUnlinked": {
+    "message": "not linked",
+    "description": "Do not merge with apiNone (decision 07.09)"
+  },
+  "diagConn": {
+    "message": "Connection",
+    "description": "Do not merge with capConn (decision 07.09)"
+  },
+  "diagOn": {
+    "message": "on"
+  },
+  "diagOff": {
+    "message": "off"
+  },
+  "diagAct": {
+    "message": "Active proxy"
+  },
+  "diagFromAcc": {
+    "message": "from the account"
+  },
+  "diagAdded": {
+    "message": "added by hand"
+  },
+  "diagGone": {
+    "message": "not in account",
+    "description": "Do not merge with naccT (decision 07.09)"
+  },
+  "diagCountry": {
+    "message": "country"
+  },
+  "diagNoCountry": {
+    "message": "not determined"
+  },
+  "diagNone": {
+    "message": "none",
+    "description": "Do not merge with diagNo: only the Russian text coincides"
+  },
+  "diagLast": {
+    "message": "Last response"
+  },
+  "diagNotMeasured": {
+    "message": "not measured"
+  },
+  "diagWebrtc": {
+    "message": "Block WebRTC",
+    "description": "Do not merge with setWebrtcT (decision 07.09)"
+  },
+  "diagDenied": {
+    "message": "browser refused permission"
+  },
+  "diagVerify": {
+    "message": "Test on connect"
+  },
+  "diagFailover": {
+    "message": "Switch over on drop"
+  },
+  "diagReload": {
+    "message": "Reload tab on change"
+  },
+  "diagRestore": {
+    "message": "Restore on startup"
+  },
+  "diagLists": {
+    "message": "Domain lists"
+  },
+  "diagBlack": {
+    "message": "black",
+    "description": "Lower-case form inside the line; do not merge with luBlack (decision 03.09)"
+  },
+  "diagWhite": {
+    "message": "white",
+    "description": "Lower-case form inside the line; do not merge with luWhite (decision 03.09)"
+  },
+  "diagListsOff": {
+    "message": "disabled",
+    "description": "Lower-case form inside the diagnostics line. Not the popup listsOff (\"Domain lists disabled\") — before flattening this was a name clash"
+  },
+  "diagInBlack": {
+    "message": "in black",
+    "description": "7Л: строка диагностики «в чёрном N, в белом M»"
+  },
+  "diagInWhite": {
+    "message": "in white"
+  },
+  "diagValid": {
+    "message": "valid",
+    "description": "7Л: строка диагностики — правил по normalizeDomains в действующем списке"
+  },
+  "diagSkipped": {
+    "message": "skipped",
+    "description": "7Л: строка диагностики — строк, из которых имя не получилось (skipped)"
+  },
+  "diagYes": {
+    "message": "yes"
+  },
+  "diagNo": {
+    "message": "no",
+    "description": "Do not merge with diagNone: only the Russian text coincides"
+  },
+  "errOtherExt": {
+    "message": "Another extension controls the proxy settings — disable it and try again",
+    "description": "Stage 4: background reply controlled_by_other_extensions on enable"
+  },
+  "errNotControllable": {
+    "message": "Proxy control is unavailable — organisation policy or browser startup settings",
+    "description": "Stage 4: background reply not_controllable. Deliberately generic (master prompt 3.11): the causes cannot be told apart by value"
+  },
+  "errEnable": {
+    "message": "Could not enable the proxy",
+    "description": "Stage 4: any other background refusal on enable (proxy not in the list, settings could not be built)"
+  },
+  "errNoAnswer": {
+    "message": "The extension background did not respond — reload the extension",
+    "description": "Stage 4: message to the background got no reply"
+  },
+  "errStorage": {
+    "message": "Could not save the extension data",
+    "description": "Stage 4: storage write failed"
+  },
+  "addedSkipped": {
+    "message": "Added: $1, lines not recognised: $2",
+    "description": "Stage 4: $1 — proxies added, $2 — lines that could not be parsed; on the page they stay in the field"
+  },
+  "urlCart": {
+    "message": "/en/cart",
+    "description": "Stage 4: the proxys.io cart address for the “Buy proxies” button (#btnBuy); ru — /ru/cart. Addresses given by the human on 08.09, no UTM. 7Е: renewal (“Renew” on a proxy and the expiry chip in the hero) leads to the dashboard (urlMy), not here"
+  },
+  "urlChecker": {
+    "message": "/en/proxy-checker",
+    "description": "Stage 4: proxy checker address for the help button (help5Btns1); ru — /ru/proxy-checker. Verified 05.09, no redirect"
+  },
+  "badAddr": {
+    "message": "The address does not look like an IP or a host name",
+    "description": "Stage 4: “Fields” form and row editing — address filled in but not parseable: IPv4 not made of four 0…255 octets, host name with invalid characters. Empty address — needAddrPort"
+  },
+  "accKeyDead": {
+    "message": "The key no longer works — updates are stopped. Check it in your account or paste a new one",
+    "description": "Stage 6: line under the key in the page settings when the scheduled refresh got a key refusal (account.error = 'bad' or 'expired'). The key is not erased, proxies are untouched, the alarm is cleared; linking a key again removes the line. A notification about it — stage 7. For 'empty' — accKeyEmpty (7К.2)"
+  },
+  "accKeyEmpty": {
+    "message": "No orders found for this key, or the key is invalid — updates are stopped. Check the key in your account; when an order appears, press “Refresh now”.",
+    "description": "7К.2 (Д-11, text approved by the human 26.09): line under the key when account.error = 'empty' (API code 1002 — the account has no orders or the order is unpaid); the key is not erased, the alarm is cleared, “Refresh now” asks again. accKeyDead stays for 'bad' and 'expired'. 7К.3 (human's decision 28.09 after the developers' answer): without “the key is accepted”"
+  },
+  "setAutoUpdateT": {
+    "message": "Refresh the list from your account",
+    "description": "Stage 6 (decision of 10.09, deviation from the prototype): settings.autoUpdate toggle in the Account block of settings, under the key; key name is built by swRow from 'autoUpdate'"
+  },
+  "setAutoUpdateD": {
+    "message": "Every six hours we pull expiry dates, countries, logins and passwords for the proxies you added and mark the ones that are no longer in your account. Nothing is added or removed"
+  },
+  "diagAutoUpdate": {
+    "message": "Refresh from account",
+    "description": "Diagnostics line next to verify; do not merge with setAutoUpdateT (decision of 07.09)"
+  },
+  "accRefresh": {
+    "message": "Refresh now",
+    "description": "Stage 6 (decision of 10.09): button next to the “Refresh the list from your account” toggle, shown only with a linked key; keyRefresh command to the background"
+  },
+  "accRefreshed_one": {
+    "message": "List refreshed: $1 entry",
+    "description": "$1 — number of entries in the account after “Refresh now”; form picked by msgN() via Intl.PluralRules"
+  },
+  "accRefreshed_few": {
+    "message": "List refreshed: $1 entries",
+    "description": "$1 — number of entries in the account after “Refresh now”; form picked by msgN() via Intl.PluralRules"
+  },
+  "accRefreshed_many": {
+    "message": "List refreshed: $1 entries",
+    "description": "$1 — number of entries in the account after “Refresh now”; form picked by msgN() via Intl.PluralRules"
+  },
+  "accRefreshed_other": {
+    "message": "List refreshed: $1 entries",
+    "description": "$1 — number of entries in the account after “Refresh now”; form picked by msgN() via Intl.PluralRules"
+  },
+  "nFailoverT": {
+    "message": "Proxy not responding — switched over",
+    "description": "7Б: title of the system notification (chrome.notifications) on a drop with the “Switch to the next on failure” toggle on, when a replacement was found in the list"
+  },
+  "nFailoverS": {
+    "message": "$1 → $2",
+    "description": "7Б: body of the same notification; $1 — address of the proxy that stopped responding, $2 — address switched to (address:port)"
+  },
+  "nFailoverNoneT": {
+    "message": "Proxy not responding",
+    "description": "7Б: title of the system notification on a drop with the “Switch to the next on failure” toggle on, when no working replacement was found in the list"
+  },
+  "nFailoverNoneS": {
+    "message": "No working proxy found in the list — check the addresses",
+    "description": "7Б: body of the same notification"
+  },
+  "diagProbeFail": {
+    "message": "failed",
+    "description": "7В: diagnostics line “Last response” — the on-connect check got no image response (network, proxy refusal, timeout, ISP stub page); followed by the date. Lower-case form inside the line; never merged with interface keys (decision 07.09)"
+  },
+  "diagProbeOff": {
+    "message": "check disabled",
+    "description": "7В: the same line when the “Test proxy on connect” toggle is off. Lower-case form; do not merge with setVerifyT or diagVerify (decision 07.09)"
+  },
+  "diagProbeMs": {
+    "message": "$1 ms",
+    "description": "7В: the same line after a successful check; $1 — response in ms, followed by the date. Diagnostics only, never shown on screen (decision 29.08); do not merge with the frozen chkMs, msN, cqMs"
+  },
+  "diagSiteUnreachable": {
+    "message": "proxys.io is unreachable through this proxy — account refresh and the key will not work while it is on",
+    "description": "7В (human decision 11.09, fifth issue): a separate diagnostics line after “Last response” when the on-connect check got answers only from the third-party connectivity addresses (state.probeSiteDown) — the proxy is alive, the site is not visible from its country; never shown on screen. Never merged with interface keys (decision 07.09)"
+  },
+  "diagControl": {
+    "message": "Proxy setting control",
+    "description": "7Е: diagnostics line — the raw state.levelOfControl (controlled_by_this_extension / controllable_by_this_extension / controlled_by_other_extensions / not_controllable), “?” if the background has not written it yet; do not merge with errOtherExt/errNotControllable (decision of 07.09)"
+  },
+  "diagMask": {
+    "message": "Hide passwords",
+    "description": "7Е: diagnostics line — the settings.mask switch; do not merge with setMaskT (decision of 07.09)"
+  },
+  "diagSiteRow": {
+    "message": "Site rule in the window",
+    "description": "7Е: diagnostics line — the settings.siteRow switch (the “Proxy for:” row in the window); do not merge with setSiteRowT (decision of 07.09)"
+  },
+  "diagSiteTrack": {
+    "message": "Page request monitoring",
+    "description": "7Е: diagnostics line — the settings.siteTrack switch; do not merge with setSiteTrackT (decision of 07.09)"
+  },
+  "diagHotkeys": {
+    "message": "Keyboard shortcuts",
+    "description": "7Е: diagnostics line — the settings.hotkeys switch (7Д); do not merge with setHotkeysT (decision of 07.09)"
+  },
+  "diagLastError": {
+    "message": "Last error",
+    "description": "7Е: diagnostics line — state.lastError as a raw code (auth / dead) or diagNone"
+  },
+  "diagEvents": {
+    "message": "Recent events",
+    "description": "7Е: diagnostics block heading — up to five latest background events from notifs.events as “kind — date” lines (lost / healed), no addresses; none — diagNone"
+  },
+  "diagRemote": {
+    "message": "Messages file",
+    "description": "7И (p. 8): heading of the diagnostics line about the proxys.io messages file (remote cache) — like diagEvents; value — diagRemoteGot / diagRemoteNone / diagRemoteFail; no addresses in the line. Not to be merged with UI keys (decision 07.09)"
+  },
+  "diagRemoteGot": {
+    "message": "$1, domain $2, fetched $3",
+    "description": "7И: value of diagRemote when there is a cache: $1 — number of messages in the cache (all languages), $2 — link domain from the file (site; default host when absent), $3 — date of the last successful fetch in the browser locale"
+  },
+  "diagRemoteNone": {
+    "message": "none",
+    "description": "7И: value of diagRemote when no fetch has happened yet (no remote key). Not to be merged with diagNo: only the Russian coincides; with diagNone — the human’s decision 26.09: do not merge"
+  },
+  "diagRemoteFail": {
+    "message": "fetch failed",
+    "description": "7И: value of diagRemote when there is no cache and the last fetch failed (remote.error 'net' — server unreachable, 'schema' — file newer than our format; not distinguished in the text)"
+  },
+  "diagMigrate": {
+    "message": "Data migration from previous version",
+    "description": "Stage 8: heading of the diagnostics line about migrating data from version 1.4.7.11 (after the diagKey line) — like diagRemote; value — diagMigrateDone / diagMigrateNone / diagMigrateFail; no addresses, logins or passwords in the line. Not to be merged with UI keys (decision 07.09)"
+  },
+  "diagMigrateDone": {
+    "message": "done $1",
+    "description": "Stage 8: value of diagMigrate when state.migratedAt is set (written only by the migration in one operation with the data): $1 — date and time of the migration in the browser locale"
+  },
+  "diagMigrateNone": {
+    "message": "not needed",
+    "description": "Stage 8: value of diagMigrate when there is no migratedAt field and no previous-version keys in the storage — a clean install. Not to be merged with diagNo / diagNone / diagRemoteNone"
+  },
+  "diagMigrateFail": {
+    "message": "previous-version data found, migration not done",
+    "description": "Stage 8: value of diagMigrate when there is no migratedAt field but previous-version keys exist in the storage — the storage is in the “legacy” state, the migration failed (reason in the worker console), the extension works as before the migration; retried at the next worker start"
+  },
+  "urlMy": {
+    "message": "/en/my",
+    "description": "7Г: the proxys.io dashboard address for “Renew” in the popup notification panel (developers’ answer of 15.09: there is no separate renewal address, renewal starts from the dashboard page); ru — /ru/my. 7Е: on the page “Renew” in the row menu and in the expired chip and the expiry chip in the hero (#heroExp) lead here too; the cart (urlCart) stays with the “Buy proxies” button"
+  },
+  "urlContacts": {
+    "message": "/en/contacts",
+    "description": "7Е: the proxys.io contacts page for the “Contact us” button (#hSupport) at the bottom of Help — opens in a tab, like the cart and the checker; ru — /ru/contacts, uk = ru. The previous “Opening the proxys.io support chat” toast and its key are removed (no consumer left)"
+  },
+  "nLostT": {
+    "message": "Proxy $1 is not responding",
+    "description": "7Г: title of the notification panel card about a drop with a switch-over (background event 'lost', only with the “Switch to the next on failure” toggle on); $1 — address of the proxy that stopped responding"
+  },
+  "nLostS": {
+    "message": "Switched to $1",
+    "description": "7Г: body of the same card when a replacement was found; $1 — address switched to"
+  },
+  "nLostNoneS": {
+    "message": "No working proxy was found",
+    "description": "7Г: body of the drop card when no replacement was found in the list — the connection stays down"
+  },
+  "nGoneT": {
+    "message": "Proxy $1 is gone from your account",
+    "description": "7Г: title of the card about an account proxy the key refresh no longer finds (gone); $1 — proxy address"
+  },
+  "nGoneS": {
+    "message": "Its expiry and country will no longer update",
+    "description": "7Г: body of the same card; the proxy is not removed from the list (3.7), the card goes away by itself when the proxy is deleted or returns to the account"
+  },
+  "nReplacedT": {
+    "message": "Proxy $1 replaced with $2",
+    "description": "7Г: title of the card about a gone proxy whose order has a new address in the account that is not in the list; $1 — old address, $2 — new one"
+  },
+  "nReplacedS": {
+    "message": "A new address in the same order — add it",
+    "description": "7Г: body of the same card; the “Show” button opens the account proxy picker"
+  },
+  "nKeyT": {
+    "message": "The API key no longer works",
+    "description": "7Г: title of the card when the key refresh got a key refusal (account.error 'bad' or 'expired'); the “Settings” button opens the base settings tab of the page, where the accKeyDead line is"
+  },
+  "nKeyS": {
+    "message": "Updates are stopped — check the key in your account",
+    "description": "7Г: body of the same card; the key is not erased, proxies are untouched"
+  },
+  "nKeyEmptyT": {
+    "message": "No orders found for this key",
+    "description": "7И (human's edit 24.09): title of the popup's “key” card when account.error is 'empty' (API code 1002) instead of nKeyT; the card text is kErrEmpty (the same reason as on the page); the “Settings” button — as for nKeyT. 7К.3 (human's decision 28.09 after the developers' answer): without “the key is accepted”"
+  },
+  "nHealedT": {
+    "message": "Password for $1 updated from your account",
+    "description": "7Г: title of the card about successful self-healing (background event 'healed', 6.1): the proxy rejected the login and password, the password was taken from the account, reconnected; $1 — proxy address"
+  },
+  "nHealedS": {
+    "message": "The proxy works again",
+    "description": "7Г: body of the same card"
+  },
+  "nClose": {
+    "message": "Close",
+    "description": "7Г: tooltip of the close button on cards that close for good (not responding, self-healing, key no longer works, gone, replaced); expiry cards use nHideDay, “new in your account” uses nHide (decision 17.09)"
+  },
+  "siteFor": {
+    "message": "Proxy for:"
+  },
+  "notSite": {
+    "message": "No website on this tab"
+  },
+  "loadedOf_one": {
+    "message": "of $1 address"
+  },
+  "loadedOf_few": {
+    "message": "of $1 addresses"
+  },
+  "loadedOf_many": {
+    "message": "of $1 addresses"
+  },
+  "loadedOf_other": {
+    "message": "of $1 addresses"
+  },
+  "loadTipOk": {
+    "message": "Addresses (hosts) the page contacted: $1. No requests failed."
+  },
+  "loadTipFail": {
+    "message": "Addresses: $1, without errors: $2. Failed:"
+  },
+  "stVia": {
+    "message": "via proxy"
+  },
+  "stDirect": {
+    "message": "direct"
+  },
+  "stPowerOff": {
+    "message": "proxy is off"
+  },
+  "stListsOff": {
+    "message": "lists are off",
+    "description": "7Л (п. 7): короткое состояние строки при «Выкл» — тумблер включён и заперт"
+  },
+  "whyLists": {
+    "message": "Lists are off — all traffic goes via proxy; to manage sites, turn on the black or the white list",
+    "description": "7Л (п. 7): ⓘ строки при «Выкл»; короткое состояние — stListsOff"
+  },
+  "whyNoExt": {
+    "message": "The page’s third-party addresses are unknown — turn on request monitoring",
+    "description": "7Л: третья строка ⓘ строки, когда мониторинг запросов выключен (тумблер тогда правит только сайт)"
+  },
+  "whyNoExtData": {
+    "message": "The page’s third-party addresses are unknown — reload the page",
+    "description": "7Л: то же при включённом мониторинге без данных о вкладке"
+  },
+  "whyEmptyBlack": {
+    "message": "The black list is empty — all traffic goes via proxy",
+    "description": "7Л (В8): ⓘ строки при режиме «Чёрный» без годных правил в чёрном списке"
+  },
+  "whyModeBlack": {
+    "message": "Black list — all sites go via proxy except the listed ones",
+    "description": "этап 9 (правка человека 29.09): вторая строка ⓘ строки «Прокси для:» при режиме «Чёрный» — чем правит режим, одной строкой (вместо extNote)"
+  },
+  "whyModeWhite": {
+    "message": "White list — only the listed sites go via proxy",
+    "description": "этап 9 (правка человека 29.09): то же при режиме «Белый»; при пустом белом списке — единственная строка ⓘ (прежний ключ «Белый список пуст…» снят решением человека 29.09)"
+  },
+  "whyBlackIn": {
+    "message": "Direct: the black list has the rule “$1”"
+  },
+  "whyBlackOut": {
+    "message": "Via proxy: the black list has no rule for this address"
+  },
+  "whyWhiteIn": {
+    "message": "Via proxy: the white list has the rule “$1”"
+  },
+  "whyWhiteOut": {
+    "message": "Direct: the white list has no rule for this address"
+  },
+  "whyLocal": {
+    "message": "Local address — the browser always connects to it directly, bypassing the proxy and the lists"
+  },
+  "whyPower": {
+    "message": "The proxy is off — all traffic goes direct; lists apply only while the proxy is on"
+  },
+  "powerFirst": {
+    "message": "Turn the proxy on first"
+  },
+  "scopeTip": {
+    "message": "Open the panel: the page’s subdomains and third-party addresses"
+  },
+  "siteAria": {
+    "message": "Proxy applies to this site"
+  },
+  "panelTitle": {
+    "message": "Page addresses"
+  },
+  "secSubs": {
+    "message": "Subdomains"
+  },
+  "secExt": {
+    "message": "Third-party addresses"
+  },
+  "secFails_one": {
+    "message": "$1 failure"
+  },
+  "secFails_few": {
+    "message": "$1 failures"
+  },
+  "secFails_many": {
+    "message": "$1 failures"
+  },
+  "secFails_other": {
+    "message": "$1 failures"
+  },
+  "requests_one": {
+    "message": "$1 request"
+  },
+  "requests_few": {
+    "message": "$1 requests"
+  },
+  "requests_many": {
+    "message": "$1 requests"
+  },
+  "requests_other": {
+    "message": "$1 requests"
+  },
+  "failAll": {
+    "message": "failed"
+  },
+  "failPart": {
+    "message": "partially"
+  },
+  "failTip": {
+    "message": "$1: $2 of $3 requests failed — $4"
+  },
+  "tagBlocked": {
+    "message": "blocked by another extension or policy"
+  },
+  "errTimeout": {
+    "message": "timed out"
+  },
+  "errReset": {
+    "message": "connection reset"
+  },
+  "errRefused": {
+    "message": "connection refused"
+  },
+  "errDns": {
+    "message": "name not found (DNS)"
+  },
+  "errOffline": {
+    "message": "no network"
+  },
+  "errProxy": {
+    "message": "no connection to the proxy"
+  },
+  "errTunnel": {
+    "message": "the proxy did not open a tunnel to the site"
+  },
+  "errCert": {
+    "message": "certificate error"
+  },
+  "errHttp": {
+    "message": "server replied $1"
+  },
+  "errHttpProxy": {
+    "message": "proxy replied $1"
+  },
+  "errOther": {
+    "message": "connection failure ($1)"
+  },
+  "routeVia": {
+    "message": "last request — via proxy"
+  },
+  "routeDirect": {
+    "message": "last request — direct"
+  },
+  "extNote": {
+    "message": "A rule applies in every tab: the script decides each request by its address, not by the page.",
+    "description": "7Л (В3): одна фраза без предупреждений — подпись раздела «Сторонние адреса» и ⓘ у его строк (этап 9: из ⓘ строки «Прокси для:» ушла — там whyModeBlack / whyModeWhite)"
+  },
+  "trackOff": {
+    "message": "Page request monitoring is off — third-party hosts and failures are not shown."
+  },
+  "trackOn": {
+    "message": "Turn on in settings"
+  },
+  "noData": {
+    "message": "No request data for this page yet — reload it."
+  },
+  "thisTab": {
+    "message": "this tab"
+  },
+  "asSite": {
+    "message": "as the whole site"
+  },
+  "coveredBy": {
+    "message": "covered by rule $1"
+  },
+  "modeBlack": {
+    "message": "Black list: listed domains go direct, the rest go via proxy. A rule applies in all tabs."
+  },
+  "modeWhite": {
+    "message": "White list: only listed domains go via proxy, the rest go direct. A rule applies in all tabs."
+  },
+  "modeOff": {
+    "message": "Lists are off — all traffic goes via proxy. To manage sites, turn on the black or the white list."
+  },
+  "modePower": {
+    "message": "The proxy is off — all traffic goes direct; lists apply only while the proxy is on."
+  },
+  "allLists": {
+    "message": "All lists — in settings"
+  },
+  "tBypass": {
+    "message": "Bypassing proxy: $1"
+  },
+  "tVia": {
+    "message": "Via proxy: $1"
+  },
+  "listFull": {
+    "message": "The list is full — free up space in settings"
+  },
+  "stViaExc": {
+    "message": "via proxy — exception"
+  },
+  "stDirectExc": {
+    "message": "direct — exception"
+  },
+  "whyExcVia": {
+    "message": "Via proxy: the exception “!$1” takes the address out of the black-list rule “$2”"
+  },
+  "whyExcDirect": {
+    "message": "Direct: the exception “!$1” takes the address out of the white-list rule “$2”"
+  },
+  "secOf": {
+    "message": "$1 of $2"
+  },
+  "setNotifScopeT": {
+    "message": "Expiry notifications",
+    "description": "7З: title of the “Account” block row on the settings page — scope of expiry notifications (settings.notifScope), a four-position segmented selector"
+  },
+  "setNotifScopeD": {
+    "message": "Which proxies to warn about when the rental is about to expire or has expired: a card in the notification panel and the number on the icon.",
+    "description": "7З: description of the same row (user’s change 22.09, 2: the list of positions was dropped — clear enough as is)"
+  },
+  "setNotifScopeOff": {
+    "message": "Off",
+    "description": "7З: selector position — no expiry cards at all (other notifications stay)"
+  },
+  "setNotifScopeAdded": {
+    "message": "Added",
+    "description": "7З: selector position — only proxies from the list (default, as before 7З)"
+  },
+  "setNotifScopePicked": {
+    "message": "Selected",
+    "description": "7З: selector position — only the addresses marked with the bell in the row’s drop-down (settings.notifWatch), among all key proxies"
+  },
+  "setNotifScopeAll": {
+    "message": "All in account",
+    "description": "7З: selector position — the whole list plus all account addresses"
+  },
+  "accNotifNoKey": {
+    "message": "API key required",
+    "description": "7З: tooltip of the locked positions “Selected” and “All in account” while no key is linked"
+  },
+  "accNotifNoKeyD": {
+    "message": "“Selected” and “All in account” work only with an API key linked",
+    "description": "7З: line under the selector description without a key; the stored position then acts as “Added”"
+  },
+  "accNotifOfN": {
+    "message": "$1 of $2 marked",
+    "description": "7З (user’s change 22.09, 1): caption of the closed proxy drop-down in the “Expiry notifications” row; $1 — how many bells are on, $2 — how many key proxies (manual ones not counted)"
+  },
+  "accNotifDd": {
+    "message": "Proxies and expiry notifications",
+    "description": "7З: aria-label of the button that opens the proxy drop-down with bells"
+  },
+  "accNotifAcc": {
+    "message": "in account",
+    "description": "7З: caption of a drop-down row for an account address that is not in the proxy list"
+  },
+  "accNotifManual": {
+    "message": "manual",
+    "description": "7З: caption of a drop-down row for a proxy added by hand — it has no expiry, the row is locked"
+  },
+  "accNotifNone": {
+    "message": "No proxies yet",
+    "description": "7З: the proxy drop-down is empty — nothing in the list and nothing in the account"
+  },
+  "accNotifMark": {
+    "message": "Notify about this proxy’s expiry",
+    "description": "7З: tooltip of a drop-down row at “Selected” while the address is not marked"
+  },
+  "accNotifUnmark": {
+    "message": "Stop notifying about this proxy’s expiry",
+    "description": "7З: tooltip of the same row for a marked address"
+  },
+  "accNotifLimit": {
+    "message": "$1 proxies already marked — that is the limit",
+    "description": "7З: toast when marking beyond the notifWatch limit; $1 — the limit (NOTIF_WATCH_MAX)"
+  },
+  "nExpand": {
+    "message": "Expand",
+    "description": "7З (user’s change 22.09, 4): tooltip of the corner arrow of an expandable card (an order with several addresses, the summary) — show the rows; a click anywhere on the card expands too; window memory, collapsed next time the panel opens"
+  },
+  "nCollapse": {
+    "message": "Collapse",
+    "description": "7З: the same arrow on an expanded card"
+  },
+  "nLevelExpiredT": {
+    "message": "Expired",
+    "description": "7З (user’s mockup 22.09): title of the expired-proxies table card (kind badAll); red"
+  },
+  "nLevelSoonT": {
+    "message": "Expiring",
+    "description": "7З: title of the expiring table card (kind warnAll, within EXP_WARN_DAYS); yellow"
+  },
+  "nLevelOrders_one": {
+    "message": "$1 order",
+    "description": "7З: table header caption — number of orders (rows); $1 — number, form picked by msgN(); followed by “ · ” nLevelProxies and, for expiring, nLevelNearest"
+  },
+  "nLevelOrders_few": {
+    "message": "$1 orders",
+    "description": "7З: same, few"
+  },
+  "nLevelOrders_many": {
+    "message": "$1 orders",
+    "description": "7З: same, many"
+  },
+  "nLevelOrders_other": {
+    "message": "$1 orders",
+    "description": "7З: same, other"
+  },
+  "nLevelProxies_one": {
+    "message": "$1 proxy",
+    "description": "7З: table header caption and row tag — number of proxies; $1 — number, form picked by msgN() (7К.2, Ж-3)"
+  },
+  "nLevelProxies_few": {
+    "message": "$1 proxies",
+    "description": "7К.2 (Ж-3): same, few (not used by English plural rules)"
+  },
+  "nLevelProxies_many": {
+    "message": "$1 proxies",
+    "description": "7К.2 (Ж-3): same, many (not used by English plural rules)"
+  },
+  "nLevelProxies_other": {
+    "message": "$1 proxies",
+    "description": "7К.2 (Ж-3): same, other"
+  },
+  "nLevelNearest": {
+    "message": "soonest $1",
+    "description": "7З: tail of the “Expiring” header caption — the nearest expiry; $1 — short form (nAgo* / nToday / nTomorrow / nInDays*)"
+  },
+  "nAgo_one": {
+    "message": "$1 day ago",
+    "description": "7З: expiry in an “Expired” table row — how many days ago (the word “expired” is in the header); $1 — days, form picked by msgN(); yesterday — nAgoYesterday"
+  },
+  "nAgo_few": {
+    "message": "$1 days ago",
+    "description": "7З: same, few"
+  },
+  "nAgo_many": {
+    "message": "$1 days ago",
+    "description": "7З: same, many"
+  },
+  "nAgo_other": {
+    "message": "$1 days ago",
+    "description": "7З: same, other"
+  },
+  "nAgoYesterday": {
+    "message": "yesterday",
+    "description": "7З: expiry in a table row — expired yesterday"
+  },
+  "nToday": {
+    "message": "today",
+    "description": "7З: expiry in an “Expiring” table row — expires today"
+  },
+  "nTomorrow": {
+    "message": "tomorrow",
+    "description": "7З: expiry in a table row — expires tomorrow (expShTomorrow is the chip abbreviation; here the full word)"
+  },
+  "nInDays_one": {
+    "message": "$1 day",
+    "description": "7З: expiry in an “Expiring” table row — in how many days (the word “expires” is in the header); $1 — days, form picked by msgN()"
+  },
+  "nInDays_few": {
+    "message": "$1 days",
+    "description": "7З: same, few"
+  },
+  "nInDays_many": {
+    "message": "$1 days",
+    "description": "7З: same, many"
+  },
+  "nInDays_other": {
+    "message": "$1 days",
+    "description": "7З: same, other"
+  },
+  "nRenewCabinet": {
+    "message": "Renew in your account",
+    "description": "7З (mockup 22.09): the only button of an expanded expiry table — the proxys.io account page (urlMy), one per level: every “Renew” led to the same page"
+  },
+  "nNotAddedTip": {
+    "message": "Not added to the list",
+    "description": "7З: tooltip of the icon (dashed circle with a plus) next to an account address that is not in the proxy list"
+  },
+  "nNotAdded": {
+    "message": "not added",
+    "description": "7З: caption in the plate of an address that exists only in the account (not in the proxy list); the plate’s arrow opens the account pick screen"
+  },
+  "noteProtoSocks": {
+    "message": "Chrome cannot pass a login and password for SOCKS5 or SOCKS4. Use a proxy with IP authorization, or add its HTTP port."
+  },
+  "typeExactTip": {
+    "message": "Proxy type is taken from the address scheme (socks5://, socks4://, http://, https://)."
+  },
+  "typeVerifiedTip": {
+    "message": "Proxy type was confirmed by a live check."
+  },
+  "typeGuessTip": {
+    "message": "Type is guessed from the port. Use “Check type” on the extension page to confirm it."
+  },
+  "lTypeAll": {
+    "message": "All"
+  },
+  "lTypeReset": {
+    "message": "Reset type filter"
+  },
+  "phType": {
+    "message": "Type"
+  },
+  "amGuess": {
+    "message": "Type guessed from the port"
+  },
+  "amSkipped": {
+    "message": "not parsed: $1"
+  },
+  "miGeo": {
+    "message": "Detect country"
+  },
+  "miTypeCheck": {
+    "message": "Check type"
+  },
+  "typeNeedOff": {
+    "message": "Turn the proxy off first: the check temporarily changes the browser proxy setting."
+  },
+  "typeChecking": {
+    "message": "Checking type…"
+  },
+  "typeCheckingN": {
+    "message": "Checking $1 of $2…"
+  },
+  "typeChecked": {
+    "message": "Type checked: $1"
+  },
+  "typeCheckedMix": {
+    "message": "Type checked: $1 · exact from the scheme (not probed): $2",
+    "description": "2.3: bulk type check — how many addresses were skipped because their type comes from an explicit scheme"
+  },
+  "typeAllExact": {
+    "message": "Nothing to check: $1 addresses already have an exact type from their scheme.",
+    "description": "2.3: bulk type check — how many addresses were skipped because their type comes from an explicit scheme"
+  },
+  "typeAllFailed": {
+    "message": "No protocol answered — the proxy may be down or blocking the check."
+  },
+  "typeCheckFail": {
+    "message": "Could not check the type."
+  },
+  "typeFound": {
+    "message": "Type: $1"
+  }
+}
