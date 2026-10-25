@@ -2,7 +2,7 @@
   "update_url": "https://clients2.google.com/service/update2/crx",
   "manifest_version": 3,
   "name": "Sky.Proxy",
-  "version": "2.4.1",
+  "version": "2.6.1",
   "description": "__MSG_appDesc__",
   "default_locale": "en",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAoaksqZnzMpoYLBx3IHk7xo25li5Ul0Rt+GiBMLFGM/OJ1t8q1oVnU4bgC3B60uN4mhkpneKSz8IBLL9OLnXeq1meX4mfrGdQbNIhGYDbETGCOo2rjvR0ege6zeGij5v0HJUxUz7hrmaTZIfmh13BfUM4YzfFt34yO5DM/ymROG1jxNUpNACIpwX54lmjrNOoBMJbHeJDikiElbrk7mRnbL4C6VdW3su+0FXCWVqYvKJqQUrOG9IZcwmBjnYy3BwQgNR9K2/W12TLCDVNvVwF9P9IsZ1D458DUi03sf8GSEYRzWqzmqjIY/lAKIdV5Aq+u0i/0pRIXU03fKybIuVKmQIDAQAB",

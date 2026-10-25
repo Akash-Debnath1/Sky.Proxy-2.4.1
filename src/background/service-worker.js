@@ -67,6 +67,7 @@ import { isExpired } from '../shared/format.js';   // 7Б: истёкший пр
 import { msg, uiLang } from '../shared/i18n.js';   // 7Б: тексты системного уведомления — только из словаря; 7И: uiLang — язык баннеров файла сообщений
 import * as notifRules from '../shared/notifs.js';   // 7Г: правила уведомлений — те же, что у попапа
 import { hostPort, isIPHost } from '../shared/parse.js';   // 7Ж: isIPHost — сравнение details.ip с адресом активного прокси
+import { normType } from '../shared/proxytype.js';   // 2.6: найденный протокол — в той же форме, что у записи
 import * as schema from '../shared/schema.js';
 import * as state from '../shared/state.js';
 import { isSettingsObject, normSettings, normState } from '../shared/state.js';   // 2.3: дописать умолчания в хранилище
@@ -174,9 +175,19 @@ function prepared(prep) {
  * Упавшая работа очередь не заклинивает: ошибка возвращается тому, кто звал.
  */
 let chain = Promise.resolve();
+/* 2.6: идёт ли сейчас работа внутри очереди. Нужно одному месту — лечению
+   протокола после обрыва (healType): его запускает и слушатель отказа
+   соединения (вне очереди — значит через inLine), и переключение при
+   обрыве (уже внутри очереди). Второй inLine изнутри был бы ожиданием
+   самого себя — то есть вечным «Подключением» в окнах. */
+let inQueue = false;
 
 function inLine(work) {
-  const turn = chain.then(() => work());   // 7К.2 (А-5): работа без аргумента — итог предыдущей ей не передаётся
+  const turn = chain.then(() => {
+    inQueue = true;
+    const p = Promise.resolve().then(() => work());   // 7К.2 (А-5): работа без аргумента — итог предыдущей ей не передаётся
+    return p.finally(() => { inQueue = false; });
+  });
   chain = turn.catch(() => {});
   return turn;
 }
@@ -459,6 +470,12 @@ function prepareAndReconcile(reason) {
     await applyWebrtc('start');   // своих ошибок не бросает — пишет в консоль
     await syncTz('start');   // 2.2: пояс страниц — после сверки, когда известен активный прокси
     geo.run().catch(() => {});   // 2.4: страны для адресов без флага — не задерживает старт
+    /* 2.6.1: свой адрес нужен один раз — с ним сравнивается выходной, чтобы
+       честно сказать «этот сайт всё ещё видит вас». Прокси выключен и адреса
+       ещё нет — мерим; включён — мерить будет фон после подключения. */
+    state.getState()
+      .then((s) => (s.enabled || s.directIp ? null : proveExit('start')))
+      .catch(() => {});
     // Этап 8: на хранилище прошлой версии, где перенос не удался ('legacy'),
     // значок не перерисовывается — перерисовка пишет state.badgeCount, и наш
     // ключ state появился бы до переноса, а перенос при следующем старте
@@ -677,6 +694,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       inLine(() => enableProxy(typeof message.id === 'string' ? message.id : ''))
         .then((res) => {
           if (!res.ok) return res;
+          /* 2.6.1: доказательство выхода — фоном, ответа окну не задерживает */
+          proveExit(cmd);
           // 7В: пометка probing уходит в state до ответа окну (иначе окно успело бы
           // нарисовать «Подключено» и лишь потом «Проверяем…»); сам запрос — следом.
           return probeAfter(cmd)
@@ -686,7 +705,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     );
   }
   if (cmd === 'disable') {
-    return answer(inLine(() => proxy.clearProxy().then(() => probeOff()).then(() => ({ ok: true }))));
+    return answer(inLine(() => proxy.clearProxy().then(() => probeOff()).then(() => {
+      proveExit('disable');   /* 2.6.1: запомнить свой адрес — с ним сравнивается выход */
+      return { ok: true };
+    })));
+  }
+  if (cmd === 'checkExit') {
+    /* 2.6.1: перепроверить по клику из окна (без ответа — окно ждёт подписку) */
+    proveExit('manual');
+    return answer(Promise.resolve({ ok: true }));
   }
   if (cmd === 'siteReload') {
     // 7Л (правка человека 20.09, 8): применить списки из хранилища и перезагрузить
@@ -1616,6 +1643,86 @@ function startDead(why, forId) {
     });
 }
 
+/* ── 2.6 · лечение протокола после обрыва ───────────────────────────────
+ * У записи из строки без схемы тип угадан по порту (proxytype.js; в списке
+ * такой тип помечен звёздочкой). Догадка бывает неверной — и тогда всё
+ * выглядит как мёртвый прокси: ни один запрос не проходит, фон пишет
+ * 'dead', человек читает «Нет ответа», хотя прокси жив и просто говорит на
+ * другой схеме.
+ *
+ * Что делаем: один раз на адрес проверяем протокол живой пробой
+ * (typecheck.js — четыре схемы по http, 2 с на схему) и, если ответила
+ * другая, записываем её в строку и подключаемся заново. Пометка
+ * typeVerified снимает догадку: звёздочка в списке исчезает.
+ *
+ * Границы:
+ *  - только при угаданном и ещё не подтверждённом типе;
+ *  - только пока включено и активен тот же прокси; повод — либо 'dead'
+ *    (обрыв), либо проверка при подключении, через которую не прошёл ни
+ *    один запрос (fromProbe): и то и другое значит «трафика нет»;
+ *  - один раз на адрес за жизнь воркера (healTried) и не больше HEAL_MAX
+ *    адресов: адрес, на который не ответила ни одна схема, второй раз
+ *    проверять нечего;
+ *  - идёт ДО переключения при обрыве: если дело было в протоколе, менять
+ *    прокси незачем;
+ *  - любой отказ (ни одна схема не ответила, прокси сменили, настройка не
+ *    применилась) — просто false: 'dead' остаётся, работает обычный путь.
+ */
+const healTried = new Set();
+const HEAL_MAX = 8;
+
+async function healType(id, opts) {
+  const fromProbe = !!(opts && opts.fromProbe);
+  if (!id || healTried.size >= HEAL_MAX) return false;
+  const st = await state.getState();
+  if (!st.enabled || st.activeProxyId !== id) return false;
+  /* Поводы не смешиваются: из обрыва — только по 'dead'; из проверки — только
+     пока ошибки нет (иначе её уже разбирает свой путь: 'auth', 'dead'). */
+  if (fromProbe ? st.lastError !== null : st.lastError !== 'dead') return false;
+  const list = await state.getProxies();
+  const p = list.find((x) => x && x.id === id);
+  if (!p || p.typeGuess !== true || p.typeVerified === true) return false;
+  const key = `${String(p.ip).toLowerCase()}:${p.port}`;
+  if (healTried.has(key)) return false;
+  healTried.add(key);
+
+  console.log('[pxs] лечение протокола: тип был угадан — проверяю, не другая ли схема');
+  const res = await typecheck.checkType(
+    { ip: p.ip, port: p.port, login: p.login || '', pass: p.pass || '', type: p.type },
+    { fresh: true, whileDead: true },
+  );
+  if (!res.ok) {
+    console.log(`[pxs] лечение протокола: ни одна схема не ответила (${res.error}) — ошибка остаётся`);
+    return false;
+  }
+  const found = normType(res.type);
+  if (found === normType(p.type)) {
+    console.log(`[pxs] лечение протокола: догадка верна (${found}) — дело не в протоколе, ошибка остаётся`);
+    return false;
+  }
+
+  /* Запись перечитывается: пока шла проба, человек мог её удалить или
+     сменить пароль в соседнем окне. */
+  const cur = await state.getProxies();
+  if (!cur.some((x) => x && x.id === id)) return false;
+  const upd = { ...p, type: found, typeVerified: true };
+  delete upd.typeGuess;
+  await state.setProxies(cur.map((x) => (x.id === id ? upd : x)));
+
+  const after = await state.getState();
+  if (!after.enabled || after.activeProxyId !== id) return false;
+  const back = await enableProxy(id);   // applyProxy без keepError — 'dead' снимается
+  if (!back.ok) {
+    console.warn(`[pxs] лечение протокола: это ${found}, но настройка не применилась (${back.error})`);
+    return false;
+  }
+
+  console.log(`[pxs] лечение протокола: протокол — ${found}, переподключились`);
+  await noteEvent('healed', { id, ip: p.ip, type: found });
+  probeAfter('healType');   // подтверждение новой схемы, как после команды окна
+  return true;
+}
+
 /**
  * Порог набран (или отказ на запросе проверки): проверить состояние,
  * поставить 'dead', при включённом тумблере — поставить переключение в
@@ -1634,6 +1741,15 @@ async function markDead(why, forId) {
   console.warn(`[pxs] обрыв: ${why} — прокси не отвечает, записано 'dead'`);
 
   const settings = await state.getSettings();
+  /* 2.6: прежде чем искать замену — поправить возможную ошибку протокола.
+     Прокси с угаданным по порту типом, который говорит на другой схеме,
+     выглядит ровно как мёртвый. Лечение возвращает true, если тип нашёлся
+     и подключение поднялось: тогда 'dead' уже снят, и переключаться не
+     нужно. Внутри очереди (путь переключения при обрыве) — без нового
+     inLine, иначе очередь ждала бы саму себя. */
+  const healNow = () => healType(st.activeProxyId);
+  if (await (inQueue ? healNow() : inLine(healNow))) return;
+
   if (settings.failover !== true) return;
   // Переключение ставится в очередь и НЕ ждётся здесь (третья выдача 7В):
   // после переключения идёт проверка нового прокси, и её отказ соединения
@@ -1841,6 +1957,91 @@ function probeAfter(cmd) {
     });
 }
 
+/* ── 2.6.1 · ДОКАЗАТЕЛЬСТВО ВЫХОДА ────────────────────────────────────────
+ * «Онлайн» у нас означает «настройка применена и проверка прошла», но человек
+ * смотрит не на настройку, а на сайт: у него в строке адреса всё ещё его
+ * собственный город, и он делает вывод «IP не меняется, расширение не
+ * работает». Правда проста и проверяема: страница была открыта ДО включения.
+ * Поэтому сразу после включения фон спрашивает внешнюю службу, какой адрес
+ * она видит, и кладёт ответ в state (exit*). Окно показывает его строкой под
+ * героем — «Выход: 45.9.41.177 · Германия» и кнопку «Обновить страницу».
+ *
+ * Заодно запоминается свой адрес (directIp) — он снимается, когда прокси
+ * выключен. Если выходной адрес совпал со своим при включённом прокси, окно
+ * честно говорит «адрес тот же, что у вас» — это единственный случай, когда
+ * у человека есть повод искать ошибку.
+ *
+ * Ответа окну проверка не задерживает: она идёт следом и приходит подпиской
+ * на state. Таймаут 6 с, службы те же, что у «Проверить IP» в попапе; отказ
+ * ничего не стирает — прежний ответ остаётся со своей датой.
+ */
+const EXIT_URLS = Object.freeze([
+  'https://ipwho.is/?fields=success,ip,country_code,city',
+  'https://api.ipify.org?format=json',
+]);
+const EXIT_TIMEOUT_MS = 6000;
+/** Хвост проверки выхода: второй заход не начинается, пока идёт первый. */
+let exitTail = Promise.resolve();
+
+async function askExit() {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), EXIT_TIMEOUT_MS);
+  try {
+    for (const url of EXIT_URLS) {
+      try {
+        const res = await fetch(url, { cache: 'no-store', credentials: 'omit', signal: ctrl.signal });
+        if (!res.ok) continue;
+        const j = await res.json();
+        const ip = String((j && (j.ip || j.query)) || '');
+        if (!isIPHost(ip)) continue;
+        const cc = typeof j.country_code === 'string' && /^[A-Za-z]{2}$/.test(j.country_code) ? j.country_code.toUpperCase() : '';
+        const city = typeof j.city === 'string' ? j.city.replace(/\s+/g, ' ').trim().slice(0, 40) : '';
+        return { ip, cc, city };
+      } catch (err) {
+        if (ctrl.signal.aborted) return null;
+      }
+    }
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Спросить, какой адрес видят сайты, и записать его в состояние.
+ * @param {'connect'|'switch'|'disable'|'manual'} why
+ * @returns {Promise<{ip: string, cc: string, city: string}|null>}
+ */
+function proveExit(why) {
+  const job = exitTail.then(async () => {
+    const st = await state.getState();
+    const got = await askExit();
+    if (!got) {
+      /* 2.6.1: попытка записывается и без ответа — иначе окно вечно показывало
+         бы «Смотрим адрес…» и человек не знал бы, что служба молчит */
+      await state.patchState({ exitAsk: Date.now() });
+      console.log(`[pxs] выход (${why}): адрес не прочитан — прежний ответ остаётся`);
+      return null;
+    }
+    const now = await state.getState();
+    /* Пока шёл запрос, состояние могло смениться (человек выключил прокси или
+       сменил его) — тогда ответ относится уже не к тому пути. Отвечаем только
+       на тот же вопрос: включён тот же прокси или так же выключен. */
+    if (now.enabled !== st.enabled || now.activeProxyId !== st.activeProxyId) {
+      console.log(`[pxs] выход (${why}): состояние сменилось, пока шёл запрос — не записываю`);
+      return null;
+    }
+    const nowAt = Date.now();
+    const patch = { exitIp: got.ip, exitCc: got.cc, exitCity: got.city, exitAt: nowAt, exitAsk: nowAt, exitVia: now.enabled ? 'proxy' : 'direct' };
+    if (!now.enabled) patch.directIp = got.ip;
+    await state.patchState(patch);
+    console.log(`[pxs] выход (${why}): сайты видят ${got.ip}${got.cc ? ' (' + got.cc + ')' : ''}${now.enabled ? '' : ' — прокси выключен'}`);
+    return got;
+  });
+  exitTail = job.catch(() => {});
+  return job;
+}
+
 async function startProbe(cmd) {
   const [settings, st] = await Promise.all([state.getSettings(), state.getState()]);
 
@@ -1884,7 +2085,28 @@ async function finishProbe(job) {
   }
   await probeResult(Date.now(), res.ok ? res.ms : 0, res.ok && res.siteDown);
   // Тишина на всех хостах (третья и пятая выдачи, В2-а) — прокси не отвечает: тот же путь, что при обрыве.
-  if (!res.ok && res.silent) startDead('тишина на всех хостах при проверке при подключении', job.id);
+  if (res.ok) return;
+  if (res.silent) {
+    startDead('тишина на всех хостах при проверке при подключении', job.id);
+    return;
+  }
+  /* 2.6: проверка не прошла, но хосты не молчали — значит, запросы упали на
+     ошибках. Для записи с угаданным протоколом это первый подозреваемый:
+     живой прокси на другой схеме отвечает именно так. Сначала лечение
+     протокола, и только если оно ничего не нашло — честное «не отвечает»:
+     «подключено» при полностью нерабочем канале — неправда, которую человек
+     иначе видит только по пустым страницам. */
+  const after = async () => {
+    if (await healType(job.id, { fromProbe: true })) return;
+    const [list, cur] = await Promise.all([state.getProxies(), state.getState()]);
+    const p = list.find((x) => x && x.id === job.id);
+    if (!p || p.typeGuess !== true || p.typeVerified === true) return;   // точный тип — прежние правила
+    if (!cur.enabled || cur.activeProxyId !== job.id || cur.lastError !== null) return;
+    startDead('проверка при подключении: ни один запрос не прошёл, протокол угадан', job.id);
+  };
+  (inQueue ? after() : inLine(after)).catch((err) => {
+    console.error('[pxs] разбор непрошедшей проверки упал:', err);
+  });
 }
 
 /*
@@ -2190,9 +2412,9 @@ function applyPopupTheme(theme) {
  * Выставляет badge.js: база по состоянию (цветной — включён, чёрно-белый —
  * выключен; решение человека 10.09, как в 1.4.7.11) и плашка браузера —
  * счётчик непрочитанных уведомлений (7.12) или красная метка при lastError
- * (решение 11.09). Флага страны на значке нет (решение человека 17.09:
- * логотип не заслоняем, страна на значке не нужна) — тумблер и поле
- * settings.badge сняты. Здесь только сбор набора для badge.js: всё
+ * (решение 11.09). С 2.5 при включённом прокси вместо логотипа — флаг
+ * страны активного адреса (слово человека 25.10); тумблера у этого нет:
+ * флаг и есть ответ на «куда я подключён», а без страны остаётся логотип. Здесь только сбор набора для badge.js: всё
  * читается из хранилища заново при каждом поводе —
  * сравнивать с прошлым в памяти воркера нечем (сон стирает), а badge.js
  * сам не выставляет то, что уже выставлено.
@@ -2239,12 +2461,16 @@ async function runRedrawBadge(reason) {
   // тон плашки — сильнейший среди непрочитанных, нейтральная плашка — по теме расширения.
   const cards = notifRules.list({ proxies: all.proxies, account: all.account, state: all.state, notifs: all.notifs, settings: all.settings, remote: all.remote, version: VERSION, lang: uiLang, now });
   const fresh = notifRules.unreadCards(cards, all.notifs, now);
+  // 2.5: флаг страны активного прокси на самом значке (badge.js) — пока прокси
+  // включён; страны нет (не определена, lookup выключен) — остаётся логотип.
+  const active = all.proxies.find((p) => p && p.id === all.state.activeProxyId);
   await badge.render({
     enabled: all.state.enabled === true,
     unread: fresh.length,
     tone: notifRules.tone(fresh),
     theme: all.settings.theme,
     lastError: all.state.lastError !== null,
+    cc: active && active.cc ? active.cc : null,
   });
   await state.patchState({ badgeCount: fresh.length });
 }

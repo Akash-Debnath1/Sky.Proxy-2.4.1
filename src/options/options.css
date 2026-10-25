@@ -750,6 +750,26 @@ button.well:hover{border-color:rgba(255,255,255,.28)}
   .cq-wire::after{animation:none;opacity:0}
 }
 
+/* ── ДЕКОРАТИВНЫЕ ЦИКЛЫ ГАСНУТ, КОГДА ИХ НЕ ВИДНО (2.5.1) ──
+   Кабель, лампы и молния живут бесконечными циклами. Всё это видно
+   только в герое: пока герой за пределами экрана (человек листает
+   список) или вкладка неактивна, каждый такой цикл — работа
+   композитора впустую, и она заметна: прокрутка списка на слабой
+   машине шла в 12 кадров вместо 60. Классы ставит options.js
+   (IntersectionObserver на герое и visibilitychange), анимации не
+   удаляются — при возврате всё идёт с того же места. */
+html.hero-away .hero *,
+html.tab-hidden .hero *,
+html.tab-hidden .dot,
+html.tab-hidden .power *{
+  animation-play-state:paused !important;
+}
+/* та же оговорка, что у коннектора: кому движение неприятно —
+   тем не показываем его вовсе */
+@media (prefers-reduced-motion:reduce){
+  .hero *, .dot, .btn-check svg, .r-conn.busy .cd{animation:none !important}
+}
+
 /* ЗАМОРОЖЕНО: прежняя отрисовка порта из примитивов. Её
    заменила авторская из Figma (см. .cq выше). Оставлена
    целиком — откат должен стоить одного атрибута hidden. */
@@ -1396,6 +1416,12 @@ button.rcheck:hover{color:var(--ink)}
    красная подключает именно эту строку.
    Цвета — из токенов темы (--acc / --bad и их тинты): в светлой теме
    зелёный темнее, красный глуше, контраст тот же. */
+/* 2.5.1: границы раскладки строки — правка одной строки не должна
+   пересчитывать всю страницу (список длинный, строки высокие).
+   Только style: layout-содержание делает строку контекстом наложения,
+   и выпадающее меню строки уезжало ПОД следующую строку. */
+.row{contain:style}
+
 .r-conn{
   display:inline-flex;align-items:center;gap:6px;flex-shrink:0;
   height:26px;padding:0 10px;border-radius:999px;
@@ -1475,10 +1501,18 @@ html[data-theme="light"] .row.on .nacc{color:rgba(30,103,43,.7)}
 .menu{
   position:absolute;right:0;top:calc(100% + 6px);z-index:30;min-width:176px;
   padding:6px;border-radius:14px;
-  background:var(--ovl);border:1px solid var(--line-2);
+  /* 2.5.1: меню строки — плотная подложка, а не полупрозрачное стекло.
+     Прежние 72 % пропускали подписи соседней строки: «Disconnected» и
+     шестерёнка читались сквозь пункты, и текст меню сливался с чужим.
+     У попапа такое правило было с самого начала (.pmenu), у страницы —
+     нет. Заодно с меню ушёл blur: пересчитывать его на каждом кадре
+     прокрутки незачем — под ним всё равно плотный слой. */
+  background:#101616;border:1px solid var(--line-2);
   box-shadow:0 18px 44px -12px rgba(0,0,0,.85);
   animation:pop .16s var(--e);
+  -webkit-backdrop-filter:none;backdrop-filter:none;
 }
+html[data-theme="light"] .menu{background:#F6F9F7}
 .menu[hidden]{display:none}
 @keyframes pop{from{opacity:0;transform:translateY(-4px) scale(.98)}to{opacity:1;transform:none}}
 .menu button{
@@ -1919,12 +1953,16 @@ html[data-theme="light"] .menu.nsm .nsm-row .fl{outline-color:rgba(0,0,0,.15)}
      кромки контейнера — рядом с «Купить», а не у края экрана */
   position:fixed;left:calc(50% + 500px);right:auto;top:32px;transform:translateY(-12px);
   display:flex;align-items:center;gap:12px;padding:12px 20px;
-  border-radius:var(--r-block);background:var(--ovl);border:1px solid var(--line-2);
+  /* 2.5.1: тост — плотная подложка (как меню строки): под ним ходят
+     подписи шапки, и на 72 % они просвечивали сквозь текст */
+  border-radius:var(--r-block);background:#101616;border:1px solid var(--line-2);
   font-size:13.5px;box-shadow:0 22px 50px -16px rgba(0,0,0,.9);
   max-width:min(380px, calc(100vw - 32px));
   opacity:0;pointer-events:none;transition:.25s var(--e);z-index:80;
 }
 .toast.on{opacity:1;transform:translateY(0)}
+html[data-theme="light"] .toast,
+html[data-theme="light"] .tip{background:#F6F9F7}
 /* экран едва шире контейнера: поля нет — прижимаемся к краю */
 @media(max-width:1280px){.toast{left:auto;right:24px}}
 .toast .t-dot{width:8px;height:8px;border-radius:50%;background:var(--acc);flex-shrink:0}   /* этап 6: длинный текст тоста сплющивал точку (находка человека 10.09, проверка 5) */
@@ -1945,7 +1983,8 @@ html[data-theme="light"] .menu.nsm .nsm-row .fl{outline-color:rgba(0,0,0,.15)}
 .tip{
   position:fixed;z-index:60;left:0;top:0;max-width:280px;
   padding:9px 11px;border-radius:var(--r-el);
-  background:var(--ovl);border:1px solid var(--line-2);
+  /* 2.5.1: та же плотная подложка, что у меню и тоста */
+  background:#101616;border:1px solid var(--line-2);
   box-shadow:0 18px 44px -12px rgba(0,0,0,.8);
   font-size:12px;line-height:1.45;color:var(--ink);white-space:pre-line;
   opacity:0;pointer-events:none;transform:translateY(3px);

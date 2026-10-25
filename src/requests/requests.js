@@ -34,6 +34,9 @@ import * as storage from '../shared/storage.js';
 import * as state from '../shared/state.js';
 import { SESSION_KEYS, PAGE_BLOCKED_ERRORS, PAGE_OK_ERRORS, PAGE_OK_ERROR_PREFIX } from '../shared/constants.js';
 import { siteOf } from '../shared/parse.js';
+import { quietGlass } from '../shared/quiet-glass.js';   /* 2.5.1: без blur во время прокрутки */
+
+quietGlass();   /* 2.5.1: прокрутка без размытия фона */
 
 const params = new URLSearchParams(location.search);
 const tabId = /^\d+$/.test(params.get('tab') || '') ? Number(params.get('tab')) : -1;

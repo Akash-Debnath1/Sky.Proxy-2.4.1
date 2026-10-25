@@ -136,6 +136,7 @@
 import { msg, msgN, uiLang } from '../shared/i18n.js';
 import { siteUrl, setSiteHost, siteHost } from '../shared/links.js';   /* 7И: хост ссылок — из файла сообщений */
 import { $, $$, esc } from '../shared/dom.js';
+import { quietGlass } from '../shared/quiet-glass.js';   /* 2.5.1: без blur во время прокрутки */
 import { toast } from '../shared/toast.js';
 import { ICON_ARROW, ICON_CLOCK, ICON_WARN, ICON_LIST, ICON_GEAR, iconSun, iconMoon, iconEyeOff } from '../shared/icons.js';
 import { expDays, expLabel, expShort, isExpired, geoName, geoPlace, tagStyle, flag, COUNTRIES, CC_MAP, hasGeo, proxyHay, EXP_WARN_DAYS, EXP_BAD_DAYS } from '../shared/format.js';
@@ -294,6 +295,7 @@ const canCheck = p => !!p;   /* будущее: p => p.src === 'pxs' */
 const PER_PAGE = 10;
 let page = 1, listTab = 'list';
 let showAll = false;   /* режим «показать все прокси» без страниц */
+let settingsDirty = false;   /* 2.5.1: настройки, отложенные подпиской — собираются при показе */
 let editId = null, editDraft = null;
 let editTagAt = null;        /* {id,i}: какая заметка редактируется по клику */
 let addingTagFor = null;
@@ -333,10 +335,17 @@ function writeSetting(patch){
 }
 /* текст к коду ошибки: 'auth' и 'dead' — как в прототипе, 'exp' — срок,
    два уровня управления — из proxy.js фона, остальное — общая ошибка */
+/* 2.6: SOCKS-прокси с логином не подключится никогда — Chrome предлагает
+   SOCKS-серверу только метод без авторизации. Вместо невнятного «нет
+   ответа» строка называет настоящую причину. */
+function socksAuth(p){
+  const t = p ? normType(p.type) : '';
+  return Boolean(p && p.login && (t === 'SOCKS5' || t === 'SOCKS4'));
+}
 function errText(kind){
   return kind === 'exp'  ? msg('failExp')
        : kind === 'auth' ? msg('wrongCreds')
-       : kind === 'dead' ? msg('errDead')
+       : kind === 'dead' ? (socksAuth(active()) ? msg('errSocksAuth') : msg('errDead'))
        : kind === 'controlled_by_other_extensions' ? msg('errOtherExt')
        : kind === 'not_controllable' ? msg('errNotControllable')
        : kind === 'noAnswer' ? msg('errNoAnswer')
@@ -363,7 +372,9 @@ function noteLastError(prevErr, atStart){
     }, FAILOVER_WAIT_MS);
     return;
   }
-  toast(msg('connErr') + msg(st.lastError === 'auth' ? 'errShortAuth' : 'errShortDead'), true);
+  toast(msg('connErr') + msg(st.lastError === 'auth' ? 'errShortAuth'
+                                            : st.lastError === 'dead' && socksAuth(active()) ? 'errSocksAuth'
+                                            : 'errShortDead'), true);
 }
 /* снять незавершённое: устаревший таймер расстыковки и ответ фона
    больше ничего не трогают */
@@ -1599,6 +1610,30 @@ function pageNums(page, pages){
   return out;
 }
 
+/* ── РАЗВЁРНУТЫЙ СПИСОК ПОРЦИЯМИ (2.5.1) ──────────────────────
+   Строк в разметке ровно столько, сколько человек уже долистал:
+   первая порция при «Показать все», следующая — за 600 px до конца.
+   Дописываем в конец, а не перерисовываем: фокус и hover в уже
+   показанных строках не страдают. */
+const SHOW_ALL_STEP = 40;
+let showAllShown = SHOW_ALL_STEP;
+
+function appendRows(){
+  if(!showAll) return;
+  const vis = visibleList();
+  if(showAllShown >= vis.length) return;
+  const next = Math.min(vis.length, showAllShown + SHOW_ALL_STEP);
+  const html = vis.slice(showAllShown, next).map(rowHtml).join('');
+  showAllShown = next;
+  $('#rows')?.insertAdjacentHTML('beforeend', html);
+}
+
+window.addEventListener('scroll', () => {
+  if(!showAll) return;
+  if(window.scrollY + window.innerHeight < document.documentElement.scrollHeight - 600) return;
+  appendRows();
+}, { passive: true });
+
 function renderPager(total, pages){
   const pg = $('#pager');
   const q = query.trim().length > 0;
@@ -1675,7 +1710,12 @@ function renderList(){
   const keepFocus = editId !== null && af?.classList?.contains('ed-inp') ? af.id : null;
   const keepSel = keepFocus ? [af.selectionStart, af.selectionEnd] : null;
 
-  const slice = showAll ? vis : vis.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  /* 2.5.1: развёрнутый список рисуется порциями (SHOW_ALL_STEP), остальное
+     добавляется по мере прокрутки: 200 строк в разметке — это секунда на
+     пересборку и прокрутка в 12 кадров вместо 60 */
+  if(!showAll) showAllShown = SHOW_ALL_STEP;
+  else if(showAllShown < SHOW_ALL_STEP) showAllShown = SHOW_ALL_STEP;
+  const slice = showAll ? vis.slice(0, showAllShown) : vis.slice((page - 1) * PER_PAGE, page * PER_PAGE);
   box.innerHTML = slice.map(rowHtml).join('');
   renderPager(vis.length, pages);
   if(addingTagFor !== null) $('#tagInp')?.focus();
@@ -2278,6 +2318,7 @@ function clearSearch(focus){
   page = 1; renderList();
   if(focus) $('#lq').focus();
 }
+let searchFrame = 0;
 $('#lq').addEventListener('input', e => {
   query = e.target.value;
   /* новый запрос — новый список: держать человека на седьмой
@@ -2285,7 +2326,11 @@ $('#lq').addEventListener('input', e => {
   page = 1; showAll = false;
   closeGeoPick();
   $('#lqX').hidden = !query;
-  renderList();
+  /* 2.5.1: ввод приходит чаще кадра (автоповтор, вставка, быстрая
+     печать), а пересборка строк — работа на кадр целиком. Собираем
+     буквы в кадр: список перерисуется один раз, курсор не дрожит */
+  if(searchFrame) return;
+  searchFrame = requestAnimationFrame(() => { searchFrame = 0; renderList(); });
 });
 $('#lq').addEventListener('keydown', e => {
   if(e.key === 'Escape'){ e.stopPropagation(); clearSearch(true); }
@@ -2660,7 +2705,11 @@ async function checkTypeOf(id){
     ip: p.ip, port: p.port, login: p.login || '', pass: p.pass || '', type: normType(p.type),
   }});
   if(!res.ok){
-    toast(res.error === 'enabled' ? msg('typeNeedOff') : msg('typeCheckFail'), true);
+    /* 2.6: у адреса с логином вероятная причина отказа — не мёртвый хост, а
+       невозможность авторизоваться в SOCKS; текст говорит прямо об этом */
+    toast(res.error === 'enabled' ? msg('typeNeedOff')
+        : p.login ? msg('typeFixSocksHint')
+        : msg('typeCheckFail'), true);
     return;
   }
   const upd = { ...p, type: normType(res.type), typeVerified: true };
@@ -3830,11 +3879,13 @@ $('#v-settings').addEventListener('click', e => {
   }
 });
 
+/* настройки, отложенные подпиской: собираются в момент показа (2.5.1) */
 function goView(v){
   $$('#nav button').forEach(x => x.removeAttribute('aria-current'));
   $('#nav [data-go="' + v + '"]').setAttribute('aria-current', 'page');
   ['proxy','settings','help'].forEach(x => $('#v-' + x).hidden = (x !== v));
   window.scrollTo({top:0});
+  if(v === 'settings' && settingsDirty){ settingsDirty = false; renderSettings(); }
 }
 
 /* «Привязать» ведёт в добавление по ключу */
@@ -4198,11 +4249,50 @@ applyStatic();
    Своё эхо и правки из попапа приходят одним путём: попап и страница
    открыты вместе → изменение в одном видно в другом. Совпавшее с копией
    не перерисовываем: второй прогон только сбивал бы фокус и переходы */
+/* Что из state меняет вид героя и строк: включённость, кто активен, ошибка
+   и пометка «идёт проверка». Остальные поля (lastProbe*, tz*, badgeCount,
+   levelOfControl) рисуются своими местами или не рисуются в окне вовсе. */
+function viewKey(s){
+  return `${s.enabled}|${s.activeProxyId}|${s.lastError}|${s.probing}`;
+}
+
+/* ── ДЕКОРАЦИИ, КОТОРЫХ НЕ ВИДНО (2.5.1) ───────────────────────
+   Кабель и лампы в герое живут вечными циклами. Пока герой уехал за
+   экран (человек листает список) или вкладка в фоне, это чистая работа
+   композитора: на слабой машине прокрутка списка шла в 12 кадров вместо
+   60. Правило CSS — html.hero-away / html.tab-hidden в options.css. */
+quietGlass();   /* 2.5.1: во время прокрутки стекло без blur — кадры возвращаются */
+
+(function decorateOnlyWhenSeen(){
+  const hero = $('#hero');
+  if(hero && 'IntersectionObserver' in window){
+    new IntersectionObserver(([en]) => {
+      document.documentElement.classList.toggle('hero-away', !en.isIntersecting);
+    }, { threshold: 0 }).observe(hero);
+  }
+  document.addEventListener('visibilitychange', () => {
+    document.documentElement.classList.toggle('tab-hidden', document.hidden);
+  });
+  document.documentElement.classList.toggle('tab-hidden', document.hidden);
+  /* телефон/ноутбук с батареей: человек с «уменьшить движение» видит
+     статичный герой — это правило в CSS, здесь только класс на случай
+     системной настройки, пришедшей после загрузки */
+  const rm = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const setRM = () => document.documentElement.classList.toggle('rm', rm.matches);
+  setRM();
+  if(rm.addEventListener) rm.addEventListener('change', setRM);
+})();
+
 state.subscribe(ch => {
   if(ch.proxies && !same(ch.proxies, proxies)){
     proxies = ch.proxies;
     if(editId !== null && !proxies.some(p => p.id === editId)){ editId = null; editDraft = null; }
-    renderList(); renderHero(); renderSettings();   /* счёт «добавлено N из M» живёт в настройках; 2.1: строка протокола — вместе с ними */
+    renderList(); renderHero();
+    /* 2.5.1: настройки видны не всегда, а их перерисовка — самая большая
+       часть работы (счёт «добавлено N из M», строка протокола). Пока
+       вкладка скрыта, только помечаем; соберём при переходе */
+    if($('#v-settings').hidden) settingsDirty = true;
+    else renderSettings();
     if(keyState === 'pick') renderKeyPick();
   }
   if(ch.settings && !same(ch.settings, settings)){
@@ -4218,6 +4308,11 @@ state.subscribe(ch => {
     const prevId = st.activeProxyId;
     const prevTz = `${st.tzZone}|${st.tzStatus}|${st.enabled}`;
     const prevEnabled = st.enabled;
+    /* 2.5.1: герой и список зависят не от всего state. Результат проверки
+       (lastProbe*), пояс, badgeCount пишутся часто — каждое включение даёт
+       несколько записей подряд, — и каждая перерисовывала строки и герой
+       целиком. Сравниваем только то, что на них влияет */
+    const prevView = viewKey(st);
     applyState(ch.state);
     /* 2.2: строка состояния под тумблером пояса — только она, без
        перерисовки всех настроек: пояс меняется и на включении, и после
@@ -4234,7 +4329,7 @@ state.subscribe(ch => {
       const p = active();
       holdSwitch(p ? msg('lostSwitched', [p.ip]) : null);
     }
-    renderList(); renderHero();
+    if(viewKey(st) !== prevView){ renderList(); renderHero(); }
     noteLastError(prevErr);
     if(wasProbing && !probing()) probeDone();   /* 7В */
   }

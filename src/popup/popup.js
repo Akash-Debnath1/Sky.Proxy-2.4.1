@@ -118,8 +118,9 @@ import { msg, msgN, uiLang } from '../shared/i18n.js';
 import { siteUrl, setSiteHost } from '../shared/links.js';   /* 7И: хост ссылок — из файла сообщений */
 import { $, $$, esc } from '../shared/dom.js';
 import { toast } from '../shared/toast.js';
+import { quietGlass } from '../shared/quiet-glass.js';   /* 2.5.1: без blur во время прокрутки */
 import { ICON_CLOSE, ICON_ARROW, ICON_CLOCK, ICON_WARN, ICON_GEAR, iconSun, iconMoon } from '../shared/icons.js';
-import { expDays, expLabel, isExpired, tagStyle, flag, hasGeo, proxyHay, EXP_WARN_DAYS, EXP_BAD_DAYS } from '../shared/format.js';
+import { expDays, expLabel, isExpired, tagStyle, flag, hasGeo, proxyHay, geoPlace, EXP_WARN_DAYS, EXP_BAD_DAYS } from '../shared/format.js';   /* 2.6.1: geoPlace — «Germany, Frankfurt am Main» в строке «Выход» */
 import * as state from '../shared/state.js';
 import * as storage from '../shared/storage.js';
 import * as notifRules from '../shared/notifs.js';   /* 7Г: правила уведомлений — одни на попап и фон */
@@ -127,6 +128,8 @@ import { parseProxyLines, tabHost, siteOf, listsFrom, listField, normalizeDomain
 import { PROXY_TYPES, typeLabel, normType } from '../shared/proxytype.js';   /* 2.1: тип в строке списка и в разборе вставки */   /* 7Ж: списки и хост вкладки — одни с фоном; 7Л: listField — поле выбранного списка, normalizeDomains — исключения списка без правил */
 import { SESSION_KEYS, LIST_MODES } from '../shared/constants.js';
 import { SETTINGS } from '../shared/schema.js';   /* 7Ж: предел поля списка — из схемы, своей константы нет */
+
+quietGlass();   /* 2.5.1: прокрутка без размытия фона */
 /* ── данные: с этапа 4 — из хранилища, через state.js ──
    src — откуда прокси попал в список, и это не бухгалтерия:
    от него зависит, что мы вообще про прокси знаем.
@@ -224,10 +227,19 @@ function send(cmd){
 async function refreshState(){ applyState(await state.getState()); }
 /* текст к коду ошибки: 'auth' и 'dead' — как в прототипе, 'exp' — срок,
    два уровня управления — из proxy.js фона, остальное — общая ошибка */
+/* 2.6: SOCKS-прокси с логином не подключится НИКОГДА: Chrome предлагает
+   SOCKS-серверу только метод без авторизации (проверено стендовым сервером:
+   браузер присылает один способ — 0x00). Показывать на такой отказ «нет
+   ответа» — неправда: причина известна, и человек может её исправить, взяв
+   у поставщика HTTP-прокси или адрес, открытый по IP. */
+function socksAuth(p){
+  const t = p ? normType(p.type) : '';
+  return Boolean(p && p.login && (t === 'SOCKS5' || t === 'SOCKS4'));
+}
 function errText(kind){
   return kind === 'exp'  ? msg('failExp')
        : kind === 'auth' ? msg('wrongCreds')
-       : kind === 'dead' ? msg('errDead')
+       : kind === 'dead' ? (socksAuth(active()) ? msg('errSocksAuth') : msg('errDead'))
        : kind === 'controlled_by_other_extensions' ? msg('errOtherExt')
        : kind === 'not_controllable' ? msg('errNotControllable')
        : kind === 'noAnswer' ? msg('errNoAnswer')
@@ -254,7 +266,9 @@ function noteLastError(prevErr, atStart){
     }, FAILOVER_WAIT_MS);
     return;
   }
-  toast(msg('connErr') + msg(st.lastError === 'auth' ? 'errShortAuth' : 'errShortDead'), true);
+  toast(msg('connErr') + msg(st.lastError === 'auth' ? 'errShortAuth'
+                                            : st.lastError === 'dead' && socksAuth(active()) ? 'errSocksAuth'
+                                            : 'errShortDead'), true);
 }
 /* открыть страницу расширения на разделе (решение 08.09): признак раздела —
    во временную область хранилища, тема — параметром адреса, чтобы первый
@@ -330,6 +344,13 @@ function applyStatic(){
   /* 3Б.2: три строки про #btnLang и #langMenu сняты вместе с глобусом */
   $('#pMenu').setAttribute('aria-label', msg('proxyList'));
   $('#btnGear').title = msg('gearT');
+  $('#btnChkIp').title = msg('chkIpTip');
+  $('#btnChkIp').setAttribute('aria-label', msg('chkIpTip'));
+  $('#ckBtnT').textContent = msg('chkIpBtn');
+  /* 2.6.1: строка «Выход» — подпись, кнопка перезагрузки и её подсказка */
+  $('#exReload').textContent = msg('exitReload');
+  $('#exReload').title = msg('exitReloadTip');
+  $('#exLbl').textContent = msg('exitLbl');
   $('#lstSeg').setAttribute('aria-label', msg('luModeAria'));   /* 7Л: подписи кнопок — renderSetrow */
   $('#nBackT').textContent = msg('back');
   /* 7Ж: строка сайта и панель. Подпись «Прокси для:» — текстовый узел перед
@@ -906,8 +927,148 @@ if(cqScene){
   else window.addEventListener('resize', cqLayout);
 }
 
+/* ── 2.6.1 · «Выход»: адрес, который видят сайты ──────────────────────────
+ * Фон сразу после включения спрашивает внешнюю службу через текущее
+ * соединение и кладёт ответ в state (exitIp/exitCc/exitCity/exitVia), а свой
+ * адрес — в directIp (когда прокси выключен). Здесь он показывается строкой
+ * под героем вместе с кнопкой «Обновить страницу»: страница, открытая до
+ * включения, показывает старый адрес, и человек принимает это за поломку.
+ * Состояния: ok — адрес есть; same — совпал со своим (повод искать ошибку);
+ * wait — ждём ответ; fail — служба не ответила.
+ * Пересборки нет: строка одна, меняются только тексты и data-state.
+ */
+let exitKey = '';   /* что уже нарисовано — чтобы не дёргать DOM зря */
+let exitReloadT = null;
+function renderExit(){
+  const box = $('#exitRow');
+  if(!box) return;
+  const reload = $('#exReload'), ipEl = $('#exIp'), metaEl = $('#exMeta'), lblEl = $('#exLbl');
+
+  /* 2.6.1: при ошибке строку не показываем — про сбой уже говорит герой и
+     тост; две красные строки об одном и том же только пугают */
+  if(!st.enabled || st.lastError){
+    box.hidden = true;
+    exitKey = '';
+    return;
+  }
+  box.hidden = false;
+
+  /* 2.6.1: кнопка всегда доступна — цель находится в момент нажатия
+     (pageTarget ниже). Прежняя проверка «есть ли вкладка» отключала её на
+     служебных адресах, а человек в это время видел страницу, которую надо
+     перезагрузить. Подсказка объясняет, что произойдёт. */
+  reload.disabled = false;
+
+  const lbl = msg('exitLbl');
+  if(lblEl.textContent !== lbl) lblEl.textContent = lbl;
+
+  /* ответа ещё нет: либо проверка идёт, либо служба промолчала — и это
+     разные строки, «Смотрим адрес…» навсегда было бы ложью */
+  if(st.exitVia !== 'proxy' || !st.exitIp){
+    const tried = typeof st.exitAsk === 'number' && st.exitAsk > 0;
+    box.dataset.state = tried ? 'fail' : 'wait';
+    if(ipEl.textContent) ipEl.textContent = '';
+    const line = msg(tried ? 'exitNoAnswer' : 'exitWait');
+    if(metaEl.textContent !== line) metaEl.textContent = line;
+    exitKey = '';
+    return;
+  }
+
+  const same = Boolean(st.directIp && st.directIp === st.exitIp);
+  /* 2.6.1: страна — названием, как в строках списка («United States, The Dalles»),
+     а не кодом: код рядом с флагом читается как мусор */
+  const place = geoPlace({ cc: st.exitCc, city: st.exitCity });
+  const key = [st.exitIp, st.exitCc, st.exitCity, same ? 'same' : 'ok'].join('|');
+  box.dataset.state = same ? 'same' : 'ok';
+  if(ipEl.textContent !== st.exitIp) ipEl.textContent = st.exitIp;
+  if(exitKey !== key){
+    exitKey = key;
+    metaEl.innerHTML = same
+      ? esc(msg('exitSame'))
+      : (st.exitCc ? flag(st.exitCc) : '') + esc(place || msg('exitSeen'));
+  }
+}
+
+/* 2.6.1: попап — не вкладка, поэтому активная вкладка окна всегда сайт. Но
+   если эту же страницу открыть вкладкой (разработка, отладка), «активной»
+   сначала будет она сама; при возврате к окну перечитываем вкладку, чтобы
+   кнопки «Обновить страницу» и строка сайта говорили о настоящей странице. */
+document.addEventListener('visibilitychange', () => {
+  if(document.visibilityState !== 'visible') return;
+  readTab().then(() => { siteIcon($('#stIco')); renderSite(); renderExit(); }).catch(() => {});
+});
+
+/* 2.6.1: какая вкладка должна перезагрузиться. Обычный попап сам вкладкой не
+   является — активная вкладка окна и есть страница под ним. Но тот же файл
+   открывается и вкладкой (отладка, окно-попап), и тогда «активная» — он сам;
+   в этом случае берём активную вкладку обычного окна. */
+async function pageTarget(){
+  /* цель — только http(s): у служебных и своих страниц url бывает null, и
+     такая вкладка не то, что человек видит под попапом */
+  const isPage = (t) => Boolean(t) && typeof t.id === 'number' && typeof t.url === 'string' && /^https?:/i.test(t.url);
+  try{
+    const t = (await chrome.tabs.query({ active:true, currentWindow:true }))[0];
+    if(isPage(t)) return t;
+  }catch(err){ /* ниже — общий путь */ }
+  try{
+    const wins = await chrome.windows.getAll({ windowTypes:['normal'], populate:true });
+    const w = wins.find(x => x.focused) || wins[0];
+    const t = w && Array.isArray(w.tabs) ? w.tabs.find(x => x.active && isPage(x)) : null;
+    if(isPage(t)) return t;
+  }catch(err){ /* вкладки нет */ }
+  return null;
+}
+
+$('#exitRow')?.addEventListener('click', async (e) => {
+  if(e.target.closest('#exReload')){
+    /* 2.6.1: цель ищем в момент нажатия — кнопка должна вести к той странице,
+       которую человек видит сейчас */
+    const t = await pageTarget();
+    if(!t) return;
+    tabId = t.id;
+    tabInfo = tabHost(t.url || '') ? { url:t.url, host:tabHost(t.url) } : null;
+    /* 2.6.1: перезагрузка мимо кэша — сайт, отдавший адрес из кэша, иначе
+       показал бы старый даже после обычного reload */
+    try{ await chrome.tabs.reload(t.id, { bypassCache: true }); }
+    catch(err){ console.error('[pxs] не удалось перезагрузить вкладку:', err); }
+    /* короткая отметка, что нажатие сработало: строка гаснет и возвращается */
+    const box = $('#exitRow');
+    box.style.opacity = '.55';
+    clearTimeout(exitReloadT);
+    exitReloadT = setTimeout(() => { box.style.opacity = ''; }, 900);
+    return;
+  }
+  /* клик по самой строке — перепроверить адрес */
+  chrome.runtime.sendMessage({ cmd:'checkExit' }).catch(() => {});
+});
+
+/* 2.6: подсказка под кнопкой питания — «тип угадан по порту, проверьте».
+   Одна кнопка на всё окно, создаётся при первой отрисовке и дальше только
+   прячется: пересоздание на каждом кадре сбивало бы фокус и мигало. */
+let typeHintEl = null;
+function renderTypeHint(){
+  if(!typeHintEl){
+    typeHintEl = document.createElement('button');
+    typeHintEl.type = 'button';
+    typeHintEl.id = 'typeHint';
+    typeHintEl.className = 'type-hint';
+    const b = $('#btnPower');
+    if(b && b.parentNode) b.parentNode.insertBefore(typeHintEl, b.nextSibling);
+    typeHintEl.addEventListener('click', () => {
+      const p = active();
+      openPage(p ? { go:'proxy', id:p.id } : { go:'proxy' });
+    });
+  }
+  const p = active();
+  const show = Boolean(st.enabled && st.lastError === 'dead' && p && p.typeGuess === true);
+  typeHintEl.hidden = !show;
+  if(show && typeHintEl.textContent !== msg('errHintType')) typeHintEl.textContent = msg('errHintType');
+}
+
 function renderPower(){
   cqSync();   /* отрисовка коннектора идёт следом за состоянием */
+  renderTypeHint();
+  renderExit();   /* 2.6.1: адрес, который видят сайты, и кнопка перезагрузки */
   const pw = power(), err = heroError();
   pop.dataset.power = err ? 'err' : pw;
   /* 7К.2 (Г-1, решение человека 26.09): мышь с кнопки снимается (CSS
@@ -1076,6 +1237,50 @@ function applyTheme(theme){
    темы, решение 08.09 ── */
 $('#btnGear').addEventListener('click', () => openPage({ go:'settings' }));
 
+/* ── ПРОВЕРКА IP (2.5.1) ─────────────────────────────────────────────
+   Вопрос человека «а прокси правда работает?» решается одним запросом:
+   спрашиваем сервис, какой адрес он видит. Идёт этот запрос через
+   текущее соединение браузера, поэтому при включённом прокси ответ —
+   адрес прокси, при выключенном — свой. Флаг страны берём из того же
+   списка, что и строки (по адресу, если он там есть). */
+const IP_SERVICES = ['https://ipwho.is/?fields=success,ip,country_code,city', 'https://api.ipify.org?format=json'];
+let ipBusy = false;
+
+async function checkIp(){
+  if(ipBusy) return;
+  ipBusy = true;
+  const box = $('#chkIp'), out = $('#ckOut'), btn = $('#btnChkIp'), lbl = $('#ckBtnT');
+  box.dataset.state = 'busy';
+  btn.disabled = true;
+  lbl.textContent = msg('chkIpBusy');
+  out.textContent = '';
+  let got = null;
+  for(const url of IP_SERVICES){
+    try{
+      const res = await fetch(url, { cache:'no-store', credentials:'omit' });
+      if(!res.ok) continue;
+      const j = await res.json();
+      const ip = (j && (j.ip || j.query)) || '';
+      if(/^[0-9a-fA-F:.]{3,45}$/.test(ip)){ got = { ip, cc: j.country_code || '' }; break; }
+    }catch(err){ /* следующий сервис */ }
+  }
+  ipBusy = false;
+  btn.disabled = false;
+  lbl.textContent = msg('chkIpBtn');
+  box.dataset.state = got ? 'done' : 'fail';
+  if(!got){ out.textContent = msg('chkIpFail'); return; }
+  const p = (proxies || []).find(x => x.ip === got.ip);
+  const cc = (p && p.cc) || got.cc || '';
+  /* подстановка в chrome.i18n — только массивом: строка разложилась бы на
+     буквы и в текст попал бы сам «{ip}» */
+  const line = st && st.enabled ? msg('chkIpVia', [got.ip]) : msg('chkIpDirect', [got.ip]);
+  /* flag() отдаёт готовую разметку <i class="fl" …>, а не стиль — вставляем
+     как есть; страна неизвестна — без флага (серый прямоугольник тут лишний) */
+  out.innerHTML = (cc ? flag(cc) : '') + esc(line);
+}
+
+$('#btnChkIp').addEventListener('click', checkIp);
+
 /* ── уведомления (7Г) ── */
 /* иконка нового типа: скачивание — прокси не появились сами,
    их надо забрать из аккаунта */
@@ -1157,7 +1362,11 @@ function notifView(x){
     case 'warnAll':  return { ico:ICON_CLOCK, t:msg('nLevelSoonT'), c:levelCount(x), s:msg('nLevelNearest', [NEAR_HOLE]), near:whenShort(x.d), nearTone:x.d <= EXP_BAD_DAYS ? 'bad' : 'warn' };
     case 'new':      return { ico:DL,         t:msgN('nNewT', x.n), s:msg('nNewS'), act:'show', al:msg('show'), arrow:true };
     case 'lost':     return { ico:ICON_WARN,  t:msg('nLostT', [x.ip]), s:x.newIp ? msg('nLostS', [x.newIp]) : msg('nLostNoneS') };
-    case 'healed':   return { ico:N_OK,       t:msg('nHealedT', [x.ip]), s:msg('nHealedS') };
+    /* 2.6: у события лечения протокола есть поле type — карточка говорит,
+       какая схема нашлась; у лечения пароля поля нет, тексты прежние */
+    case 'healed':   return x.type
+                       ? { ico:N_OK, t:msg('nHealedTypeT', [x.ip]), s:msg('nHealedTypeS', [x.type]) }
+                       : { ico:N_OK, t:msg('nHealedT', [x.ip]), s:msg('nHealedS') };
     case 'gone':     return { ico:N_GONE,     t:msg('nGoneT', [x.ip]), s:msg('nGoneS') };
     case 'replaced': return { ico:N_SWAP,     t:msg('nReplacedT', [x.ip, x.newIp]), s:msg('nReplacedS'), act:'show', al:msg('show'), arrow:true };
     /* 7И (правка человека 24.09): 'empty' — по ключу заказов не найдено; та же причина, что на странице (kErrEmpty) */
@@ -2221,7 +2430,7 @@ state.readAll().then(all => {
   noteLastError(null, true);
   /* 7Ж: вкладка — один раз, после чтения хранилища; до этого строка сайта
      не рисуется (renderSite ждёт tabInfo) */
-  return readTab().then(() => { siteIcon($('#stIco')); renderSite(); });
+  return readTab().then(() => { siteIcon($('#stIco')); renderSite(); renderExit();   /* 2.6.1: кнопка перезагрузки знает вкладку */ });
 }).catch(err => {
   console.error('[pxs] попап не смог прочитать хранилище:', err);
   toast(msg('errStorage'), true);

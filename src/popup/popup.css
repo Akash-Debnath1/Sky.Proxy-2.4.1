@@ -882,16 +882,25 @@ html[data-theme="light"] .pop .pick-btn:hover{border-color:rgba(0,0,0,.3)}
 
 /* ── тост ── */
 .toast{
-  position:absolute;left:50%;top:10px;transform:translate(-50%,-14px);   /* 7Л (правка человека 20.09): наверху окна, не над кнопками низа */
+  /* 2.6: тост стоит справа от знака, а не по центру окна. По центру его левый
+     край приходился ровно на «Sky.Proxy» — ошибка соединения ложилась поверх
+     логотипа, и верхняя строка читалась как сломанная вёрстка. Справа под ним
+     только кнопка темы, и она возвращается вместе с исчезновением тоста.
+     Перенос строк разрешён: в узком окне две строки лучше наезда на знак. */
+  position:absolute;left:auto;right:8px;top:10px;transform:translateY(-14px);
+  max-width:calc(100% - 166px);white-space:normal;   /* знак «Sky.Proxy» — слева, до него не достаём */
   z-index:80;opacity:0;pointer-events:none;
-  background:var(--ovl);border:1px solid var(--line-2);border-radius:14px;   /* В2: карточка поверх — 14 */
-  padding:8px 13px;font-size:12px;font-weight:500;color:var(--ink);
-  white-space:nowrap;max-width:calc(100% - 24px);overflow:hidden;text-overflow:ellipsis;
+  /* 2.6: надстройка непрозрачная. 72 % кеша поверх логотипа «Sky.Proxy» читались
+     как испорченная надпись: тост лежит в верхней строке и накрывает знак.
+     Цвет — тот же, что у меню строки, чтобы «поверх» выглядело одинаково. */
+  background:var(--ovl-solid,#101616);border:1px solid var(--line-2);border-radius:14px;   /* В2: карточка поверх — 14 */
+  padding:7px 11px;font-size:11.5px;line-height:1.3;font-weight:500;color:var(--ink);
+  overflow:hidden;text-overflow:ellipsis;
   box-shadow:0 14px 34px -12px rgba(0,0,0,.7);
   transition:opacity .2s,transform .25s var(--e);
 }
 html[data-theme="light"] .pop .toast{box-shadow:0 14px 34px -12px rgba(30,42,33,.3)}
-.toast.on{opacity:1;transform:translate(-50%,0)}
+.toast.on{opacity:1;transform:translateY(0)}
 .toast.err{border-color:var(--bad-edge)}
 
 /* ═══════════════════════════════════════════════════════════
@@ -908,6 +917,34 @@ html[data-theme="light"] .pop{background:#FFFFFF;background-image:none}
 html[data-theme="light"] .pop .psel,
 html[data-theme="light"] .pop .psel:hover{background:var(--well)}
 /* кнопка настроек — язык btn-check героя: обводка, без заливки */
+/* 2.5.1: «Проверить IP» — строка над «Настройками»: кнопка слева,
+   результат справа. Состояния — data-state (idle / busy / done / fail):
+   busy гасит кнопку, fail красит ответ в красный. */
+.chkip{
+  display:flex;align-items:center;gap:10px;flex:0 0 auto;width:100%;
+  height:40px;box-sizing:border-box;
+}
+.ck-btn{
+  display:flex;align-items:center;gap:7px;flex:0 0 auto;height:32px;padding:0 12px;
+  border-radius:var(--r-chip);border:1px solid var(--line-2);background:transparent;
+  font-size:12px;font-weight:600;color:var(--mut);cursor:pointer;
+  transition:background .15s,color .15s,border-color .15s;
+}
+.ck-btn:hover{background:var(--hov);color:var(--ink);border-color:rgba(255,255,255,.26)}
+.ck-btn svg{color:currentColor;flex-shrink:0}
+.chkip[data-state="busy"] .ck-btn{color:var(--warn);border-color:var(--warn-edge);cursor:progress}
+.chkip[data-state="busy"] .ck-btn svg{animation:blink 1s infinite}
+.ck-out{
+  flex:1;min-width:0;font-size:11.5px;line-height:1.35;color:var(--mut);
+  display:flex;align-items:center;gap:6px;
+  overflow:hidden;text-overflow:ellipsis;
+}
+.ck-out .fl{flex-shrink:0}
+.chkip[data-state="done"] .ck-out{color:var(--ink)}
+.chkip[data-state="fail"] .ck-out{color:var(--bad)}
+html[data-theme="light"] .ck-btn:hover{border-color:rgba(0,0,0,.28)}
+html[data-theme="light"] .chkip[data-state="busy"] .ck-btn{border-color:var(--warn-edge)}
+
 .btn-set{background:transparent;border:1px solid var(--line-2)}
 .btn-set:hover{background:var(--hov);border-color:rgba(255,255,255,.24)}
 html[data-theme="light"] .pop .btn-set{background:transparent}
@@ -1191,3 +1228,71 @@ html[data-theme="light"] .am-tp[data-pt="SOCKS5"]{color:#6136A8}
 html[data-theme="light"] .am-tp[data-pt="SOCKS4"]{color:#8A5A0E}
 .am-guess,.am-skip{font-size:10px;line-height:1.3;color:var(--mut-2)}
 .am-guess{color:var(--warn)}
+
+/* ═══════════════════════════════════════════════════════════
+   2.6 · ПОДСКАЗКА ПОД КНОПКОЙ ПИТАНИЯ
+   Показывается, когда подключение сорвалось, а протокол записи угадан по
+   порту: самая частая причина такого срыва — не тот протокол. Строка ведёт
+   на страницу расширения, к строке этого прокси, где в меню есть
+   «Проверить тип». Своей кнопкой проверку из попапа не запускаем: проверке
+   нужен выключенный прокси, и человек остался бы без связи на это время.
+   ═══════════════════════════════════════════════════════════ */
+.type-hint{
+  display:block;width:100%;box-sizing:border-box;
+  margin:8px 0 0;padding:8px 11px;
+  border:1px dashed var(--line-2);border-radius:12px;background:transparent;
+  color:var(--mut);font:inherit;font-size:11.5px;line-height:1.35;text-align:left;
+  cursor:pointer;transition:color .16s,border-color .16s,background .16s;
+}
+.type-hint::after{content:" ↗";color:var(--acc)}
+.type-hint:hover{color:var(--ink);border-color:var(--acc);border-style:solid}
+.type-hint:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.type-hint[hidden]{display:none}
+
+/* ═══════════════════════════════════════════════════════════
+   2.6.1 · «ВЫХОД: адрес, который видят сайты»
+   Строка под героем: что ответила внешняя служба через текущее соединение,
+   и кнопка «Обновить страницу». Это ответ на самую частую жалобу «IP не
+   меняется»: страница, открытая до включения, показывает старый адрес, и
+   без этой строки человеку неоткуда узнать, что прокси-то работает.
+   data-state: idle (скрыта), wait (проверяем), ok (адрес есть), same
+   (адрес совпал со своим), fail (служба не ответила).
+   ═══════════════════════════════════════════════════════════ */
+.exit{
+  display:flex;align-items:center;gap:9px;
+  margin:8px 0 0;padding:8px 8px 8px 11px;
+  border:1px solid var(--line-2);border-radius:14px;
+  background:var(--well,#161B18);
+  transition:opacity .16s,border-color .16s;
+}
+.exit[hidden]{display:none}
+.ex-i{flex:none;display:flex;color:var(--acc)}
+.ex-t{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+.ex-top{display:flex;align-items:baseline;gap:6px;min-width:0}
+.ex-meta{display:flex;align-items:center;gap:5px;min-width:0}
+.ex-lbl{font-size:11px;color:var(--mut);letter-spacing:.01em}
+.ex-ip{font-size:12.5px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.ex-ip:empty{display:none}
+.ex-meta{font-size:11px;color:var(--mut-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.ex-meta .fl{flex:none;margin-top:1px}
+.ex-meta:empty{display:none}
+.ex-b{
+  flex:none;margin-left:auto;padding:5px 10px;border-radius:10px;
+  border:1px solid var(--line-2);background:transparent;color:var(--ink);
+  font:inherit;font-size:11.5px;font-weight:600;cursor:pointer;
+  transition:background .16s,border-color .16s,color .16s;
+}
+.ex-b:hover{background:rgba(72,180,87,.16);border-color:var(--acc);color:var(--acc-hi,#48B457)}
+.ex-b:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.ex-b[disabled]{opacity:.45;cursor:default}
+/* проверяем: точка пульсирует, кнопка перезагрузки ждёт */
+.exit[data-state="wait"] .ex-i{animation:exPulse 1.1s ease-in-out infinite}
+@keyframes exPulse{0%,100%{opacity:.45}50%{opacity:1}}
+/* адрес совпал со своим — единственный повод искать ошибку */
+.exit[data-state="same"]{border-color:var(--bad-edge);background:rgba(190,60,50,.10)}
+.exit[data-state="same"] .ex-i{color:var(--bad)}
+.exit[data-state="same"] .ex-b{border-color:var(--bad-edge);color:var(--bad)}
+/* служба не ответила — не ошибка подключения, просто нет данных */
+.exit[data-state="fail"] .ex-i{opacity:.5}
+.exit[data-state="fail"] .ex-ip{color:var(--mut)}
+@media (prefers-reduced-motion: reduce){.exit[data-state="wait"] .ex-i{animation:none}}

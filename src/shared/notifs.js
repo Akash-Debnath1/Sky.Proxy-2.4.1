@@ -366,6 +366,7 @@ export function all(data){
       if(typeof e.id === 'string') x.id = e.id;
       if(typeof e.ip === 'string') x.ip = e.ip;
       if(typeof e.newIp === 'string' && e.newIp) x.newIp = e.newIp;
+      if(typeof e.type === 'string' && e.type) x.type = e.type;   /* 2.6: лечение протокола — какая схема нашлась */
       return x;
     });
   ev.sort((a, b) => b.at - a.at);

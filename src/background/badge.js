@@ -1,19 +1,25 @@
 /**
- * Значок на панели браузера (7Г; 7.12 счётчик, 7.3 закрыт без флага).
+ * Значок на панели браузера (7Г; 7.12 счётчик; 2.5 — флаг страны).
  *
  * Сюда из service-worker.js переехал setIcon сессии 6.1 целиком: база
  * значка по состоянию (цветной — прокси включён, чёрно-белый — выключен,
  * как в 1.4.7.11) выставляется здесь же. Второго setIcon в проекте нет.
  * Всё остальное — на плашке браузера (chrome.action.setBadgeText).
  *
- * ФЛАГА НА ЗНАЧКЕ НЕТ (решение человека 17.09, пятая выдача 7Г, пункт 7.3
- * закрыт без него): логотип флагом не заслоняем; у большинства один-два
- * прокси, страна на значке им не нужна; значок мал и понять по нему
- * что-либо трудно. Четыре выдачи до этого (флаг на холсте 8×6, плашки
- * на холсте, свой счётчик на холсте, код страны на плашке) — отклонены
- * по этим причинам; тумблер и поле settings.badge («Флаг страны на
- * значке») сняты тем же решением 7Г: в DEFAULT_SETTINGS его нет,
- * записанное раньше значение normSettings отбрасывает.
+ * ФЛАГ СТРАНЫ НА ЗНАЧКЕ (2.5, слово человека 25.10: «на месте значка
+ * должен быть флаг того IP, к которому подключился»). Пока прокси
+ * включён и у активного адреса известна страна, значок — флаг этой
+ * страны; выключен прокси или страна неизвестна — прежний логотип
+ * (цветной при включённом, чёрно-белый при выключенном). Это отменяет
+ * прежнее решение 17.09 «флага на значке нет»: тогда его сняли без
+ * опоры на данные, а теперь человек прямо попросил обратного.
+ *
+ * Почему отдельные файлы, а не спрайт: chrome.action.setIcon принимает
+ * путь к картинке, а не CSS-фон, — спрайт с background-position панель
+ * не понимает. Значки 16 и 32 px на страну собирает
+ * tools/build-flag-icons.js из того же спрайта src/assets/flags.png
+ * (src/assets/icons/flags/<cc>-16.png и <cc>-32.png). Незнакомый код,
+ * которого нет в flagmap.js, — логотип: битую картинку не ставим.
  *
  * ПОЧЕМУ ПЛАШКА БРАУЗЕРА. Кнопка действия в панели — 28×28 dp, наш
  * значок — 16×16 dp в её центре, рисовать мы можем только внутри этих 16,
@@ -66,6 +72,7 @@
  */
 
 import { ICONS } from '../shared/constants.js';
+import { FLAG_CODES } from '../shared/flagmap.js';   /* 2.5: значки-флаги для панели */
 
 /**
  * Текст плашки при ошибке: пробел — плашка минимальной ширины (квадрат)
@@ -112,18 +119,33 @@ function norm(view) {
     tone: unread > 0 ? (TONES.includes(v.tone) ? v.tone : 'info') : null,
     theme: v.theme === 'light' ? 'light' : 'dark',
     lastError: v.lastError === true,
+    cc: flagCode(v.cc),   /* 2.5: страна активного прокси (или null) */
   };
+}
+
+/**
+ * Код страны из строки: две латинские буквы, известные спрайту. Всё
+ * прочее — null: значок тогда остаётся логотипом.
+ *
+ * @param {unknown} cc
+ * @returns {string|null}
+ */
+function flagCode(cc) {
+  if (typeof cc !== 'string') return null;
+  const code = cc.trim().toLowerCase();
+  return FLAG_CODES.includes(code) ? code : null;
 }
 
 /**
  * Выставить значок и плашку по набору. Совпал с прошлым — не делать ничего.
  * Ошибок наружу не бросает: пишет в консоль.
  *
- * @param {{enabled: boolean, unread: number, tone: string|null, theme: string, lastError: boolean}} view
+ * @param {{enabled: boolean, unread: number, tone: string|null, theme: string, lastError: boolean, cc?: string|null}} view
  *   enabled — прокси включён (база цветная); unread — непрочитанных
  *   уведомлений; tone — сильнейший тон среди них ('bad' | 'warn' | 'info',
  *   notifs.tone); theme — тема расширения (settings.theme) для нейтральной
- *   плашки; lastError — стоит ошибка ('auth' или 'dead')
+ *   плашки; lastError — стоит ошибка ('auth' или 'dead'); cc — страна
+ *   активного прокси (2.5; флаг вместо логотипа при включённом прокси)
  * @returns {Promise<void>}
  */
 export async function render(view) {
@@ -131,15 +153,27 @@ export async function render(view) {
   const key = JSON.stringify(v);
   if (key === shown) return;
   shown = key;
-  setIcon(v.enabled);
+  setIcon(v.enabled, v.cc);
   await setBadge(pickBadge(v));
 }
 
-/** База значка по состоянию — как в 6.1. */
-function setIcon(enabled) {
-  const set = enabled ? ICONS.on : ICONS.off;
+/**
+ * Значок по состоянию: флаг страны, если прокси включён и страна
+ * известна (2.5), иначе прежний логотип — цветной при включённом
+ * прокси и чёрно-белый при выключенном.
+ *
+ * @param {boolean} enabled
+ * @param {string|null} cc код страны из flagCode()
+ */
+function setIcon(enabled, cc) {
   const path = {};
-  for (const size of Object.keys(set)) path[size] = chrome.runtime.getURL(set[size]);
+  if (enabled && cc) {
+    path[16] = chrome.runtime.getURL(`src/assets/icons/flags/${cc}-16.png`);
+    path[32] = chrome.runtime.getURL(`src/assets/icons/flags/${cc}-32.png`);
+  } else {
+    const set = enabled ? ICONS.on : ICONS.off;
+    for (const size of Object.keys(set)) path[size] = chrome.runtime.getURL(set[size]);
+  }
   chrome.action.setIcon({ path }).catch((err) => {
     shown = null;
     console.warn('[pxs] значок не выставлен:', err);

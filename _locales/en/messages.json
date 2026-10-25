@@ -3056,5 +3056,77 @@
   },
   "typeFound": {
     "message": "Type: $1"
+  },
+  "chkIpBtn": {
+    "message": "Check IP",
+    "description": "Button in the popup that asks a service which public address the browser currently uses"
+  },
+  "chkIpBusy": {
+    "message": "Checking…",
+    "description": "Button while the IP check is in flight"
+  },
+  "chkIpVia": {
+    "message": "Your traffic goes through $1",
+    "description": "Result line: address seen by the outside world and whether it comes from the proxy"
+  },
+  "chkIpDirect": {
+    "message": "No proxy — your own IP is $1",
+    "description": "Result line when the proxy is off: the address is the real one"
+  },
+  "chkIpFail": {
+    "message": "Could not check the address",
+    "description": "Result line when the IP service did not answer"
+  },
+  "chkIpTip": {
+    "message": "Ask an outside service which address it sees — proves the proxy really works",
+    "description": "Tooltip of the Check IP button"
+  },
+  "nHealedTypeT": {
+    "message": "Protocol of $1 recognised",
+    "description": "2.6: title of the notification card when the connect failed only because the protocol was guessed wrong and the background found the real one (event 'healed' with a type field); $1 — proxy address"
+  },
+  "nHealedTypeS": {
+    "message": "It answers on $1, not on what the port suggested — reconnected through it",
+    "description": "2.6: subtitle of the same card; $1 — the protocol that really answered (HTTP, HTTPS, SOCKS5, SOCKS4)"
+  },
+  "errSocksAuth": {
+    "message": "Chrome cannot log in to a SOCKS proxy",
+    "description": "2.6: short connection-error label for a SOCKS proxy that carries a login and password. Chrome offers only the no-auth method to SOCKS servers (checked against a stand server), so such a proxy can never connect — the message replaces the vague “No response”"
+  },
+  "errHintType": {
+    "message": "The type was guessed from the port — it may be wrong. This is the first thing to check.",
+    "description": "2.6: line under the failed power button in the popup when the address carries a guessed protocol"
+  },
+  "typeFixSocksHint": {
+    "message": "No protocol answered. If this address needs a login, ask for an HTTP proxy or for IP authorisation: Chrome cannot authenticate SOCKS.",
+    "description": "2.6: replaces the plain 'could not check the type' toast when the address carries a login — the likely reason is the SOCKS limitation, not a dead host"
+  },
+  "exitLbl": {
+    "message": "Exit IP",
+    "description": "2.6.1: label of the strip under the power button showing the address sites actually see"
+  },
+  "exitSeen": {
+    "message": "the address sites see",
+    "description": "2.6.1: short note after the exit address when the country is unknown"
+  },
+  "exitWait": {
+    "message": "Checking the address sites see…",
+    "description": "2.6.1: the strip while the background asks an outside service through the current connection"
+  },
+  "exitSame": {
+    "message": "Same as your own address — this page may still show the old one",
+    "description": "2.6.1: warning when the exit address equals the last address measured with the proxy off"
+  },
+  "exitReload": {
+    "message": "Reload page",
+    "description": "2.6.1: button in the exit strip — reloads the active tab so the site shows the new address"
+  },
+  "exitReloadTip": {
+    "message": "Reload this tab so the site sees the new address",
+    "description": "2.6.1: tooltip of the exit strip's reload button"
+  },
+  "exitNoAnswer": {
+    "message": "No answer from the address service — the proxy may be blocking it",
+    "description": "2.6.1: the exit strip when the outside lookup services did not answer through the current connection; not an error of the connection itself"
   }
 }

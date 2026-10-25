@@ -118,6 +118,14 @@ export const DEFAULT_STATE = Object.freeze({
   tzZone: '',
   tzStatus: 'idle',
   tzAt: 0,
+  /* 2.6.1: что видят сайты — доказательство выхода ('' — ещё не мерили) */
+  exitIp: '',
+  exitCc: '',
+  exitCity: '',
+  exitAt: 0,
+  exitAsk: 0,
+  exitVia: '',
+  directIp: '',
 });
 
 /**

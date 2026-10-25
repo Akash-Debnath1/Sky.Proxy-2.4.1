@@ -200,7 +200,11 @@ async function checkOne(input, opts) {
   }
 
   const st = await state.getState();
-  if (st.enabled) {
+  /* 2.6: whileDead — проверка по следам обрыва. Рабочего соединения уже нет
+     (фон записал 'dead'), терять нечего, и ждать, пока человек выключит
+     тумблер, незачем: именно эта проверка и чинит подключение. */
+  const whileDead = !!(opts && opts.whileDead);
+  if (st.enabled && !whileDead) {
     // Пробная настройка сняла бы рабочее соединение — не наше право.
     return { ok: false, error: 'enabled' };
   }

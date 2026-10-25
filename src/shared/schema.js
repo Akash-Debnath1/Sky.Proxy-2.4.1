@@ -349,6 +349,20 @@ export const STATE = Object.freeze({
   /* 2.2: что сейчас с часовым поясом — для строки настройки и диагностики.
      tzZone — IANA-имя ('' — нет), tzStatus — 'idle' | 'looking' | 'on' |
      'fail', tzAt — когда поставили. Пишет только фон (tz.js). */
+  /* 2.6.1: доказательство выхода. exitIp — адрес, который видят сайты
+     (спрошен у внешней службы через текущее соединение), exitCc/exitCity —
+     страна и город этого адреса, exitVia — при каком состоянии мерили
+     ('proxy' при включённом, 'direct' при выключенном), directIp — последний
+     свой адрес, снятый при выключенном прокси. Пусто — ещё не мерили. */
+  exitIp: { type: 'string', max: 45 },
+  exitCc: { type: 'string', len: 2 },
+  exitCity: { type: 'string', max: 40 },
+  exitAt: { type: 'number', min: 0 },
+  /* когда спрашивали в последний раз — успешно или нет: если попытка новее
+     ответа, служба не ответила, и окно говорит об этом прямо */
+  exitAsk: { type: 'number', min: 0 },
+  exitVia: { type: 'string', oneOf: ['', 'proxy', 'direct'] },
+  directIp: { type: 'string', max: 45 },
   tzZone: { type: 'string', max: 64 },
   tzStatus: { type: 'string', oneOf: ['idle', 'looking', 'on', 'fail'] },
   tzAt: { type: 'number', min: 0 },
@@ -384,6 +398,10 @@ export const NOTIF_EVENT = Object.freeze({
   id: { type: 'string', min: 1, max: 64 },
   ip: { type: 'string', min: 1, max: 255 },
   newIp: { type: 'string', min: 1, max: 255 },
+  /* 2.6: у 'healed' от лечения протокола — какая схема нашлась на самом
+     деле («SOCKS5»). У лечения пароля поля нет: там протокол ни при чём,
+     и карточка говорит о пароле. */
+  type: { type: 'string', oneOf: PROXY_TYPES },
 });
 
 /**

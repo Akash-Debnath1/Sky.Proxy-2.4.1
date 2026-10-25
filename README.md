@@ -8,10 +8,10 @@
 
 ### Sky.Proxy
 
-**A Chrome proxy manager with typed proxies, country flags, timezone-by-IP, and a transparent-glass interface.**
+**A Chrome proxy manager with typed proxies, country flags — even on the toolbar icon — timezone-by-IP, and a transparent-glass interface.**
 
 [![Manifest V3](https://img.shields.io/badge/Manifest-V3-48B457?style=flat-square&labelColor=0b1110)](https://developer.chrome.com/docs/extensions/develop/migrate/what-is-mv3)
-[![Version](https://img.shields.io/badge/version-2.4.1-48B457?style=flat-square&labelColor=0b1110)](#-installation)
+[![Version](https://img.shields.io/badge/version-2.6.1-48B457?style=flat-square&labelColor=0b1110)](#-installation)
 [![Chromium](https://img.shields.io/badge/Chrome%20%2F%20Edge%20%2F%20Brave-supported-48B457?style=flat-square&labelColor=0b1110)](#-installation)
 [![License](https://img.shields.io/badge/license-see%20LICENSE-6b7a74?style=flat-square&labelColor=0b1110)](#-license)
 
@@ -36,10 +36,30 @@ inverted from one another.
 > brand — it replaces the letter “o” in **Proxy**, so the name is new while the sign stays
 > recognisable: ball = identity, letters = name.
 
-> **New in 2.4.** Every address carries a **country flag with its city** — the list reads
-> like a checker table — and each row has a **Connect / Disconnect** control: green when
-> that proxy carries your traffic, red when it does not, and the label shows the action
-> under the pointer.
+> **New in 2.6.1 — the address sites see, right on screen.** “The IP did not change”
+> is usually not a broken proxy: it is the page you already had open. The moment the proxy
+> connects, Sky.Proxy asks an outside service which address it sees **through the proxy** and
+> shows it under the power button — address, flag and country — with a **Reload page** button
+> that reloads the tab past the cache. Measured on the stand: the page opened before
+> connecting goes through the proxy after that one click, proven by the proxy's own log.
+>
+> **New in 2.6.0 — the connection fixes itself.** The most common reason a working proxy
+> looks dead is a wrong protocol: a SOCKS5 server whose port was read as HTTP. Sky.Proxy now
+> checks the protocol the moment the connection fails, rewrites the row and reconnects —
+> **0.6 s** on the stand, with a notification card that says which protocol answered. A proxy
+> that really is silent is now called out instead of sitting at “Connected”, SOCKS + login is
+> named for what it is (Chrome cannot log in to SOCKS), and the popup points at the suspected
+> guess instead of leaving you guessing.
+>
+> **New in 2.5.1 — speed.** The interface no longer fights your machine: the frosted
+> glass steps aside while you scroll, the hero animation sleeps when it is off screen,
+> the list draws a slice and appends the rest as you go, and a state write that changes
+> nothing on screen no longer rebuilds the rows. Scroll on a 200-address list went from
+> **20 fps to 60** (measured, software rendering). Plus a one-click **Check IP** in the popup.
+>
+> **2.5.0.** The **toolbar icon itself becomes the flag of the country you are connected
+> through** — pin it, look at it, and you know where your traffic leaves without opening a
+> thing. Turn the proxy off and the Sky.Proxy logo comes back.
 
 ## 🎯 Features
 
@@ -167,9 +187,30 @@ packets — down from 18 s.
 </td></tr>
 <tr><td valign="top">
 
-### ⚙️ 7 · The rest of the toolbox
+### 🚩 7 · The toolbar icon wears the flag
 
-- **Power switch** with live status (connecting / on / off / error) and badge on the icon.
+Pin the extension and the button stops being a logo: while a proxy is on, the icon **is the
+flag of the country that proxy sits in**.
+
+- **Germany** in, 🇩🇪 out. Switch to Japan and the icon is 🇯🇵 before the page even reloads —
+  it is redrawn from the same `state` the row pills use.
+- **No proxy, no flag.** Turn it off and the grey Sky.Proxy ball returns, so the difference
+  between “protected” and “direct” is one glance away. A proxy with no known country keeps
+  the colour logo.
+- **The counter is untouched.** Unread notifications and the red “proxy error” mark still
+  live on the browser’s own badge in the corner of the button — flag underneath, number on
+  top, no overlap.
+- **Every country, guaranteed.** 255 flags, each shipped as a 16 px and a 32 px PNG built
+  from the same sprite the rows use (`tools/build-flag-icons.js`), so no flag is ever
+  drawn as a broken image.
+- Works in every Chromium browser — Chrome, Edge, Brave, Opera — because it only uses
+  `chrome.action.setIcon`, nothing browser-specific.
+
+</td><td valign="top">
+
+### ⚙️ 8 · The rest of the toolbox
+
+- **Power switch** with live status (connecting / on / off / error); the icon itself shows the connected country’s flag, the badge shows unread notifications.
 - **Switch to the next on failure** — automatic failover to the first proxy that answers.
 - **Test proxy on connect** — verifies the proxy before handing it the traffic, so a dead
   server shows up as an error instead of a page timeout.
@@ -186,7 +227,108 @@ packets — down from 18 s.
 - **3 interface languages** — English · Русский · Українська (picked from the browser locale).
 - **Legacy migration** — records from the old 2.0.0 storage are upgraded on first run.
 
+</td></tr>
+<tr><td valign="top">
+
+### 🚀 9 · Built to stay smooth
+
+The interface is glass, and glass is expensive: every frosted panel has to be blurred
+again on every frame while something moves underneath. On a long list that showed up as
+20 fps scrolling. Four changes, measured on the same 200-address list:
+
+| | before | after |
+|---|---|---|
+| Scrolling the list | ~20 fps | **60 fps** |
+| “Show all” 200 rows | 200 rows at once, 1.0 s | first 40 in 0.36 s, the rest on scroll |
+| Badge / timezone / probe write | rebuilt every row + hero | nothing on screen changed → no work |
+| Hero, scrolled away or tab hidden | animation kept running | paused until it is back |
+
+- **Quiet glass:** while you scroll or type, the big surfaces drop their blur
+  (`html.qglass`), and 160 ms after you stop the glass comes back exactly as it was.
+- **Only what shows is drawn:** settings are rebuilt when you open them, not on every
+  storage write; rows repaint only when the connection state actually changes.
+- **Progressive list:** “Show all” renders 40 rows and appends more as you reach the
+  bottom — no thousand-row repaint.
+- **Honest menus:** the row menu, tooltips and toasts now sit on a solid panel instead of
+  72 % glass, so the row underneath no longer reads through the text.
+
 </td><td valign="top">
+
+### 🔍 10 · “Check IP” — proof, not a promise
+
+A proxy that is “on” is not the same as a proxy that *works*. One button in the popup
+asks an outside service which address it sees:
+
+- **Proxy on** → `🇩🇪 Your traffic goes through 185.210.154.136` — the address the site
+  sees, with the country flag.
+- **Proxy off** → `🇺🇸 No proxy — your own IP is …` — the honest answer, so you can tell a
+  broken proxy from a working one at a glance.
+- **Service silent** → `Could not check the address` in red; the button is never left
+  spinning.
+- The request goes **through whatever connection the browser is using**, so it measures
+  the real path — not a stored value.
+
+<img src="docs/check-ip.png" alt="The popup's Check IP row: a shield button and the answer, with the country flag, saying the traffic goes through the proxy" width="100%">
+
+</td></tr>
+<tr><td colspan="2" valign="top">
+
+### 🩺 11 · Wrong protocol? It finds out and fixes itself
+
+Most “the proxy does not work” reports are not dead proxies — they are the *wrong protocol*
+on a live server. A line pasted without a scheme has its type guessed from the port, and a
+guess is only a guess: `127.0.0.1:1082` guessed as HTTP is a server that accepts nothing.
+
+**2.6.0 closes that loop by itself.** As soon as the connection fails — the connection test
+says nothing, or traffic reports a drop — the extension probes the address on all four
+schemes, writes the one that answers into the row (the row stops showing the guessed-type
+asterisk) and reconnects. On the test bench it takes **0.6 s** and one notification card.
+
+| What you see | What actually happened |
+|---|---|
+| Row says `SOCKS5`, icon has the flag | protocol found by a live probe, reconnected — nothing to do |
+| `Connection error: No response` + a hint under the button | the address really answered nothing, `failover` stays in charge |
+| `Connection error: Chrome cannot log in to a SOCKS proxy` | the address carries a login and Chrome only speaks no-auth SOCKS — a product limit, stated plainly |
+| `Check type` in Settings says “No protocol answered” | with a login filled in, the toast names the SOCKS limit instead of blaming your host |
+
+> **Why it can be trusted.** The probe is the same one behind “Check type”: four schemes,
+> cheap HTTP first, 2 s each, one answer cached for 24 h. It only runs while the connection is
+> already broken, once per address, so a working proxy is never interrupted.
+
+<img src="docs/type-heal.png" alt="Two popups side by side: on the left a proxy with a guessed HTTP type fails with 'Connection error: No response' and a hint about the guessed type; on the right, 0.6 seconds later, the same row reads SOCKS5 and the popup says Online" width="100%">
+
+</td></tr>
+<tr><td colspan="2" valign="top">
+
+### 🛰 12 · “Exit IP” — what the sites actually see
+
+A proxy that says “Online” and a page that still shows your own city: that is the most
+reported “it does not work” — and nine times out of ten the page was simply opened before the
+proxy was switched on. A site asked once does not ask again; the number on it is from that
+first load.
+
+**2.6.1 closes that gap with proof, not a promise.** As soon as the proxy connects, the
+background asks an outside service which address *it* sees through the connection in use, and
+the popup shows it right under the power button:
+
+| What the strip reads | What it means |
+|---|---|
+| `Exit IP 104.199.118.145 · 🇺🇸 USA, The Dalles` + **Reload page** | the connection is truly carrying your traffic — press the button and the site shows this address |
+| `Same as your own address — this page may still show the old one` | the address that came back is your own: this proxy is not taking you anywhere else |
+| `Checking the address sites see…` | the answer is on its way (it is asked on every connect) |
+| `No answer from the address service` | the proxy blocks the lookup — not a connection failure, and it never lies about it |
+
+- The reload goes **past the cache** (`bypassCache`), works on the tab you are looking at, and
+  is measured on the stand: after the click that tab's request appears **in the proxy's own
+  log**.
+- The last address measured with the proxy off is kept, so “same as your own” is a real
+  comparison, not a guess.
+- Nothing is asked when the proxy is off or has an error; the strip simply hides.
+
+<img src="docs/exit-ip.png" alt="The popup under the power button: a strip reading Exit IP 104.199.118.145 with the US flag and 'USA, The Dalles', and a Reload page button — dark theme on the left, light theme on the right" width="100%">
+
+</td></tr>
+<tr><td colspan="2" valign="top">
 
 ### 🧪 Test suite
 
@@ -206,6 +348,11 @@ A Playwright harness drives a real Chromium with the extension loaded:
 | `t19-legacy` | 2.0.0 storage: types added, settings/state defaults written |
 | `t26-geo` | country + city by IP, flag in the row, Connect/Disconnect pill, `Country by IP` switch |
 | `t27-package` | the packed release folder loads: worker, sprite, flags positioned on the grid |
+| `t28-badgeflag` | the toolbar icon takes the flag of the connected country, falls back to the logo, both PNG sizes load |
+| `t29-smooth` | writes that change nothing on screen leave the rows alone, show-all draws in slices, quiet glass and the paused hero |
+| `t30-checkip` | Check IP: reports an address, never claims a proxy when it is off, button never sticks |
+| `t31-connect` | 15 checks: a wrong guessed type is found and fixed on its own, traffic then really flows through it, a silent address is never called connected, SOCKS+login is named honestly |
+| `t32-exit` | 20 checks: the exit address measured through the proxy, the strip in the popup, a real reload that ends up in the proxy's log, the “same as your own” warning, the strip hidden while off |
 
 **All green, zero console errors.**
 
@@ -225,6 +372,9 @@ A Playwright harness drives a real Chromium with the extension loaded:
 **Every row: flag, country, city — and Connect / Disconnect**
 <img src="docs/rows-flags.png" alt="Proxy list: country flag and city next to each IP, a green Connect pill on the active proxy and red Disconnected pills elsewhere" width="100%">
 <img src="docs/rows-flags-light.png" alt="The same list in the light glass theme" width="100%">
+
+**The toolbar icon: your country, at a glance**
+<img src="docs/toolbar-flag.png" alt="Sky.Proxy toolbar icons: grey logo when off, colour logo when on without a country, and the flags of Germany, Japan, the Philippines, Brazil, the USA and the UK when connected through those countries" width="100%">
 
 **The pill names the state, and the action on hover**
 <img src="docs/rows-connect.png" alt="The active row shows a green Connect pill; with the pointer on it the same pill turns red and reads Disconnect" width="100%">
@@ -246,6 +396,7 @@ A Playwright harness drives a real Chromium with the extension loaded:
 
 **Paste list — every line is recognised and typed before it is added**
 <img src="docs/paste-types.png" alt="Bulk paste with per-line proxy type recognition (SOCKS4, SOCKS5, HTTPS)" width="100%">
+<img src="docs/add-dark.png" alt="The Add proxy tab: four pasted lines, a recognised summary of HTTP/HTTPS/SOCKS5/SOCKS4 and a per-line table" width="100%">
 
 **All four protocols — SOCKS4 included, in the filter and in the add form**
 <img src="docs/filters-socks4.png" alt="Type filters with SOCKS4 selected" width="100%">
@@ -253,6 +404,9 @@ A Playwright harness drives a real Chromium with the extension loaded:
 
 **Settings — connection, timezone by IP, proxy type**
 <img src="docs/settings-dark.png" alt="Sky.Proxy settings page" width="100%">
+
+**Help — built-in answers, with the formats and the account steps**
+<img src="docs/help-dark.png" alt="The Help page: eight accordions, the first two open, with copyable paste formats and the API-key steps" width="100%">
 
 </div>
 
@@ -315,6 +469,16 @@ requests┘                              ├── typecheck.js  live SOCKS5/SOC
   box, the manual fields and the API import.
 - **Types** come from `src/shared/proxytype.js`: a declared scheme always wins, a port
   guess is marked as such, and `typecheck.js` can confirm it for real.
+- **A guessed protocol is repaired, not blamed** (`healType` in the worker): when the
+  connection test or a traffic drop says “nothing gets through”, a row with a port-guessed
+  type is probed once on all four schemes (`typecheck.js`); the scheme that answers is
+  written into the row (`typeVerified`, guess dropped) and the proxy is applied again. One
+  attempt per address, and only while the connection is already broken.
+- **Exit proof** (`proveExit` in the worker): after a connect, a switch, a disable or on
+  request, the background fetches `ipwho.is` → `api.ipify.org` through the connection in use,
+  stores the answer in `state.exit*` (next to `directIp`, the last address measured with the
+  proxy off) and the popup compares the two. The request is the honest kind: it travels the
+  same path as your traffic.
 - **Timezone** works by injecting a small document-start script per tab
   (`src/background/tz.js` + `src/shared/tzcore.js`) that swaps the `Intl`/`Date` surface
   for the zone resolved for the active IP.
@@ -329,6 +493,8 @@ requests┘                              ├── typecheck.js  live SOCKS5/SOC
 
 ```
 manifest.json            MV3 manifest (name, version, permissions, commands)
+LICENSE                  MIT — the badge above points here
+.gitignore               OS junk, zips, node_modules from the test harness
 _locales/{en,ru,uk}/     ~920 UI strings per language
 src/background/          service worker: proxy, PAC, probe, timezone, typing, API, migration
 src/shared/              tokens.css · brand.css · glass.css · schema · parse · state · i18n …
@@ -336,9 +502,12 @@ src/options/             full page: proxies, settings, hotkeys, lists, help
 src/popup/               toolbar popup: switch, per-site, lists, notifications
 src/requests/            request monitor window
 src/assets/              fonts (Onest, JetBrains Mono), icons, logos, flags.png (255-country sprite)
+src/assets/icons/flags/  the same 255 flags as 16/32 px toolbar icons (generated)
 src/shared/flagmap.js    flag codes in sprite order (generated with the sprite)
 tools/gen-tz.mjs         regenerates the timezone/country tables
 tools/build-flags.js     renders src/assets/flags.png from the flag-icons set
+tools/build-flag-icons.js renders the 16/32 px toolbar flag icons from that sprite
+src/shared/quiet-glass.js   drops the blur while scrolling or typing (2.5.1)
 docs/                    screenshots used by this README
 ```
 
@@ -362,6 +531,10 @@ Nothing is collected or sent anywhere except the lookups described above.
 
 | Version | What changed |
 |---|---|
+| **2.6.1** | **Exit IP on screen.** After every connect the background measures the address sites see *through the proxy* and the popup shows it under the power button, with a **Reload page** button that reloads past the cache — the tabs opened before connecting then show the new address. If the measured address is your own, the strip says so instead of pretending. |
+| **2.6.0** | **The connection repairs itself.** A guessed protocol that turns out wrong is found by a live four-scheme probe, written into the row and reconnected (0.6 s on the bench, with a “Protocol of … recognised” card). A proxy that answers nothing is no longer left at “Connected”, SOCKS + login is reported as what it is (Chrome cannot authenticate to SOCKS), the popup points at the guessed type, and toasts no longer overlap the wordmark. |
+| **2.5.1** | **Smoothness pass**: quiet glass while scrolling, hero animation paused off-screen and in background tabs, show-all list drawn in slices, redundant repaints removed (state writes that change nothing on screen), solid menus/tooltips/toasts. Plus **Check IP** in the popup — one click shows the address the outside world sees. |
+| **2.5.0** | **The toolbar icon becomes the flag** of the country the connected proxy sits in — off, or no country known, and the Sky.Proxy logo is back. 255 flags as 16/32 px icons, unread badge untouched. |
 | **2.4.1** | The row pill names the **state** and previews the **action**: green “Connect” on the proxy in use, red “Disconnect” under the pointer (and the other way round on a red row). Also fixed a state-write race that could leave a proxy enabled in the browser but *off* in the list after connecting straight from a row. |
 | **2.4.0** | **Country flag + city** beside every address (looked up by IP, cached 30 days, 255 flags, `Country by IP` switch) and a **Connect / Disconnect** pill in every row — green while that proxy carries your traffic, red otherwise. |
 | **2.3.0** | **SOCKS4 is always visible** in the type filter, can be added from the form, and port 4145 is recognised as SOCKS4; **“Check type” is much faster** (cheap HTTP probe, 2 s timeout, scheme lines skipped, 24 h result cache, dead-host shortcut). |
@@ -394,8 +567,7 @@ Issues and pull requests are welcome. Useful things to know:
 
 ## 📄 License
 
-Add the license you want to ship under (MIT is a common choice for extensions) and drop
-the text into a `LICENSE` file — the badge above points there.
+MIT — see [LICENSE](LICENSE). Use it, fork it, ship it; keep the copyright line.
 
 ---
 
@@ -431,10 +603,42 @@ the text into a `LICENSE` file — the badge above points there.
   হবে তা আগেই দেখা যায় (আর লেখা বদলালেও বোতামের চওড়া বদলায় না)। লালে ক্লিক করলে
   ওই প্রক্সি চালু হয়, সবুজে ক্লিক করলে সংযোগ বন্ধ হয়ে সরাসরি যায়; বদলানোর সময়
   অ্যাম্বার রঙে «Connecting…»।
+- **টুলবারের আইকনেই দেশের পতাকা** — এক্সটেনশনটি pin করলে, যে IP-তে connected আছেন সেই
+  দেশের পতাকাই আইকনে বসে (জার্মানি → 🇩🇪, জাপান → 🇯🇵)। প্রক্সি বন্ধ করলেই আগের
+  Sky.Proxy লোগো ফিরে আসে, আর দেশ অজানা থাকলে রঙিন লোগোই থাকে। আইকনের কোণে
+  নোটিফিকেশনের সংখ্যা/লাল দাগ আগের মতোই — পতাকার উপরে, একটার ওপর আরেকটা নয়।
+  প্রতিটি দেশের জন্য ১৬ ও ৩২ পিক্সেলের PNG তৈরি হয় একই স্প্রাইট থেকে, তাই কোনো
+  পতাকা ভাঙা দেখায় না।
+- **ইন্টারফেস এখন অনেক মসৃণ** — স্ক্রল করার সময় কাচের blur বন্ধ থাকে (থামলেই ফিরে
+  আসে), হিরোর অ্যানিমেশন স্ক্রিনের বাইরে গেলে থেমে যায়, «সব দেখুন» ২০০ সারি একসাথে
+  না এঁকে ৪০টি করে আঁকে, আর স্ক্রিনে কিছু না বদলানো state-লেখা আর পুরো তালিকা
+  নতুন করে আঁকে না। ২০০ ঠিকানার তালিকায় স্ক্রল **২০ → ৬০ fps**।
+- **Check IP** — পপআপে এক ক্লিকে বাইরের সার্ভিসকে জিজ্ঞেস করে দেখায় ট্রাফিক সত্যিই
+  প্রক্সি দিয়ে যাচ্ছে কি না: `🇩🇪 Your traffic goes through 185.210.154.136`, আর
+  প্রক্সি বন্ধ থাকলে সৎভাবে `No proxy — your own IP is …`।
+- **ভুল প্রোটোকল নিজেই ঠিক হয়ে যায় (2.6.0)** — স্কিম ছাড়া পেস্ট করা লাইনের ধরন
+  পোর্ট দেখে অনুমান করা হয়, আর অনুমান ভুল হলে প্রক্সি «মৃত» মনে হয়। এখন সংযোগ
+  ব্যর্থ হওয়ার সঙ্গে সঙ্গেই এক্সটেনশন চারটি স্কিমে আসল পরীক্ষা চালায়, যে স্কিমে
+  উত্তর আসে সেটাই সারিতে লিখে দেয় (তারকাচিহ্ন উঠে যায়) এবং নিজেই আবার connect
+  করে — স্ট্যান্ডে **০.৬ সেকেন্ডে**; একটা নোটিফিকেশন কার্ড দেখায় কোন প্রোটোকল
+  পাওয়া গেল (`Protocol of 127.0.0.1 recognised — SOCKS5`)।
+- **সৎ উত্তর, ফাঁকা «Connected» নয়** — যে ঠিকানা সত্যিই কিছু উত্তর দেয় না, তার
+  জন্য লেখা হয় `Connection error: No response` (আর তখনই failover কাজ করে)।
+  আর **SOCKS + লগইন** হলে সরাসরি বলা হয় «Chrome cannot log in to a SOCKS proxy» —
+  কারণ ক্রোম SOCKS-এ শুধু no-auth পদ্ধতিই পাঠায়, এটা ক্রোমের সীমা, ত্রুটি নয়।
+  পপআপে অনুমান করা ধরন নিয়ে ছোট একটা ইঙ্গিতও (hint) দেখা যায়।
+- **«আউটগোয়িং IP» পপআপেই (2.6.1)** — «connect করা আছে অথচ IP বদলাচ্ছে না» এর আসল কারণ
+  প্রায় সবসময় একটাই: **পেজটা প্রক্সি চালু করার আগেই খোলা ছিল**, তাই সাইটটা পুরনো
+  ঠিকানাই দেখাচ্ছে। এখন connect হওয়া মাত্রই এক্সটেনশন বাইরের সার্ভিসকে জিজ্ঞেস করে
+  দেখে **প্রক্সি দিয়েই** কোন ঠিকানা বেরোচ্ছে, আর পপআপে পাওয়ার বোতামের নিচে দেখায়:
+  `Exit IP 104.199.118.145 · 🇺🇸 USA, The Dalles` — সাথে **Reload page** বোতাম, যা
+  ক্যাশ বাদ দিয়ে ওই ট্যাবটাই রিলোড করে (ব্রাউজারের প্রক্সি-লগে টেস্টে প্রমাণিত)।
+  মাপা ঠিকানা যদি নিজের ঠিকানাই হয়, লাল রঙে সৎভাবে লেখা হয়
+  «Same as your own address» — ফাঁকা «সব ঠিক আছে» নয়।
 - **Update Now** — হেডারের বোতাম, ক্লিকে লেখকের GitHub খোলে।
 - সাথে সুইচ/ফেইলওভার, ব্ল্যাক-হোয়াইট লিস্ট, হটকি, API key দিয়ে ইমপোর্ট,
   রিকোয়েস্ট উইন্ডো, en/ru/uk ভাষা — সব আগের মতোই কাজ করে।
 
-**ইনস্টল:** `chrome://extensions` → Developer mode Engr.Akash Debnath→ **Load unpacked** → এই ফোল্ডার।
+**ইনস্টল:** `chrome://extensions` → Developer mode → **Load unpacked** → এই ফোল্ডার।
 
 </div>
